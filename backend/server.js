@@ -1,7 +1,7 @@
 // 1. Import required packages
 import express from 'express'
 import cors from 'cors'
-import {authentication} from './database.js'
+import {authentication , getTheId , getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getTeacherName , getStudentName} from './database.js'
 import session from 'express-session' 
 
 
@@ -13,7 +13,7 @@ app.set('view engine' , 'ejs') ;
 // 3. Middleware setup
 app.use(cors()); // Allow Cross-Origin requests
 app.use(express.json()); // Parse incoming JSON bodies
-app.use(express.urlencoded({ extended : true }))
+app.use(express.urlencoded({ extended : true })) //Parse incoming bodies for the req object from the form 
 app.use(session({
   secret: 'secret-key',
   resave: false,
@@ -40,28 +40,52 @@ app.post('/login', async (req , res) => {
    }
 
    else {
-    //save the user in the session 
+    //save the user id from its table in the session 
+    const userRealId = await getTheId(user.id) ; 
+
+    if (userRealId === -1) {
+    req.session.loginError = 'حدث خطأ أثناء استرجاع بيانات الحساب.';
+    return res.redirect('/login');
+    }
+
     req.session.user = {
-      id: user.id,
+      user_id: user.id,
       username: user.username,
-      type: user.user_type
+      role: user.role ,
+      ...(user.role === 'student' ? { student_id: userRealId } : { teacher_id: userRealId })
+
     };
-    if(user.user_type == 'student')
-      res.redirect('/hellostudent') ; 
-    else 
-      res.redirect('/helloteacher') ; 
+    
+    if(user.role == 'student') {
+      console.log(req.session.user);
+      res.redirect('/student') ; }
+    else {
+      console.log(req.session.user);
+      res.redirect('/teacher') ; }
    }
 })
 
 
+app.get('/student' , async (req,res ) => {
 
+  const username = req.session.user.username ;
+  const student_id = req.session.user.student_id ;
+  const first_name = await getStudentName(student_id) ; 
+  res.render( 'student' , {first_name }) ; 
 
-app.get('/hellostudent' , (req,res ) => {
-  res.send(`hello student ${req.session.user.username} `)
 })
 
-app.get('/helloteacher' , (req,res ) => {
-  res.send(`hello teacher ${req.session.user.username} `)
+app.get('/teacher' , async (req,res ) => {
+
+  const username = req.session.user.username ; //لازم اعمل الاسم ما اسم المستخدم 
+  const teacher_id = req.session.user.teacher_id ; 
+  const first_name = await getTeacherName(teacher_id) ; 
+  const student_count = await getStudentCountForTeacher(teacher_id) ; 
+  const absence_count = await getTodayAbsenceCount(teacher_id) ;
+  const attendance_count = student_count - absence_count ;
+  const activity_count = await getTodayActivityCount(teacher_id) ; 
+  res.render( 'teacher' , { first_name , student_count , absence_count , attendance_count , activity_count  })
+
 })
 
 
@@ -76,38 +100,3 @@ const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-
-
-
-
-
-
-
-/*
-// Get all users
-app.get('/users', (req, res) => {
-  res.json(users);
-});
-
-// Get a single user by ID
-app.get('/users/:id', (req, res) => {
-  const userId = parseInt(req.params.id);
-  const user = users.find(u => u.id === userId);
-  if (user) {
-    res.json(user);
-  } else {
-    res.status(404).json({ message: 'User not found' });
-  }
-});
-
-// Add a new user
-app.post('/users', (req, res) => {
-  const newUser = {
-    id: users.length + 1,
-    name: req.body.name
-  };
-  users.push(newUser);
-  res.status(201).json(newUser);
-});
-*/
