@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <title>التقرير اليومي</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .loading { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>التقرير اليومي - <span id="current-date"></span></h1>
+
+    <table id="students-table">
+        <thead>
+            <tr>
+                <th>اسم الطالب</th>
+                <th>حضور</th>
+                <th>ملاحظات</th>
+                
+                
+            </tr>
+        </thead>
+        <tbody id="students-list">
+            <tr>
+                <td colspan="3" class="loading">جاري تحميل قائمة الطلاب...</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button id="submit-btn" disabled>إرسال التقرير</button>
+
+
+    <script>
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+
+        async function loadStudentsNames() {
+            try {
+                const response = await fetch('/api/getStudentsNames');
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const students = await response.json();
+                displayStudents(students);
+            } catch (err) {
+                console.error('Error loading students:', err);
+                document.getElementById('students-list').innerHTML = `
+                    <tr>
+                        <td colspan="3" style="color: red;">حدث خطأ في تحميل البيانات.</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function displayStudents(students) {
+            const tbody = document.getElementById('students-list');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3">لا يوجد طلاب</td></tr>`;
+                return;
+            }
+
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+
+                    <td>${student.first_name + " " + student.last_name}</td>
+                    <td>
+                        <input type="checkbox" class="attendance" data-id="${student.id}">
+                    </td>
+                   
+                    <td>
+                        <input type="text" class="note" data-id="${student.id}" placeholder=" ادخال ملاحظة عن الطالب... ">
+                    </td>
+                  
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('submit-btn').disabled = false;
+        }
+        async function submitReport() {
+            const report = [];
+
+            const notesInputs = document.querySelectorAll('.note');
+            notesInputs.forEach(noteInput => {
+                const id = noteInput.dataset.id;
+                const attendanceCheckbox = document.querySelector(`.attendance[data-id="${id}"]`);
+                report.push({
+                    student_id: parseInt(id),
+                    attendance: attendanceCheckbox.checked,
+                    note: noteInput.value.trim()
+                });
+            });
+
+            try {
+                const res = await fetch('/dailyReport', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(report)
+                });
+
+                if (res.ok) {
+                    alert('تم إرسال التقرير بنجاح');
+                    window.location.href = "/teacher"
+                } else {
+                    alert('حدث خطأ أثناء الإرسال');
+                }
+            } catch (err) {
+                console.error('Error sending report:', err);
+                alert('تعذر إرسال التقرير');
+            }
+        }
+
+        document.getElementById('submit-btn').addEventListener('click', submitReport);
+
+        document.addEventListener('DOMContentLoaded', loadStudentsNames);
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

@@ -1,10 +1,11 @@
 // 1. Import required packages
 import express from 'express'
 import cors from 'cors'
-import {authentication , getTheId , getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getTeacherName , getStudentName} from './database.js'
+import {authentication , getTheId , getTodayActivityListByClass} from './database.js'
+import {getTeacherName , getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher } from './teacherDatabase.js'
+import {getStudentName ,  insertNote , insertAbsence} from './studentDatabase.js'
+import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
-
-
 
 
 const app = express();
@@ -20,21 +21,25 @@ app.use(session({
   saveUninitialized: true
 }));
 
-// 5. Routes
+// 5.**************************************************************** ROUTES SECTION *********************************************************************************
+//home page
 app.get('/', (req, res) => {
   res.render('home'); 
 })
 
+//login page get
 app.get('/login', (req, res) => {
   res.render('login' , { session : req.session });
 });
 
+//login page post 
 app.post('/login', async (req , res) => {
    const { username, password } = req.body ;
 
    const user = await authentication(username , password); 
 
    if(user === false ){
+    req.session.user = null; //للتنظيف من اي جلسة قديمة 
     req.session.loginError = '! اسم المستخدم أو كلمة المرور غير صحيحة';
     res.redirect('/login');
    }
@@ -65,19 +70,23 @@ app.post('/login', async (req , res) => {
    }
 })
 
-
+//get the student page
 app.get('/student' , async (req,res ) => {
-
-  const username = req.session.user.username ;
+  if (!req.session.user ) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
+    return res.redirect('/login');
+  }
   const student_id = req.session.user.student_id ;
   const first_name = await getStudentName(student_id) ; 
   res.render( 'student' , {first_name }) ; 
 
 })
 
+//get the teacher page
 app.get('/teacher' , async (req,res ) => {
-
-  const username = req.session.user.username ; //لازم اعمل الاسم ما اسم المستخدم 
+  if (!req.session.user || !req.session.user.teacher_id ) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
+    return res.redirect('/login');
+  }
+ try{
   const teacher_id = req.session.user.teacher_id ; 
   const first_name = await getTeacherName(teacher_id) ; 
   const student_count = await getStudentCountForTeacher(teacher_id) ; 
@@ -85,15 +94,96 @@ app.get('/teacher' , async (req,res ) => {
   const attendance_count = student_count - absence_count ;
   const activity_count = await getTodayActivityCount(teacher_id) ; 
   res.render( 'teacher' , { first_name , student_count , absence_count , attendance_count , activity_count  })
+  }catch(err){
+    console.error('Error loading /teacher page:', err);
+    res.status(500).send('حدث خطأ في السيرفر');
+  }
+})
+
+app.get('/dailyReport' , (req,res ) => {
+   if (!req.session.user || !req.session.user.teacher_id )  //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
+     return res.redirect('/login');
+  try{
+
+     res.render('dailyReport') ;
+  }catch(err){}
+})
+
+app.post('/dailyReport' , async (req,res ) => {
+  try{
+    const reportData = req.body; 
+    const date = new Date().toISOString().split('T')[0];
+    for (const entry of reportData){
+      const {student_id , attendance , note } = entry ; 
+      
+      //اذا الطالب غايب 
+      if(attendance === false)
+        await insertAbsence(student_id , date) ;
+      //اذا في ملاحظة
+      if(note && note.trim()!='')
+        await insertNote(student_id , note.trim() , date) ;      
+    }
+  res.status(200).json({ success: true, message: "تم حفظ التقرير بنجاح" });
+  }catch(err){
+  console.error("Error processing daily report:", err);
+  res.status(500).json({ success: false, message: "حدث خطأ أثناء حفظ التقرير" });
+  }
 
 })
 
+//**************************************************************** Routes End ***************************************************************************************
 
+
+//******************************************************************API SECTION***************************************************************************************
+
+//هي  ليحصل الفرونت على قائمة باسماء الطلاب بصف المعلم 
+app.get('/api/getStudentsNames' , async (req, res ) => {
+  if (!req.session.user || !req.session.user.teacher_id) {
+  return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try{
+  const teacher_id = req.session.user.teacher_id ; 
+  const studentsNamesObject = await getStudentsByTeacher(teacher_id);
+
+  res.json(studentsNamesObject);
+  }catch(err){
+    console.error('Error loading /api/getStudentsNames :', err);
+    res.status(500).send('حدث خطأ في قاعدة البيانات');
+  }
+})
+
+//هي  ليحصل الفرونت على قائمة بالانشطة اليوم بالصف سواء للمعلم او للطالب  
+app.get('/api/getTodayActivityList' , async (req, res ) => {
+  if (!req.session.user ) {
+  return res.status(401).json({ error: 'Unauthorized' });
+  }
+ 
+ try{
+  //اول شي بجيب رقم الصف للمستخدم 
+ const classId = await getClassIdFromSession(req.session.user);
+ if (!classId) {
+      return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
+    }
+ 
+const TodayActivity = await getTodayActivityListByClass(classId) ;
+//صار معي مصفوفة اغراض بتعبر عن الانشطه وكل نشاط فيه اسم ووصف وايقونه وتاريخ اليوم
+ res.json(TodayActivity) ;
+
+ }catch(err){
+  console.error('Error loading /api/getTodayActivityList :', err);
+  res.status(500).send('حدث خطأ في قاعدة البيانات');
+ }
+
+})
+
+//****************************************************************API SECTION END*************************************************************************************
+
+
+//404 page 
 app.use((req,res) => {
 
   res.send("opps 404 !! ") ; 
 })
-
 
 // 6. Start the server
 const PORT = 3000;

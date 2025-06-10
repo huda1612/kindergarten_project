@@ -3,3 +3,42 @@
 <p> you have <%= attendance_count %> attendance student in your class </p>
 <p> you have <%= absence_count %> absence student in your class </p>
 <p> you have <%= activity_count %> activity today in your class </p>
+<div id="students-container"></div>
+<a href="/dailyReport"> send the daily report </a>
+
+
+
+<script>
+async function loadStudentsNames() {
+    try {
+      const response = await fetch('/api/getStudentsNames');
+      const students = await response.json();
+      //حصلنا على الرد من السيرفر وحطيناه بالمتحول 
+
+      const container = document.getElementById('students-container');
+      container.innerHTML = ''; // نفرغ المحتوى أولًا
+
+      students.forEach(name => {
+        const p = document.createElement('p') ; //لكل اسم عم اعمل تاغ باراغراف
+        p.textContent = name.first_name + " " + name.last_name ;
+        container.appendChild(p) ;
+      });
+    } catch (err) {
+      console.error('حدث خطأ:', err);
+    }
+  }
+
+  async function  loadTodayActivity() {
+     try {
+      const response = await fetch('/api/getTodayActivityList');
+      const students = await response.json();
+  }catch(err){  
+  console.error('حدث خطأ:', err);}
+}
+
+  // استدعاء الدالة عند تحميل الصفحة
+ window.onload = function () {
+  loadStudentsNames();
+  loadTodayActivity();
+};
+</script>
