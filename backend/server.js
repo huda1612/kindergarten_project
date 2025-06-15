@@ -2,8 +2,8 @@
 import express from 'express'
 import cors from 'cors'
 import {authentication , getTheId , getTodayActivityListByClass} from './database.js'
-import {getTeacherName , getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher } from './teacherDatabase.js'
-import {getStudentName ,  insertNote , insertAbsence} from './studentDatabase.js'
+import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher } from './teacherDatabase.js'
+import {getStudentFullName , getStudentNameWithNikname , insertNote , insertAbsence } from './studentDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
 
@@ -76,8 +76,9 @@ app.get('/student' , async (req,res ) => {
     return res.redirect('/login');
   }
   const student_id = req.session.user.student_id ;
-  const first_name = await getStudentName(student_id) ; 
-  res.render( 'student' , {first_name }) ; 
+  const full_name = await getStudentFullName(student_id) ; 
+  const name_With_Nikname = await getStudentNameWithNikname(student_id) ; 
+  res.render( 'student' , {full_name, name_With_Nikname }) ; 
 
 })
 
@@ -88,12 +89,13 @@ app.get('/teacher' , async (req,res ) => {
   }
  try{
   const teacher_id = req.session.user.teacher_id ; 
-  const first_name = await getTeacherName(teacher_id) ; 
+  const full_name = await getTeacherFullName(teacher_id) ; 
+  const name_With_Nikname = await getTeacherNameWithNikname(teacher_id)
   const student_count = await getStudentCountForTeacher(teacher_id) ; 
   const absence_count = await getTodayAbsenceCount(teacher_id) ;
   const attendance_count = student_count - absence_count ;
   const activity_count = await getTodayActivityCount(teacher_id) ; 
-  res.render( 'teacher' , { first_name , student_count , absence_count , attendance_count , activity_count  })
+  res.render( 'teacher' , { full_name ,name_With_Nikname, student_count , absence_count , attendance_count , activity_count  })
   }catch(err){
     console.error('Error loading /teacher page:', err);
     res.status(500).send('حدث خطأ في السيرفر');
@@ -130,6 +132,16 @@ app.post('/dailyReport' , async (req,res ) => {
   }
 
 })
+
+app.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            return res.status(500).send("حدث خطأ أثناء تسجيل الخروج");
+        }
+        res.redirect('/'); // يرجع للصفحة الرئيسية
+    });
+});
 
 //**************************************************************** Routes End ***************************************************************************************
 

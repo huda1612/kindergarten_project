@@ -4,11 +4,20 @@ import {executeQuery} from './database.js'
 //مافي داعي نعمل بول لان عم نعمل كل الاستعلامات باستخدام التابع اللي مستوردينه من ملف قاعدة البيانات
 
 //تابع يرد اسم الطالب من معرفه
-export async function getStudentName(studentId) {
-  const rows = await executeQuery('SELECT first_name FROM students where id = ? ', [studentId]  );
+export async function getStudentFullName(studentId) {
+  const rows = await executeQuery('SELECT first_name , last_name FROM students where id = ? ', [studentId]  );
   if(rows.length === 0 )
     return "unknown" ; 
-  return rows[0].first_name ; 
+  return rows[0].first_name +" "+ rows[0].last_name  ; 
+}
+
+export async function getStudentNameWithNikname(studentId) {
+  const rows = await executeQuery('SELECT gender FROM students where id = ? ', [studentId]  );
+  const full_name =await getStudentFullName(studentId) ; 
+  if(rows[0].gender== "male")
+    return "الطالب" +" "+ full_name ;
+  else 
+    return "الطالبة" +" "+ full_name ;
 }
 
 //تابع لرد رقم الصف للطالب 

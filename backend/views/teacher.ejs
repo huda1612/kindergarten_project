@@ -1,10 +1,14 @@
-<h2> hello teacher <%= first_name %> </h2>
+<h2> مرحبا <%= name_With_Nikname %> </h2>
 <p> you have <%= student_count %> student in your class </p>
 <p> you have <%= attendance_count %> attendance student in your class </p>
 <p> you have <%= absence_count %> absence student in your class </p>
 <p> you have <%= activity_count %> activity today in your class </p>
 <div id="students-container"></div>
 <a href="/dailyReport"> send the daily report </a>
+
+<form action="/logout" method="get">
+    <button type="submit">تسجيل الخروج</button>
+</form>
 
 
 
@@ -18,9 +22,10 @@ async function loadStudentsNames() {
       const container = document.getElementById('students-container');
       container.innerHTML = ''; // نفرغ المحتوى أولًا
 
-      students.forEach(name => {
+      students.forEach(student => {
         const p = document.createElement('p') ; //لكل اسم عم اعمل تاغ باراغراف
-        p.textContent = name.first_name + " " + name.last_name ;
+       // const dateOnly = new Date(student.birth_date).toISOString().split('T')[0];
+        p.textContent = student.first_name + " " + student.last_name + " birth date : " + student.birth_date ;
         container.appendChild(p) ;
       });
     } catch (err) {

@@ -194,6 +194,7 @@ CREATE TABLE `students` (
   `first_name` varchar(45) NOT NULL,
   `last_name` varchar(45) NOT NULL,
   `birth_date` date DEFAULT NULL,
+  `gender` enum('female','male') NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_students_users_idx` (`user_id`),
   KEY `fk_students_classes_idx` (`class_id`),
@@ -208,7 +209,7 @@ CREATE TABLE `students` (
 
 LOCK TABLES `students` WRITE;
 /*!40000 ALTER TABLE `students` DISABLE KEYS */;
-INSERT INTO `students` VALUES (1,1,1,'huda','ahmed','2020-06-04'),(2,3,1,'reem','al-rajeh','2020-01-27');
+INSERT INTO `students` VALUES (1,1,1,'هدى','أحمد','2020-06-04','female'),(2,3,1,'ريم','الراجح','2020-01-27','female');
 /*!40000 ALTER TABLE `students` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -225,6 +226,7 @@ CREATE TABLE `teachers` (
   `first_name` varchar(45) NOT NULL,
   `last_name` varchar(45) NOT NULL,
   `phone` varchar(10) DEFAULT NULL,
+  `gender` enum('female','male') NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `phone_UNIQUE` (`phone`),
   KEY `user_id_idx` (`user_id`),
@@ -238,7 +240,7 @@ CREATE TABLE `teachers` (
 
 LOCK TABLES `teachers` WRITE;
 /*!40000 ALTER TABLE `teachers` DISABLE KEYS */;
-INSERT INTO `teachers` VALUES (1,2,'sana','ahmed','00000');
+INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','00000','female');
 /*!40000 ALTER TABLE `teachers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -278,4 +280,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-10 21:09:53
+-- Dump completed on 2025-06-15 22:23:10
