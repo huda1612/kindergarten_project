@@ -77,10 +77,13 @@ DROP TABLE IF EXISTS `classes`;
 CREATE TABLE `classes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `teacher_id` int NOT NULL,
+  `grade_level_id` int NOT NULL,
   `class_name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `teacher_id_idx` (`teacher_id`),
-  CONSTRAINT `fk_class_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  KEY `fk_class_grade_levels_idx` (`grade_level_id`),
+  CONSTRAINT `fk_classes_grade_levels` FOREIGN KEY (`grade_level_id`) REFERENCES `grade_levels` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_classes_teachers` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -90,7 +93,7 @@ CREATE TABLE `classes` (
 
 LOCK TABLES `classes` WRITE;
 /*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,1,'A1');
+INSERT INTO `classes` VALUES (1,1,1,'A1');
 /*!40000 ALTER TABLE `classes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -133,13 +136,16 @@ DROP TABLE IF EXISTS `files`;
 CREATE TABLE `files` (
   `id` int NOT NULL AUTO_INCREMENT,
   `class_id` int NOT NULL,
+  `daily_activities_id` int DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `path` varchar(255) NOT NULL,
   `date` date NOT NULL,
   `description` text,
   PRIMARY KEY (`id`),
   KEY `fk_files_classes_idx` (`class_id`),
-  CONSTRAINT `fk_files_classes` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_files_daily_activities_idx` (`daily_activities_id`),
+  CONSTRAINT `fk_files_classes` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_files_daily_activities` FOREIGN KEY (`daily_activities_id`) REFERENCES `daily_activities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -150,6 +156,31 @@ CREATE TABLE `files` (
 LOCK TABLES `files` WRITE;
 /*!40000 ALTER TABLE `files` DISABLE KEYS */;
 /*!40000 ALTER TABLE `files` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `grade_levels`
+--
+
+DROP TABLE IF EXISTS `grade_levels`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `grade_levels` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `grade_levels`
+--
+
+LOCK TABLES `grade_levels` WRITE;
+/*!40000 ALTER TABLE `grade_levels` DISABLE KEYS */;
+INSERT INTO `grade_levels` VALUES (1,'KG1','for ages around 4 years');
+/*!40000 ALTER TABLE `grade_levels` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -178,6 +209,60 @@ LOCK TABLES `notes` WRITE;
 /*!40000 ALTER TABLE `notes` DISABLE KEYS */;
 INSERT INTO `notes` VALUES (1,1,'كانت الطالبه نشيطة اليوم','2025-06-10'),(2,2,'هذا اول غياب للطالبه يرجى التبرير','2025-06-10');
 /*!40000 ALTER TABLE `notes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `parents`
+--
+
+DROP TABLE IF EXISTS `parents`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `parents` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(45) NOT NULL,
+  `last_name` varchar(45) NOT NULL,
+  `phone` varchar(10) NOT NULL,
+  `email` varchar(45) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `parents`
+--
+
+LOCK TABLES `parents` WRITE;
+/*!40000 ALTER TABLE `parents` DISABLE KEYS */;
+/*!40000 ALTER TABLE `parents` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `parents_students`
+--
+
+DROP TABLE IF EXISTS `parents_students`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `parents_students` (
+  `parent_id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `relation` varchar(45) NOT NULL,
+  PRIMARY KEY (`parent_id`,`student_id`),
+  KEY `fk_parents_students_students_idx` (`student_id`),
+  CONSTRAINT `fk_parents_students_parents` FOREIGN KEY (`parent_id`) REFERENCES `parents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_parents_students_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `parents_students`
+--
+
+LOCK TABLES `parents_students` WRITE;
+/*!40000 ALTER TABLE `parents_students` DISABLE KEYS */;
+/*!40000 ALTER TABLE `parents_students` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -280,4 +365,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-15 22:23:10
+-- Dump completed on 2025-06-16 18:46:01
