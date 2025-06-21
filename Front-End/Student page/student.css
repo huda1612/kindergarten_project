@@ -1,0 +1,295 @@
+/* student.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+}
+
+/* الشريط العلوي */
+nav {
+    width: 100%;
+    position:fixed;
+    top: 0;
+    
+    background-color: #a0d8ef;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.school-info {
+    display: flex;
+    align-items: center;
+    font-size: 25px;
+}
+
+.school-icon {
+    font-size: 25px;
+    color: #ff6666;
+    margin-left: 10px;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+}
+
+.student-name {
+    margin-left: 15px;
+    color: #333;
+}
+
+.logout-btn {
+    background-color: #ff9999;
+            color: black;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: .2s;
+            font-size: 18px ;
+}
+
+.logout-btn:hover {
+    background-color: #ff6666;
+    color: black;
+    transform: scale(1.1);
+}
+
+/* الهيكل الرئيسي */
+.container {
+    display: flex;
+    margin-top: 70px;
+}
+
+/* القائمة الجانبية */
+.sidebar {
+    width: 250px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    padding: 20px 0;
+    height: calc(100vh - 70px);
+    position: fixed;
+    right: 0;
+}
+
+.menu-item {
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    direction: rtl;
+}
+
+.menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+.menu-item i {
+    margin-left: 10px;
+    color: #ff6666;
+    font-size: 18px;
+}
+
+.menu-item span {
+    flex-grow: 1;
+    text-align: right;
+}
+
+/* المحتوى الرئيسي */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin-right: 250px;
+}
+
+/* مربع الترحيب */
+.welcome-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.welcome-box h2 {
+    color: #ff6666;
+    margin-bottom: 10px;
+}
+
+#today-date {
+    color: #333;
+}
+
+/* المربعات الإحصائية */
+h3{
+    color: #ff6666;
+    padding-bottom: 15px;
+}
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+
+.box1 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box2 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box3 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box4 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box1 i {
+    font-size: 24px;
+    color: #a0d8ef;
+    margin-bottom: 10px;
+}
+.box2 i {
+    font-size: 24px;
+    color: #179e22;
+    margin-bottom: 10px;
+}
+.box3 i {
+    font-size: 24px;
+    color: #169cd1;
+    margin-bottom: 10px;
+}
+.box4 i {
+    font-size: 24px;
+    color: #ee2929;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 8px;
+}
+
+/* الأقسام */
+.section-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.section-box h3 {
+    color: #ff6666;
+    margin-bottom: 10px;
+}
+
+/* قائمة الأنشطة والملاحظات */
+.activities-section{
+    background-color: white;
+    padding: 20px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.section-title {
+    color: #ff6666;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.file-item {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 10px ;
+    border-bottom: 1px solid #eee;
+   
+}
+h4{
+    font-size: 15px;
+    color:#1187b6 ;
+}
+.file-item i{
+    color: #169cd1;
+    
+}
+/* جدول الملفات */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table th,
+table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+table th {
+    background-color:#ecf4f8;
+    color: #333;
+}
+
+button {
+    padding: 6px 12px;
+    background-color: #ff6666;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color:#ff6666;
+}
+

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة المعلم</title>
+    <link rel="stylesheet" href="teacher.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- الشريط العلوي -->
+    <nav>
+        <div class="school-info">
+            <i class="fas fa-school school-icon"></i>
+            <span>روضة الفرح</span>
+        </div>
+        
+        <div class="teacher-info">
+            <span class="teacher-name">الأستاذة سارة أحمد</span>
+            <button class="logout-btn">تسجيل الخروج</button>
+        </div>
+    </nav>
+    
+    <!-- الهيكل الرئيسي -->
+    <div class="container">
+        <!-- القائمة الجانبية -->
+        <div class="sidebar">
+            <div class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>الصفحة الرئيسية</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-child"></i>
+                <span>الأطفال</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span> إرسال التقرير اليومي</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-puzzle-piece"></i>
+                <span>الأنشطة</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-file"></i>
+                <span>رفع الملفات</span>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <!-- مربع الترحيب -->
+            <div class="welcome-box">
+                <h2>مرحبا بك، الأستاذة سارة أحمد</h2>
+                <p id="current-date">اليوم هو الأحد، 15 أكتوبر 2023</p>
+            </div>
+            
+            <!-- المربعات الإحصائية -->
+            <div class="stats-container">
+                <div class="box1">
+                    <i class="fas fa-users"></i>
+                    <div>عدد الأطفال</div>
+                    <div class="stat-value">25</div>
+                </div>
+                <div class="box2">
+                    <i class="fas fa-user-check"></i>
+                    <div>الحضور اليوم</div>
+                    <div class="stat-value">20</div>
+                </div>
+                <div class="box3">
+                    <i class="fas fa-user-times"></i>
+                    <div>الغياب اليوم</div>
+                    <div class="stat-value">5</div>
+                </div>
+                <div class="box4">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <div> عدد الأنشطة</div>
+                    <div class="stat-value">2</div>
+                </div>
+            </div>
+            
+            <!-- قائمة الأطفال -->
+            <div class="students-list">
+                <h3 class="section-title">قائمة الأطفال</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم الطفل</th>
+                            <th>تاريخ الميلاد</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>محمد علي</td>
+                            <td>5/6/2020</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>سارة أحمد</td>
+                            <td>12/3/2021</td>
+                            
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- قسم الأنشطة -->
+            <div class="activities-section">
+                <div class="section-title">
+                    <h3>أنشطة اليوم</h3>
+                    <button class="add-btn" id="addActivityBtn">إضافة نشاط</button>
+                </div>
+           <!-- قائمة الأنشطة الجاهزة (مخفية حتى يضغط على زر الإضافة) -->
+    <div class="activity-options" id="activityOptions">
+        <div class="activity-option" data-activity="الرسم والتلوين">
+            <i class="fas fa-paint-brush"></i>
+            <span>الرسم والتلوين</span>
+        </div>
+        <div class="activity-option" data-activity="القصص والحكايات">
+            <i class="fas fa-book-open"></i>
+            <span>القصص والحكايات</span>
+        </div>
+        <div class="activity-option" data-activity="الأناشيد والغناء">
+            <i class="fas fa-music"></i>
+            <span>الأناشيد والغناء</span>
+        </div>
+        <div class="activity-option" data-activity="الألعاب الحركية">
+            <i class="fas fa-running"></i>
+            <span>الألعاب الحركية</span>
+        </div>
+        <div class="activity-option" data-activity="نشاط علمي بسيط">
+            <i class="fas fa-flask"></i>
+            <span>نشاط علمي بسيط</span>
+        </div>
+    </div>
+    
+    
+    
+    <!-- قائمة الأنشطة المضافة -->
+    <div class="activities-list" id="activitiesList">
+        <!-- سيتم عرض الأنشطة المضافة هنا -->
+    </div>
+</div>
+            
+            
+            <!-- قسم الملفات -->
+            <div class="files-section">
+                <div class="section-title">
+                    <h3>ملفات اليوم</h3>
+                    <button class="add-btn">رفع ملف</button>
+                </div>
+                <div class="files-list">
+                    <div class="file-item">
+                        <span>صور نشاط الرسم.pdf</span>
+                        
+                    </div>
+                    <div class="file-item">
+                        <span>قائمة الحضور.xlsx</span>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="teacher.js"></script>
+</body>
+</html>

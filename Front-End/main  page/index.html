@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>الصفحة الرئيسية - Joy Kids</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #a0d8ef;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ff6666;
+        }
+
+        .login-button {
+            background-color: #ff9999;
+            color: black;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: .2s;
+            font-size: 18px;
+        }
+
+        .login-button:hover {
+            background-color: #ff6666;
+            color: black;
+            transform: scale(1.1);
+        }
+
+        .school-icon {
+    
+            font-size: 25px;
+        }
+        .school-icon i{
+            font-size: 25px;
+            color: #ff6666;
+        }
+
+        .first-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            background-color: #ffffff;
+            gap: 30px;
+            border-bottom: 3px solid #a0d8ef;
+        }
+
+        .first-text h2 {
+            font-size: 30px;
+            color: #ff6666;
+            margin-bottom: 10px;
+        }
+
+        .first-text p {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .first-image img {
+            max-width: 300px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        main {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #ff6666;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .section-title i {
+            color: #a0d8ef;
+        }
+
+        .contact-info i {
+            margin-left: 8px;
+            color: #a0d8ef;
+        }
+
+        a {
+            color: #0077b6;
+        }
+
+        a:hover {
+            color: #ff6666;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            justify-items: center;
+            margin-top: 15px;
+}
+
+        .gallery img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+        .lastPhoto{
+            width: 250px;
+            position: absolute;
+            left: 0;
+            top: 5px;
+    }
+
+
+
+    </style>
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav>
+        <div class="school-icon">
+            <i class="fas fa-school"></i>
+            <span>روضة الفرح</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">الصفحة الرئيسية</a>
+            <a href="#">معلومات تعريفية</a>
+            <a href="#">معلومات الاتصال</a>
+            <a href="#" class="login-button" >تسجيل الدخول</a>
+        </div>
+    </nav>
+
+    <!-- عبارة الترحيب -->
+    <div class="first-section">
+        <div class="first-text">
+            <h2>مرحبا بكم في عالم الطفولة والإبداع</h2>
+            <p>تعلم، العب، وانطلق في روضة الفرح </p>
+        </div>
+        <div class="first-image">
+            <img src="images/firstpe.jpg">
+        </div>
+    </div>
+    <!-- المحتوى -->
+    <main>
+        <!-- من نحن -->
+        <div class="card">
+            <div class="section-title"><i class="fas fa-star"></i>من نحن</div>
+            <p>
+                تعد روضة جوي كيدز من أرقى رياض الأطفال، حيث تركز على تنمية الطفل من جميع النواحي النفسية والعقلية
+                والبدنية.
+                تهدف إلى منح الطفل فرصًا كبيرة للاهتمام والتطور، وتسعى لإعداد الأطفال للمرحلة التعليمية القادمة من خلال
+                تطوير مهاراتهم الاجتماعية والمعرفية والدافعية للتعلم.
+            </p>
+        </div>
+
+        <!-- صور الصفوف -->
+        <div class="card">
+            <div class="section-title"><i class="fas fa-image"></i>لمحة من داخل صفوفنا</div>
+            <div class="gallery">
+                <img src="images/photos1.jpg" alt="">
+                <img src="images/photos3.jpg" alt="">
+                <img src="images/photes2.jpg" alt="">
+                
+                <img src="images/photo44.jpg" alt="">
+            </div>
+            </div>
+
+        <!-- معلومات التواصل -->
+        <div class="card">
+            <div class="section-title"><i class="fas fa-address-book"></i>معلومات التواصل</div>
+            <p class="contact-info">
+                <i class="fas fa-map-marker-alt"></i> العنوان: دمشق، سوريا<br>
+                <i class="fas fa-phone"></i> رقم الهاتف: 0999999999<br>
+                <i class="fas fa-envelope"></i> البريد الإلكتروني:
+                <a href="mailto:Joykids@Com.com">Joykids@Com.com</a>
+                <!-- <img class="lastPhoto" src="images/photolast.jpg" alt=""> -->
+            </p>
+            <img class="lastPhoto" src="images/photosunsunsun4.jpg" alt="">
+        </div>
+
+
+
+</body>
+
+</html>

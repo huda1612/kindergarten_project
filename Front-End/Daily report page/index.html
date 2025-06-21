@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>التقرير اليومي - Joy Kids</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #a0d8ef;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ff6666;
+        }
+        .school-icon {
+    
+            font-size: 25px;
+        }
+        .school-icon i{
+            font-size: 25px;
+            color: #ff6666;
+        }
+
+        .back-button {
+            background-color: #ff9999;
+            color: black;
+            padding: 4px 8px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #ff6666;
+            transform: scale(1.1);
+            color: black;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff6666;
+            margin: 30px 0 20px;
+            font-size: 28px;
+        }
+
+        table {
+            width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        th,
+        td {
+            border: 1px solid #f3f3f3;
+            padding: 14px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        th {
+            background-color:#b0e2f6;
+            color: #333;
+        }
+
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 5px; 
+        }
+
+        #submit-btn {
+            display: block;
+            margin: 30px auto;
+            background-color: #ff9999;
+            color: black;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        #submit-btn:hover:not(:disabled) {
+            background-color: #ff6666;
+        }
+
+        #submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- شريط التنقل -->
+    <nav>
+        <div class="school-icon">
+            <i class="fas fa-school"></i>
+            <span>روضة الفرح</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">الصفحة الرئيسية</a>
+            <a href="#">معلومات تعريفية</a>
+            <a href="#">معلومات الاتصال</a>
+            
+            <a href="" class="back-button"><i class="fas fa-arrow-left"></i></a>
+        </div>
+    </nav>
+
+    <h1>التقرير اليومي <span id="current-date"></span></h1>
+
+    <table id="students-table">
+        <thead>
+            <tr>
+                <th>اسم الطالب</th>
+                <th>حضور</th>
+                <th>ملاحظات</th>
+            </tr>
+        </thead>
+        <tbody id="students-list">
+            <tr>
+                <td colspan="3" class="loading">جاري تحميل قائمة الطلاب...</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button id="submit-btn" disabled>إرسال التقرير</button>
+
+    <script>
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+        async function loadStudentsNames() {
+            try {
+                const response = await fetch('/api/getStudentsNames');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const students = await response.json();
+                displayStudents(students);
+            } catch (err) {
+                console.error('Error loading students:', err);
+                document.getElementById('students-list').innerHTML =
+                    '<tr><td colspan="3" style="color: red;">حدث خطأ في تحميل البيانات.</td></tr>';
+            }
+        }
+
+        function displayStudents(students) {
+    const tbody = document.getElementById('students-list');
+    tbody.innerHTML = '';
+
+    if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3">لا يوجد طلاب</td></tr>';
+        return;
+    }
+
+    students.forEach(student => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${student.first_name + " " + student.last_name}</td>
+            <td><input type="checkbox" class="attendance" data-id="${student.id}"></td>
+            <td><input type="text" class="note" data-id="${student.id}" placeholder="ادخال ملاحظة عن الطالب..."></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('submit-btn').disabled = false;
+}
+
+                async function submitReport() {
+                    const report = [];
+                    const notesInputs = document.querySelectorAll('.note');
+
+                    notesInputs.forEach(noteInput => {
+                        const id = noteInput.dataset.id;
+                        const attendanceCheckbox = document.querySelector(.attendance[data - id= "${id}"]);
+                        report.push({
+                            student_id: parseInt(id),
+                            attendance: attendanceCheckbox.checked,
+                            note: noteInput.value.trim()
+                        });
+                    });
+
+                    try {
+                        const res = await fetch('/dailyReport', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(report)
+                        });
+
+                        if (res.ok) {
+                            alert('تم إرسال التقرير بنجاح');
+                            window.location.href = "/teacher";
+                        } else {
+                            alert('حدث خطأ أثناء الإرسال');
+                        }
+                    } catch (err) {
+                        console.error('Error sending report:', err);
+                        alert('تعذر إرسال التقرير');
+                    }
+                }
+
+                document.getElementById('submit-btn').addEventListener('click', submitReport);
+                document.addEventListener('DOMContentLoaded', loadStudentsNames);
+          </script>
+</body>
+
+</html>
