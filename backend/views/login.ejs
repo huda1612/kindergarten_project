@@ -2,76 +2,51 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تسجيل الدخول</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .login-form {
-            background-color: #fff;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 300px;
-        }
-
-        .login-form h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .login-form label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-
-        .login-form input[type="text"],
-        .login-form input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-
-        .login-form input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 15px;
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .login-form input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"/>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>تسجل الدخول</title>
 </head>
 <body>
+  
+    <nav>
+        <div class="school-info">
+            <i class="fas fa-school school-icon"></i>
+            <span>روضة الفرح</span>
+        </div>
+        <div class="nav-links">
+            <a href="/">الصفحة الرئيسية</a>
+            <a href="/">معلومات تعريفية</a>
+            <a href="/">معلومات الاتصال</a>
+            
+        </div>
+    </nav>
+    <div class="wrapper">
+        <form action="/login" method="POST">
+            <h1>تسجيل الدخول <i class="fas fa-child"></i></h1>
+            <div class="input-box">
+                <input type="text" placeholder="اسم المستخدم" id="username" name="username" 
+                required>
+                <i class='bx bxs-user'></i>
+            </div>
 
-    <form class="login-form" action="/login" method="POST">
-        
-        <h2>تسجيل الدخول</h2>
-        <label for="username">اسم المستخدم</label>
-        <input type="text" id="username" name="username" required>
-
-        <label for="password">كلمة السر</label>
-        <input type="password" id="password" name="password" required>
-
+            <div class="input-box">
+                <input type="password" placeholder="كلمة المرور" id="password" name="password"
+                required>
+                <i class='bx bxs-lock-alt'></i>
+            </div>
           <% if (session.loginError) { %>
           <div class="alert alert-danger"> <%= session.loginError %> </div>
           <% session.loginError = null; %>
           <% } %> 
           
-        <input type="submit" value="دخول">
-    </form>
 
+            <button type="submit" class="btn">دخول </button>
+            
+
+        </form>
+    </div>
+    
 </body>
 </html>

@@ -1,11 +1,19 @@
 // 1. Import required packages
 import express from 'express'
 import cors from 'cors'
-import {authentication , getTheId , getTodayActivityListByClass} from './database.js'
-import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher } from './teacherDatabase.js'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity} from './database.js'
+import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname , insertNote , insertAbsence } from './studentDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
+
+// للحصول على المسار الكامل للملف الحالي
+const __filename = fileURLToPath(import.meta.url);
+// للحصول على مسار المجلد الحالي
+const __dirname = path.dirname(__filename);
+
 
 
 const app = express();
@@ -20,6 +28,8 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // 5.**************************************************************** ROUTES SECTION *********************************************************************************
 //home page
@@ -95,7 +105,8 @@ app.get('/teacher' , async (req,res ) => {
   const absence_count = await getTodayAbsenceCount(teacher_id) ;
   const attendance_count = student_count - absence_count ;
   const activity_count = await getTodayActivityCount(teacher_id) ; 
-  res.render( 'teacher' , { full_name ,name_With_Nikname, student_count , absence_count , attendance_count , activity_count  })
+  const activity_names = await getActivityNames() ;
+  res.render( 'teacher' , { full_name ,name_With_Nikname, student_count , absence_count , attendance_count , activity_count , activity_names })
   }catch(err){
     console.error('Error loading /teacher page:', err);
     res.status(500).send('حدث خطأ في السيرفر');
@@ -164,6 +175,21 @@ app.get('/api/getStudentsNames' , async (req, res ) => {
   }
 })
 
+//هي لارسال اسماء الانشطة كلها مشان يختار منها المعلم 
+app.get('/api/getActivityNames' , async (req, res) => {
+   if (!req.session.user ) {
+  return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try{
+  const activityNames = await getActivityNames();
+
+  res.json(activityNames);
+  }catch(err){
+    console.error('Error loading /api/getActivityNames :', err);
+    res.status(500).send('حدث خطأ في قاعدة البيانات');
+  }
+})
+
 //هي  ليحصل الفرونت على قائمة بالانشطة اليوم بالصف سواء للمعلم او للطالب  
 app.get('/api/getTodayActivityList' , async (req, res ) => {
   if (!req.session.user ) {
@@ -173,12 +199,13 @@ app.get('/api/getTodayActivityList' , async (req, res ) => {
  try{
   //اول شي بجيب رقم الصف للمستخدم 
  const classId = await getClassIdFromSession(req.session.user);
- if (!classId) {
+ if (!classId) 
       return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
-    }
+    
  
 const TodayActivity = await getTodayActivityListByClass(classId) ;
 //صار معي مصفوفة اغراض بتعبر عن الانشطه وكل نشاط فيه اسم ووصف وايقونه وتاريخ اليوم
+//[{name: ... , description : ... , icon : ... } , .....]
  res.json(TodayActivity) ;
 
  }catch(err){
@@ -187,6 +214,29 @@ const TodayActivity = await getTodayActivityListByClass(classId) ;
  }
 
 })
+
+//هي مشان وقت بده المعلم يضيف نشاط جديد 
+app.post('/api/insertTodayDailyActivity' , async (req, res ) => {
+
+if (!req.session.user || req.session.user.role != "teacher") 
+  return res.status(401).json({ error: 'Unauthorized' });
+
+try{
+//اول شي بجيب رقم الصف للمستخدم 
+const classId = await getClassIdFromSession(req.session.user);
+if (!classId) 
+      return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
+  
+const { activityName } = req.body;  //بدي من الفرونت يبعتولي بس اسم النشاط اللي بده المعلم يضيفه
+
+await insertTodayDailyActivity(activityName , classId) ; 
+ res.json({ success: true });
+
+}catch(err){
+  console.error('Error loading /api/insertTodayDailyActivity :', err);
+  res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });}
+})
+
 
 //****************************************************************API SECTION END*************************************************************************************
 

@@ -67,14 +67,40 @@ export async function getTheId( userId ){
 
 
 //*********************************************************CLASS FUNCTIONS SECTION******************************************************************
+
 export async function getTodayActivityListByClass(classId) {
   const rows = await executeQuery(`
-      SELECT a.name, a.description, a.icon, d.date
+      SELECT a.name, a.description, a.icon
       FROM daily_activities d
       JOIN activities a ON d.activity_id = a.id
       WHERE d.class_id = ? AND d.date = CURRENT_DATE `, [classId]);
       return rows;
 }
+//تابع لاضافة نشاط يومي جديد للصف
+export async function insertTodayDailyActivity(activityName, classId ) {
+  try{
+    const [activity] = await executeQuery(
+            'SELECT id FROM activities WHERE name = ?',
+            [activityName]
+        );
+        if (!activity) throw new Error("النشاط غير موجود");
+
+        const activityId = activity.id;
+
+    const existing = await executeQuery(
+      'SELECT id FROM daily_activities WHERE activity_id = ? AND class_id = ? AND date = CURRENT_DATE',
+      [activityId, classId] );
+    if (existing.length > 0) throw new Error("النشاط مسجل بالفعل اليوم لهذا الصف");
+
+    return await executeQuery(`
+      INSERT INTO daily_activities (activity_id, class_id, date)
+      VALUES (?, ?, CURRENT_DATE) `, [activityId, classId]);
+    }catch(err){
+    console.error("فشل إضافة النشاط:", err.message);
+    throw err;
+  }
+}
+
 //*********************************************************CLASS FUNCTIONS END**********************************************************************
 
 

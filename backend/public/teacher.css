@@ -1,0 +1,315 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* الشريط العلوي */
+nav {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    background-color: #a0d8ef;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    
+}
+
+
+.school-info {
+    display: flex;
+    align-items: center;
+    font-size: 25px;
+   
+}
+
+.school-icon {
+    font-size: 25px;
+    color: #ff6666;
+    margin-left: 10px;
+}
+
+.teacher-info {
+    display: flex;
+    align-items: center;
+}
+
+.teacher-name {
+    margin-left: 15px;
+    color: #333;
+}
+
+.logout-btn {
+    background-color: #ff9999;
+    color: black;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+    font-size: 18px;
+}
+
+.logout-btn:hover {
+    background-color: #ff6666;
+    color: black;
+    transform: scale(1.1);
+}
+
+/* الهيكل الرئيسي */
+.container {
+    display: flex;
+    margin-top: 70px;
+}
+
+/* القائمة الجانبية */
+.sidebar {
+    width: 250px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    padding: 20px 0;
+    height: calc(100vh - 70px);
+    position: fixed;
+    right: 0;
+    
+}
+
+.menu-item {
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+   direction: rtl;
+}
+
+.menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+.menu-item i {
+    margin-left: 10px;
+    color: #ff6666;
+    font-size: 18px;
+    
+}
+.menu-item span {
+    flex-grow: 1; /* ليشغل النص المساحة المتبقية */
+    text-align: right; /* محاذاة النص لليمين */
+}
+
+/* المحتوى الرئيسي */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin-right: 250px;
+}
+
+.welcome-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.welcome-box h2 {
+    color: #ff6666;
+    margin-bottom: 10px;
+}
+
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.box1 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box2 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box3 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box4 {
+    background-color: white;
+    width: 23%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.box1 i {
+    font-size: 24px;
+    color: #a0d8ef;
+    margin-bottom: 10px;
+}
+.box2 i {
+    font-size: 24px;
+    color: #179e22;
+    margin-bottom: 10px;
+}
+.box3 i {
+    font-size: 24px;
+    color: #f0461c;
+    margin-bottom: 10px;
+}
+.box4 i {
+    font-size: 24px;
+    color: #169cd1;
+    margin-bottom: 10px;
+}
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+}
+
+.students-list, .activities-section, .files-section {
+    background-color: white;
+    padding: 20px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    
+}
+
+.section-title {
+    color: #ff6666;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-btn {
+    background-color: #ff6666;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #e55c5c;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: right;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.file-item {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 10px ;
+    border-bottom: 1px solid #eee;
+}
+.file-item i{
+    color: #169cd1;
+    
+}
+.activity-options {
+    display: none;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.activity-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid #eee;
+}
+
+.activity-option:hover {
+    background: #fff0f0;
+    border-color: #ff6666;
+}
+
+.activity-option i {
+    color: #ff6666;
+    margin-left: 8px;
+    font-size: 16px;
+}
+
+
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background: white;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.activity-item .time {
+    color: #777;
+    font-size: 14px;
+}
+
+.activity-item .delete-activity {
+    color: #ff6666;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+

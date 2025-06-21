@@ -85,3 +85,10 @@ export async function getClassIdByTeacherId(teacherId) {
 
 }
 
+//تابع لرد قائمة اسماء الانشطه الممكنه 
+export async function getActivityNames(){
+  const rows = await executeQuery('SELECT name , icon FROM activities')
+  //برد مصفوفة فيها كل كائن عباره عن اسم وايقونه 
+
+return rows ;
+}
