@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity} from './database.js'
+import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname , insertNote , insertAbsence } from './studentDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
@@ -79,6 +79,24 @@ app.post('/login', async (req , res) => {
       res.redirect('/teacher') ; }
    }
 })
+
+//register pasge get
+app.get('/register', async (req , res) => {
+   res.render('register', { session: req.session });
+})
+
+//register pasge post 
+app.post('/register', async (req , res) => {
+  const {id , firstName , lastName , username, password1 , password2  , role } = req.body ;
+  const registerResult = await register(id , firstName , lastName , username, password1 , password2  , role) ;
+  if(registerResult.success)
+    res.render('successRegister')  
+  else {
+    req.session.user = null; //للتنظيف من اي جلسة قديمة 
+    req.session.registerError = registerResult.message ;
+    res.redirect('/register');}
+})
+
 
 //get the student page
 app.get('/student' , async (req,res ) => {
