@@ -19,7 +19,7 @@
         </div>
         
         <div class="student-info">
-            <span class="student-name">الطالب أحمد محمد</span>
+            <span class="student-name"><%= name_With_Nikname %>  </span>
             <button class="logout-btn">تسجيل الخروج</button>
         </div>
     </nav>
@@ -39,7 +39,7 @@
         <div class="main-content">
             <!-- مربع الترحيب -->
             <div class="welcome-box">
-                <h2>مرحباً بك، أحمد محمد</h2>
+                <h2>مرحباً بك،  <%= name_With_Nikname %></h2>
                 <p id="today-date"></p>
             </div>
 
@@ -50,22 +50,22 @@
                 <div class="box1">
                     <i class="fas fa-child"></i>
                     <div>اسم الطالب:</div>
-                    <div class="stat-value">أحمد محمد</div>
+                    <div class="stat-value"><%= name_With_Nikname %> </div>
                 </div>
                 <div class="box2">
                     <i class="fas fa-user-graduate"></i>
                     <div>فئة الطالب:</div>
-                    <div class="stat-value">1</div>
+                    <div class="stat-value"><%= class_Name %></div>
                 </div>
                 <div class="box3">
                     <i class="fas fa-chalkboard-teacher"></i>
                     <div>اسم الأستاذ المشرف:</div>
-                    <div class="stat-value">سارة أحمد</div>
+                    <div class="stat-value"><%= teacher_Name %> </div>
                 </div>
                 <div class="box4">
                     <i class="fas fa-user-times"></i>
                     <div>عدد الغيابات:</div>
-                    <div class="stat-value">5</div>
+                    <div class="stat-value"><%= absenceCount %></div>
                 </div>
             </div>
 
@@ -120,10 +120,11 @@
             <!-- ملاحظات اليوم -->
             <section class="section-box">
                 <h3>ملاحظات اليوم:</h3>
-                <ul class="notes">
-                    <li>أبدى الطالب تفاعلاً جيداً</li>
-                    <li>يلزم تحسين في التركيز</li>
-                </ul>
+                <% if (today_Note) { %>
+                    <p>ملاحظة اليوم: <%= today_Note %></p>
+                  <% } else { %>
+                    <p>لا توجد ملاحظة لهذا اليوم.</p>
+                  <% } %>
             </section>
         </div>
     </div>

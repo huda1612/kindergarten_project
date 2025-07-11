@@ -5,7 +5,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
-import {getStudentFullName , getStudentNameWithNikname , insertNote , insertAbsence } from './studentDatabase.js'
+import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
+import {getAllTeachersData , insertTeacher} from './adminDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
 
@@ -135,16 +136,25 @@ app.get('/admin' , async (req,res ) => {
 
 })
 
+
 //get the student page
 app.get('/student' , async (req,res ) => {
   if (!req.session.user ) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
     return res.redirect('/login');
   }
+  try{
   const student_id = req.session.user.student_id ;
   const full_name = await getStudentFullName(student_id) ; 
-  const name_With_Nikname = await getStudentNameWithNikname(student_id) ; 
-  res.render( 'student' , {full_name, name_With_Nikname }) ; 
-
+  const name_With_Nikname = await getStudentNameWithNikname(student_id) ;
+  const class_Name =await getClassNameByStudentId(student_id);
+  const teacher_Name = await getTeacherNameByStudentId(student_id);
+  const absenceCount = await getAbsenceCountByStudentId(student_id);
+  const today_Note = await getTodayNoteByStudentId(student_id);
+  res.render( 'student' , {full_name, name_With_Nikname , class_Name ,teacher_Name , absenceCount, today_Note})
+ }catch (error) {
+  console.error(error);
+  res.status(500).send('حدث خطأ في السيرفر');
+}
 })
 
 //get the teacher page
@@ -295,6 +305,41 @@ await insertTodayDailyActivity(activityName , classId) ;
   console.error('Error loading /api/insertTodayDailyActivity :', err);
   res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });}
 })
+//****************************************************************ِAPI FOR ADMIN PAGE****************************************************************************************************
+//لرد جميع بيانات المعلمين 
+//برد مصفوفة هيك شكل عناصرها {id :... , first_name :... , last_name :...  , class_name: .... , phone:.... } وكل عنصر بمثل معلم وممكن يكون في معلم اسم صفه null لازم نعالج هالحاله
+app.get('/api/getTeachersData' , async (req, res) => {
+   if (!req.session.user ) {
+  return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try{
+  const teachersData = await getAllTeachersData();
+
+  res.json(teachersData);
+  }catch(err){
+    console.error('Error loading /api/getTeachersData :', err);
+    res.status(500).send('حدث خطأ في قاعدة البيانات');
+  }
+})
+
+//لاضافة معلم جديد الى قاعدة البيانات 
+app.post('/api/insertTeacher' , async (req, res ) => {
+
+if (!req.session.user || req.session.user.role != "teacher") 
+  return res.status(401).json({ error: 'Unauthorized' });
+
+try{
+   const { first_name , last_name , phone } = req.body; //بدي من الفرونت هالبيانات بس ورقم الهاتف ممكن لا
+   await insertTeacher(first_name , last_name , phone) ;
+   res.json({ success: true });
+
+}catch{
+  console.error('Error loading /api/insertTeacher :', err);
+  res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });}
+}
+)
+
+//****************************************************************ِAPI FOR ADMIN PAGE END****************************************************************************************************
 
 
 //****************************************************************API SECTION END*************************************************************************************
