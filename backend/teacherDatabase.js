@@ -7,13 +7,10 @@ export async function getTeacherFullName(teacherId) {
   return rows[0].first_name  +" "+ rows[0].last_name  ;
 }
 
-export async function getTeacherNameWithNikname(studentId) {
-  const rows = await executeQuery('SELECT gender FROM students where id = ? ', [studentId]  );
-  const full_name =await getTeacherFullName(studentId) ; 
-  if(rows[0].gender== "male")
-    return "الاستاذ" +" "+ full_name ;
-  else 
-    return "الاستاذة" +" "+ full_name ;
+export async function getTeacherNameWithNikname(teacherId) {
+  const rows = await executeQuery('SELECT gender FROM students where id = ? ', [teacherId]  );
+  const full_name =await getTeacherFullName(teacherId) ; 
+  return "المربية" +" "+ full_name ;
 }
 
 //تابع لاعرف عدد الطلاب اللي بصف معلم محدد

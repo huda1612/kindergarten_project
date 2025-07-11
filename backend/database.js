@@ -60,6 +60,7 @@ export async function getTheId( userId ){
     const rows = await executeQuery("SELECT id FROM teachers WHERE user_id = ?", [userId]);
     return rows.length > 0 ? rows[0].id : -1;  
     }
+    
   return -1 ;
   }
 
@@ -76,6 +77,11 @@ export async function register( id, firstName, lastName, username, password1, pa
   //التحقق من صحة الدور 
   if (role != 'teacher' && role != 'student') 
     return { success: false, message: "نوع الدور غير صحيح" };
+
+  if (role === 'admin') {
+  const [adminExists] = await executeQuery("SELECT id FROM users WHERE role = 'admin'");
+  if (adminExists) throw new Error("يوجد مدير بالفعل، لا يمكن إنشاء مدير آخر.");
+}
   
   //تحقق من وجود الرقم التعريفي والتحقق من عدم وجود حساب بهذا الرقم 
   const validId = await idCheck(id, role);
