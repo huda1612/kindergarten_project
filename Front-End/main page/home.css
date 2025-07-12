@@ -1,0 +1,315 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c9e7f2 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* لمسة زخرفية طفولية في الخلفية */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -80px;
+            left: -80px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 70% 30%, #a0d8ef55 60%, transparent 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        nav {
+            background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+            padding: 12px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-radius: 0 0 18px 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: box-shadow 0.3s;
+        }
+
+        nav.scrolled {
+            box-shadow: 0 8px 24px rgba(160, 216, 239, 0.18);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s, font-size 0.3s, background 0.3s;
+            font-size: 19px;
+            padding: 6px 14px;
+            border-radius: 12px;
+        }
+
+        nav a:hover {
+            color: #ff6666;
+            font-size: 20px;
+            background: #fff6f6;
+        }
+
+        nav a.active {
+            color: #000;
+            font-weight: bold;
+            background: #a0d8ef;
+            box-shadow: 0 2px 8px #ffb6b955;
+        }
+
+        nav a.active:hover {
+            color: #ff6666;
+            background: #fff;
+            transform: scale(1.05);
+        }
+
+        .login-button {
+            background: linear-gradient(90deg, #ffb6b9 60%, #a0d8ef 100%);
+            color: #222;
+            padding: 6px 18px;
+            border-radius: 22px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: .2s;
+            font-size: 19px;
+            box-shadow: 0 2px 8px rgba(255, 182, 185, 0.15);
+        }
+
+        .login-button:hover {
+            background: #ff6666;
+            color: #fff;
+            transform: scale(1.08);
+        }
+
+        .school-icon {
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .school-icon i {
+            font-size: 28px;
+        }
+
+        .school-icon .fa-school {
+            color: #ff6666;
+        }
+
+        .school-icon .fa-sun {
+            color: #FFD700;
+            font-size: 22px;
+            margin-right: 2px;
+        }
+
+        .school-icon span {
+            font-size: 22px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .first-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px 30px 20px;
+            background: linear-gradient(120deg, #fff 60%, #a0d8ef22 100%);
+            gap: 40px;
+            border-bottom: 3px solid #a0d8ef;
+            position: relative;
+        }
+
+        .first-text h2 {
+            font-size: 36px;
+            color: #ff6666;
+            margin-bottom: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .first-text p {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 18px;
+        }
+
+        .first-text .about-btn {
+            background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+            color: #222;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 22px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(160, 216, 239, 0.12);
+        }
+
+        .first-text .about-btn:hover {
+            background: #ff6666;
+            color: #fff;
+            transform: scale(1.07);
+        }
+
+        .first-image img {
+            max-width: 340px;
+            height: auto;
+            border-radius: 18px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
+            border: 3px solid #a0d8ef;
+        }
+
+        main {
+            padding: 40px 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .card {
+            background: linear-gradient(120deg, #fff 80%, #a0d8ef11 100%);
+            border-radius: 18px;
+            padding: 32px 28px;
+            box-shadow: 0 6px 18px rgba(160, 216, 239, 0.10);
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-7px) scale(1.01);
+            box-shadow: 0 12px 32px rgba(255, 182, 185, 0.13);
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #ff6666;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .section-title i {
+            color: #a0d8ef;
+        }
+
+        .contact-info i {
+            margin-left: 8px;
+            color: #a0d8ef;
+        }
+
+        a {
+            color: #0077b6;
+        }
+
+        a:hover {
+            color: #ff6666;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 22px;
+            justify-items: center;
+            margin-top: 18px;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: 170px;
+            object-fit: cover;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.07) rotate(-1deg);
+            box-shadow: 0 8px 24px rgba(255, 182, 185, 0.18);
+        }
+
+        .lastPhoto {
+            width: 250px;
+            position: absolute;
+            left: 0;
+            top: 5px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(160, 216, 239, 0.13);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+            color: #333;
+            text-align: center;
+            padding: 18px 0 10px 0;
+            font-size: 18px;
+            border-radius: 18px 18px 0 0;
+            margin-top: 40px;
+            box-shadow: 0 -2px 8px rgba(160, 216, 239, 0.10);
+        }
+
+        @media (max-width: 700px) {
+            .first-section {
+                flex-direction: column;
+                gap: 18px;
+            }
+
+            .first-image img {
+                max-width: 95vw;
+            }
+
+            .card {
+                padding: 12px 2px;
+            }
+
+            main {
+                padding: 10px 2px 8px 2px;
+                gap: 18px;
+            }
+
+            .section-title {
+                font-size: 20px;
+            }
+
+            .first-text h2 {
+                font-size: 24px;
+            }
+
+            .first-text p,
+            .first-text .about-btn {
+                font-size: 16px;
+            }
+
+            .about-btn {
+                padding: 7px 14px;
+            }
+
+            .swiper-slide img {
+                height: 120px;
+            }
+
+            footer {
+                font-size: 15px;
+                padding: 10px 0 4px 0;
+            }
+        }

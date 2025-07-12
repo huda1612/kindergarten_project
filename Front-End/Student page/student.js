@@ -14,3 +14,14 @@ document.querySelector('.logout-btn').addEventListener('click', function() {
     alert('تم تسجيل الخروج بنجاح');
     // يمكن إضافة توجيه لصفحة تسجيل الدخول هنا
 });
+
+// تفعيل عنصر القائمة الجانبية
+const menuItems = document.querySelectorAll('.menu-item');
+menuItems.forEach(item => {
+  item.addEventListener('click', function() {
+    menuItems.forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+
