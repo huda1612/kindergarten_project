@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب جديد - روضة أسراب اليمام الخاصة</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  
+    <nav>
+        <div class="school-info">
+            <i class="fas fa-school school-icon"></i>
+            <span>روضة أسراب اليمام الخاصة</span>
+        </div>
+        <div class="nav-links">
+            <a href="../main page/home.html">الصفحة الرئيسية</a>
+            <a href="../main page/home.html#about_us">معلومات تعريفية  </a>
+            <a href="../main page/home.html#contact"> معلومات الاتصال</a>
+        </div>
+    </nav>
+
+    <div class="wrapper">
+        <form action="/register" method="POST">
+            <h1>إنشاء حساب جديد <i class="fas fa-user-plus"></i></h1>
+
+            <div class="input-box">
+                <label for="id">الرقم التعريفي:</label>
+                <input type="number" id="id" name="id" required>
+                <i class='bx bxs-id-card'></i>
+            </div>
+
+            
+            <div class="input-box">
+                <label for="username">الاسم الأول :</label>
+                <input type="text" id="username" name="username" required>
+                <i class='bx bxs-user'></i>
+            </div>
+
+            <div class="input-box">
+                <label for="username">الاسم الأخير :</label>
+                <input type="text" id="username" name="username" required>
+                <i class='bx bxs-user'></i>
+            </div>
+
+            <div class="input-box">
+                <label for="username">اسم المستخدم:</label>
+                <input type="text" id="username" name="username" required>
+                <i class='bx bxs-user-circle'></i>
+            </div>
+
+            <div class="input-box">
+                <label for="password1">كلمة السر:</label>
+                <input type="password" id="password1" name="password1" required>
+                <i class='bx bxs-lock-alt'></i>
+            </div>
+
+            <div class="input-box">
+                <label for="password2">تأكيد كلمة السر:</label>
+                <input type="password" id="password2" name="password2" required>
+                <i class='bx bxs-lock'></i>
+            </div>
+
+            <div class="roles">
+                <label><input type="radio" name="role" value="teacher" required> مربية</label>
+                <label><input type="radio" name="role" value="student"> طالب</label>
+            </div>
+
+            <button type="submit" class="btn">إنشاء الحساب</button>
+          
+
+            <div class="login-link" style="text-align:center; margin-top: 15px;">
+                <span>لديك حساب؟</span>
+                <a href="../login page/index.html">تسجيل الدخول</a>
+                
+            </div>
+        </form>
+    </div>
+
+    <div id="success-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:#fff; padding:30px 20px; border-radius:12px; box-shadow:0 2px 16px #0002; min-width:270px; text-align:center;">
+            <h2 style="margin-bottom:15px; color:black;">تم إنشاء الحساب بنجاح</h2>
+            <button id="go-login-btn" style="margin-top:10px; padding:8px 18px; background:#ff6666; color:#fff; border:none; border-radius:6px; font-size:1em; cursor:pointer;">تسجيل الدخول</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
