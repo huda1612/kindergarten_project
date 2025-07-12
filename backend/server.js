@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
-import {getAllTeachersData , insertTeacher} from './adminDatabase.js'
+import {getAllTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById , getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById} from './adminDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
 
@@ -131,8 +131,11 @@ app.get('/admin' , async (req,res ) => {
   if (!req.session.user || req.session.user.role != 'admin' ) { 
     return res.redirect('/login');
   }
-   
-  res.render( 'admin' ) ; 
+  const teachers = await getAllTeachersData();
+  const gradeLevels = await getGradeLevels();
+  const allClassesData = await getAllClassesData() ;
+  //console.log(req.session.editClassTeacherId)
+  res.render( 'admin' ,{teachers , gradeLevels , allClassesData , session: req.session  } ) ; 
 
 })
 
@@ -306,39 +309,188 @@ await insertTodayDailyActivity(activityName , classId) ;
   res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });}
 })
 //****************************************************************ِAPI FOR ADMIN PAGE****************************************************************************************************
-//لرد جميع بيانات المعلمين 
-//برد مصفوفة هيك شكل عناصرها {id :... , first_name :... , last_name :...  , class_name: .... , phone:.... } وكل عنصر بمثل معلم وممكن يكون في معلم اسم صفه null لازم نعالج هالحاله
-app.get('/api/getTeachersData' , async (req, res) => {
-   if (!req.session.user ) {
-  return res.status(401).json({ error: 'Unauthorized' });
-  }
-  try{
-  const teachersData = await getAllTeachersData();
 
-  res.json(teachersData);
+app.post('/admin/updateClassTeacher' , async (req, res ) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+   return res.status(401).json({ error: 'Unauthorized' });
+  try{
+  const {oldTeacherId , newTeacherId } = req.body ; 
+  await updateClassTeacher(oldTeacherId , newTeacherId) ;
+  res.redirect('/admin') ;
+
   }catch(err){
-    console.error('Error loading /api/getTeachersData :', err);
-    res.status(500).send('حدث خطأ في قاعدة البيانات');
+  console.error('Error loading /admin/updateClassTeacher :', err);
+  res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
   }
 })
 
-//لاضافة معلم جديد الى قاعدة البيانات 
-app.post('/api/insertTeacher' , async (req, res ) => {
+app.post('/admin/deleteTeacher' , async (req, res ) => {
+ if (!req.session.user || req.session.user.role != "admin") 
+  return res.status(401).json({ error: 'Unauthorized' });
+ try{
+  const {teacherId} = req.body ; 
+  const result = await deleteTeacherById(teacherId) ;
+  if(!result.success){
+    req.session.deleteTeacherError = null ;
+    req.session.deleteTeacherError = result.Message ;
+    return res.redirect('/admin');
+  }
+  else  
+    res.redirect('/admin') ;
+ }catch(err){
+    req.session.deleteTeacherError = 'حدث خطأ أثناء حذف المعلم';
+    res.redirect('/admin');
+ }
+})
 
-if (!req.session.user || req.session.user.role != "teacher") 
+//لتحديد المعلم اللي بدنا نعدل على بياناته مشان يفتحله حقول للتعديل 
+app.post('/admin/editTeacher', (req, res) => {
+  const { editTeacherId } = req.body;
+  req.session.editTeacherId = parseInt(editTeacherId); // نحدد من هو المعلم الذي نعدّله
+  res.redirect('/admin');
+});
+
+//لتعديل بيانات معلم 
+app.post('/admin/updateTeacher', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  try{
+  const {teacherId , first_name , last_name , phone} = req.body ;
+  const result = await updateTeacherById(teacherId ,first_name , last_name , phone) ;
+  if(result.success){
+   req.session.editTeacherId = null ;
+   req.session.updateTeacherError = null ;
+   res.redirect('/admin');}
+  else 
+  {
+    req.session.updateTeacherError = null ;
+    req.session.updateTeacherError = result.message ;
+    return res.redirect('/admin');
+  }
+  }catch(err){
+    console.error('Error loading /admin/updateTeacher :', err);
+    res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
+  }
+})
+
+app.post('/admin/cencelUpdateTeacher', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  
+  req.session.editTeacherId = null ;
+  res.redirect('/admin');
+ 
+})
+
+
+//لاضافة معلم جديد الى قاعدة البيانات 
+app.post('/admin/insertTeacher' , async (req, res ) => {
+
+if (!req.session.user || req.session.user.role != "admin") 
   return res.status(401).json({ error: 'Unauthorized' });
 
 try{
-   const { first_name , last_name , phone } = req.body; //بدي من الفرونت هالبيانات بس ورقم الهاتف ممكن لا
-   await insertTeacher(first_name , last_name , phone) ;
-   res.json({ success: true });
+   const { first_name , last_name , phone } = req.body; 
+   const result = await insertTeacher(first_name , last_name , phone) ;
+   
+   if(!result.success){
+    req.session.insertTeacherError = null ;
+    req.session.insertTeacherError = result.message ;
+    return res.redirect('/admin')
+  }
+   else{
+     req.session.insertTeacherError = null ;
+     return res.redirect('/admin')
+   }
 
-}catch{
-  console.error('Error loading /api/insertTeacher :', err);
+}catch(err){
+  console.error('Error loading /admin/insertTeacher :', err);
   res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });}
 }
 )
 
+
+//للتعديل على اسم الصف 
+
+app.post('/admin/editClassName', (req, res) => {
+  const { editClassNameId } = req.body;
+  req.session.editClassNameId = parseInt(editClassNameId); // نحدد من هو الصف الذي نعدّله
+  res.redirect('/admin');
+});
+
+app.post('/admin/cencelUpdateClassName', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  
+  req.session.editClassNameId = null ;
+  res.redirect('/admin');
+ 
+})
+
+app.post('/admin/updateClassName', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  try{
+  const {classId  , class_name , oldTeacherId , newTeacherId} = req.body ;
+  const result = await updateClassNameById(classId  , class_name , oldTeacherId , newTeacherId) ;
+  if(result.success){
+   req.session.editClassNameId = null ;
+   req.session.updateClassNameError = null ;
+   res.redirect('/admin');}
+  else 
+  {
+    req.session.updateClassNameError = null ;
+    req.session.updateClassNameError = result.message ;
+    return res.redirect('/admin');
+  }
+  }catch(err){
+    console.error('Error loading /admin/updateClassName :', err);
+    res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
+  }
+})
+
+
+
+//للتعديل على معلم الصف
+
+app.post('/admin/editClassTeacher', (req, res) => {
+  const { editClassTeacherId } = req.body;
+  req.session.editClassTeacherId = parseInt(editClassTeacherId); // نحدد من هو الصف الذي نعدّله
+  res.redirect('/admin');
+});
+
+app.post('/admin/cencelUpdateClassTeacher', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  
+  req.session.editClassTeacherId = null ;
+  res.redirect('/admin');
+ 
+})
+
+app.post('/admin/updateClassTeacherByClassId', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  try{
+  const {classId  , oldTeacherId , newTeacherId} = req.body ;
+  const result = await updateClassTeacherById(classId , oldTeacherId , newTeacherId) ;
+ 
+ if(result.success){
+   req.session.editClassTeacherId = null ;
+   req.session.updateClassTeacherError = null ;
+   res.redirect('/admin');}
+  else 
+  {
+    req.session.updateClassTeacherError = null ;
+    req.session.updateClassTeacherError = result.message ;
+    return res.redirect('/admin');
+  }
+
+  }catch(err){
+    console.error('Error loading /admin/updateClassTeacherByClassId :', err);
+    res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
+  }
+})
 //****************************************************************ِAPI FOR ADMIN PAGE END****************************************************************************************************
 
 

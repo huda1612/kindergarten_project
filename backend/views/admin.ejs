@@ -1,1 +1,247 @@
-<h>ADMIN PAGE</h>
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة تحكم المدير</title>
+  
+  <style>
+    .class-container {
+    display: flex;
+    gap: 20px; /* مسافة بين الكروت */
+     flex-wrap: wrap; /* حتى ينزل للسطر اللي بعده إذا امتلأ السطر */
+    }
+
+    .class-card {
+      width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px auto;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: 'Tahoma', sans-serif;
+    }
+
+    .class-card h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #333;
+    }
+
+    .class-info {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    .class-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    .class-buttons button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-edit { background-color: #ffc107; color: #000; }
+    .btn-delete { background-color: #dc3545; color: white; }
+    .btn-view { background-color: #007bff; color: white; }
+  </style>
+</head>
+<body>
+  <h1>قائمة المعلمين</h1>
+ 
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>رقم الهاتف</th>
+        <th>اسم الصف المسؤول عنه</th>
+        <th>تغيير المعلم المسؤول عن الصف </th>
+        <th>تعديل البيانات</th>
+        <th>حذف المعلم</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <% teachers.forEach(teacher => { %>
+        <tr>
+          <td><%= teacher.first_name %> <%= teacher.last_name %></td>
+          <td><% if(teacher.phone){ %>
+            <%= teacher.phone %>
+            <% } else { %>
+                  <span>لا يوجد رقم هاتف</span>
+            <%}%>
+          </td>
+          <td><%= teacher.class_name || 'غير مرتبط بأي صف حاليًا' %></td>
+
+          <td>
+            <% if (teacher.class_name) { %>
+              <form action="/admin/updateClassTeacher" method="POST">
+                <input type="hidden" name="oldTeacherId" value="<%= teacher.id %>">
+                <select name="newTeacherId" required>
+                  <% teachers
+                        .filter(t => t.id !== teacher.id && !t.class_name)
+                        .forEach(t => { %>
+                    <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
+                  <% }) %>
+                </select>
+                <button type="submit">تغيير</button>
+              </form>
+            <% } else { %>
+              <span>بانتظار تعيين صف</span>
+            <% } %>
+          </td>
+
+          <td>
+        <% if (session.editTeacherId === teacher.id) { %>
+              <!-- نموذج التعديل يظهر فقط لهذا المعلم -->
+         <form action="/admin/updateTeacher" method="POST" style="display:inline-block; margin-left: 10px;">
+              <input type="hidden" name="teacherId" value="<%= teacher.id %>">
+              <input type="text" name="first_name" value="<%= teacher.first_name %>" required>
+              <input type="text" name="last_name" value="<%= teacher.last_name %>" required>
+              <input type="text" name="phone" value="<%= teacher.phone %>" >
+              <button type="submit">حفظ</button>
+              
+         </form>
+         <form action="/admin/cencelUpdateTeacher" method="post" style="display:inline;">
+              <button type="submit" >إلغاء</button>
+         </form>
+         <% if (session.updateTeacherError) { %>
+              <div class="alert alert-danger"><%= session.updateTeacherError %></div>
+              <% session.updateTeacherError = null; %>
+              <% } %>
+         <% } else { %>
+         <form action="/admin/editTeacher" method="POST" style="display:inline">
+         <input type="hidden" name="editTeacherId" value="<%= teacher.id %>">
+          <button type="submit">تعديل</button>
+         </form>
+  <% } %>
+</td>
+
+          <td>
+            <form action="/admin/deleteTeacher" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المعلم؟');">
+              <input type="hidden" name="teacherId" value="<%= teacher.id %>">
+              <button type="submit">حذف</button>
+              <% if (session.deleteTeacherError) { %>
+              <div class="alert alert-danger"><%= session.deleteTeacherError %></div>
+              <% session.deleteTeacherError = null; %>
+              <% } %>
+
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<h3>إضافة معلم جديد :</h3>
+
+<form id="addTeacherForm" action="/admin/insertTeacher" method="POST" >
+  <input type="text" name="first_name" placeholder="الاسم الأول" required>
+  <input type="text" name="last_name" placeholder="الاسم الأخير" required>
+  <input type="text" name="phone" placeholder="رقم الهاتف">
+  <button type="submit">إضافة</button>
+</form>
+ <% if (session.insertTeacherError) { %>
+              <div class="alert alert-danger"><%= session.insertTeacherError %></div>
+             <% session.insertTeacherError = null; %> 
+              <% } %>
+
+
+<h1>قائمة الصفوف</h1>
+
+<% gradeLevels.forEach(gradeLevel => { %>
+  <div class="class-container">
+    <h2><%= gradeLevel.name %></h2>
+
+    <% allClassesData.forEach(clas => { %>
+      <% if (clas.grade_level_id === gradeLevel.id) { %>
+        <div class="class-card">
+          <h2><%= clas.class_name %></h2>
+          <div class="class-info">عدد الطلاب: <%= clas.student_count %></div>
+          <div class="class-info">المعلم المشرف: <%= clas.first_name %> <%= clas.last_name %></div>
+
+          <div class="class-buttons">
+
+            <!-- تعديل اسم الصف -->
+            <% if (session.editClassNameId === clas.id) { %>
+              <form action="/admin/updateClassName" method="POST" style="display:inline-block; margin-left: 10px;">
+                <input type="hidden" name="classId" value="<%= clas.id %>">
+                <input type="text" name="class_name" value="<%= clas.class_name %>" required>
+                <button type="submit">حفظ</button>
+              </form>
+              <form action="/admin/cencelUpdateClassName" method="POST" style="display:inline;">
+                <button type="submit">إلغاء</button>
+              </form>
+              <% if (session.updateClassNameError) { %>
+                <div class="alert alert-danger"><%= session.updateClassNameError %></div>
+                <% session.updateClassNameError = null; %>
+              <% } %>
+
+            <% } else if(session.editClassTeacherId != clas.id) { %>
+              <form action="/admin/editClassName" method="POST" style="display:inline;">
+                <input type="hidden" name="editClassNameId" value="<%= clas.id %>">
+                <button type="submit">تعديل اسم الصف</button>
+              </form>
+            <% } %>
+
+
+            <!-- تغيير معلم الصف -->
+            <% if (session.editClassTeacherId === clas.id ) { %>
+              <form action="/admin/updateClassTeacherByClassId" method="POST" style="display:inline-block; margin-left: 10px;">
+                <input type="hidden" name="classId" value="<%= clas.id %>">
+                <input type="hidden" name="oldTeacherId" value="<%= clas.teacher_id %>">
+                <select name="newTeacherId" required>
+                  <% teachers
+                    .filter(t => t.id !== clas.teacher_id && !t.class_name)
+                    .forEach(t => { %>
+                      <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
+                  <% }) %>
+                </select>
+                <button type="submit">حفظ</button>
+              </form>
+              <form action="/admin/cencelUpdateClassTeacher" method="POST" style="display:inline;">
+                <button type="submit">إلغاء</button>
+              </form>
+
+              <% if (session.updateClassTeacherError) { %>
+                <div class="alert alert-danger"><%= session.updateClassTeacherError %></div>
+                <% session.updateClassTeacherError = null; %>
+              <% } %>
+
+            <% } else if( session.editClassNameId != clas.id) { %>
+              <form action="/admin/editClassTeacher" method="POST" style="display:inline;">
+                <input type="hidden" name="editClassTeacherId" value="<%= clas.id %>">
+                <button type="submit">تغيير معلم الصف</button>
+              </form>
+            <% } %>
+
+
+            <!-- أزرار حذف وعرض الطلاب تظهر فقط إذا لا نعدل اسم الصف ولا نعدل معلم الصف -->
+            <% if (session.editClassNameId !== clas.id && session.editClassTeacherId !== clas.id) { %>
+              <form action="/admin/deleteClass" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف الصف؟');">
+                <input type="hidden" name="classId" value="<%= clas.id %>">
+                <button class="btn-delete" type="submit">حذف</button>
+              </form>
+              <form action="/admin/viewStudents" method="GET" style="display:inline;">
+                <input type="hidden" name="classId" value="<%= clas.id %>">
+                <button class="btn-view" type="submit">عرض الطلاب</button>
+              </form>
+            <% } %>
+
+          </div>
+        </div>
+      <% } %>
+    <% }) %>
+  </div>
+<% }) %>
+
+
+</body>
+</html>
+

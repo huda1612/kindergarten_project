@@ -29,7 +29,7 @@ CREATE TABLE `absences` (
   PRIMARY KEY (`id`),
   KEY `fk_absences_students_idx` (`student_id`),
   CONSTRAINT `fk_absences_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `absences` (
 
 LOCK TABLES `absences` WRITE;
 /*!40000 ALTER TABLE `absences` DISABLE KEYS */;
-INSERT INTO `absences` VALUES (1,1,'2025-06-03'),(2,2,'2025-06-10');
+INSERT INTO `absences` VALUES (1,1,'2025-06-03'),(2,2,'2025-06-10'),(3,1,'2025-06-21');
 /*!40000 ALTER TABLE `absences` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -55,7 +55,7 @@ CREATE TABLE `activities` (
   `description` text NOT NULL,
   `icon` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,6 +64,7 @@ CREATE TABLE `activities` (
 
 LOCK TABLES `activities` WRITE;
 /*!40000 ALTER TABLE `activities` DISABLE KEYS */;
+INSERT INTO `activities` VALUES (1,'الرسم بالألوان','نشاط يتيح للأطفال التعبير عن مشاعرهم بالرسم باستخدام ألوان شمعية أو مائية.','fa-paint-brush'),(2,'القصة المصورة','قراءة قصة قصيرة مع عرض صور مشوّقة لمساعدة الطفل على فهم الأحداث.','fa-book-open');
 /*!40000 ALTER TABLE `activities` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -76,7 +77,7 @@ DROP TABLE IF EXISTS `classes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `classes` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `teacher_id` int NOT NULL,
+  `teacher_id` int DEFAULT NULL,
   `grade_level_id` int NOT NULL,
   `class_name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
@@ -93,7 +94,7 @@ CREATE TABLE `classes` (
 
 LOCK TABLES `classes` WRITE;
 /*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,1,1,'A1');
+INSERT INTO `classes` VALUES (1,1,1,'ِA1');
 /*!40000 ALTER TABLE `classes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -170,7 +171,7 @@ CREATE TABLE `grade_levels` (
   `name` varchar(45) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -179,8 +180,62 @@ CREATE TABLE `grade_levels` (
 
 LOCK TABLES `grade_levels` WRITE;
 /*!40000 ALTER TABLE `grade_levels` DISABLE KEYS */;
-INSERT INTO `grade_levels` VALUES (1,'KG1','for ages around 4 years');
+INSERT INTO `grade_levels` VALUES (1,'مرحلة أولى','هذه المرحلة للاطفال في العمر 3 سنوات'),(2,'مرحلة ثانية','المرحلة للاطفال في العمر 4 سنوات'),(3,'مرحلة ثالثة','المرحلة للاطفال في العمر 5 سنوات');
 /*!40000 ALTER TABLE `grade_levels` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `guardians`
+--
+
+DROP TABLE IF EXISTS `guardians`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `guardians` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(45) NOT NULL,
+  `last_name` varchar(45) NOT NULL,
+  `phone` varchar(10) NOT NULL,
+  `email` varchar(45) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `guardians`
+--
+
+LOCK TABLES `guardians` WRITE;
+/*!40000 ALTER TABLE `guardians` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guardians` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `guardians_students`
+--
+
+DROP TABLE IF EXISTS `guardians_students`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `guardians_students` (
+  `guardian_id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `relation` varchar(45) NOT NULL,
+  PRIMARY KEY (`guardian_id`,`student_id`),
+  KEY `fk_parents_students_students_idx` (`student_id`),
+  CONSTRAINT `fk_guardians_students_guardians` FOREIGN KEY (`guardian_id`) REFERENCES `guardians` (`id`),
+  CONSTRAINT `fk_guardians_students_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `guardians_students`
+--
+
+LOCK TABLES `guardians_students` WRITE;
+/*!40000 ALTER TABLE `guardians_students` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guardians_students` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -198,7 +253,7 @@ CREATE TABLE `notes` (
   PRIMARY KEY (`id`),
   KEY `fk_notes_students_idx` (`student_id`),
   CONSTRAINT `fk_notes_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -207,62 +262,8 @@ CREATE TABLE `notes` (
 
 LOCK TABLES `notes` WRITE;
 /*!40000 ALTER TABLE `notes` DISABLE KEYS */;
-INSERT INTO `notes` VALUES (1,1,'كانت الطالبه نشيطة اليوم','2025-06-10'),(2,2,'هذا اول غياب للطالبه يرجى التبرير','2025-06-10');
+INSERT INTO `notes` VALUES (1,1,'كانت الطالبه نشيطة اليوم','2025-06-10'),(2,2,'هذا اول غياب للطالبه يرجى التبرير','2025-06-10'),(3,1,'الطالبة لم تركز اليوم في الدروس يرجى الانتباه','2025-06-21'),(4,2,'الطالبه تغيب لاول مره اليوم','2025-06-21');
 /*!40000 ALTER TABLE `notes` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `parents`
---
-
-DROP TABLE IF EXISTS `parents`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `parents` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(45) NOT NULL,
-  `last_name` varchar(45) NOT NULL,
-  `phone` varchar(10) NOT NULL,
-  `email` varchar(45) DEFAULT NULL,
-  `address` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `parents`
---
-
-LOCK TABLES `parents` WRITE;
-/*!40000 ALTER TABLE `parents` DISABLE KEYS */;
-/*!40000 ALTER TABLE `parents` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `parents_students`
---
-
-DROP TABLE IF EXISTS `parents_students`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `parents_students` (
-  `parent_id` int NOT NULL,
-  `student_id` int NOT NULL,
-  `relation` varchar(45) NOT NULL,
-  PRIMARY KEY (`parent_id`,`student_id`),
-  KEY `fk_parents_students_students_idx` (`student_id`),
-  CONSTRAINT `fk_parents_students_parents` FOREIGN KEY (`parent_id`) REFERENCES `parents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_parents_students_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `parents_students`
---
-
-LOCK TABLES `parents_students` WRITE;
-/*!40000 ALTER TABLE `parents_students` DISABLE KEYS */;
-/*!40000 ALTER TABLE `parents_students` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -284,8 +285,8 @@ CREATE TABLE `students` (
   KEY `fk_students_users_idx` (`user_id`),
   KEY `fk_students_classes_idx` (`class_id`),
   CONSTRAINT `fk_students_classes` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_students_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_students_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -294,7 +295,7 @@ CREATE TABLE `students` (
 
 LOCK TABLES `students` WRITE;
 /*!40000 ALTER TABLE `students` DISABLE KEYS */;
-INSERT INTO `students` VALUES (1,1,1,'هدى','أحمد','2020-06-04','female'),(2,3,1,'ريم','الراجح','2020-01-27','female');
+INSERT INTO `students` VALUES (1,6,1,'هدى','أحمد','2020-06-04','female'),(2,3,1,'ريم','الراجح','2020-01-27','female'),(3,5,1,'نور','محمد','2020-01-27','female');
 /*!40000 ALTER TABLE `students` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -311,12 +312,10 @@ CREATE TABLE `teachers` (
   `first_name` varchar(45) NOT NULL,
   `last_name` varchar(45) NOT NULL,
   `phone` varchar(10) DEFAULT NULL,
-  `gender` enum('female','male') NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `phone_UNIQUE` (`phone`),
   KEY `user_id_idx` (`user_id`),
-  CONSTRAINT `fk_teachers_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_teachers_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -325,7 +324,7 @@ CREATE TABLE `teachers` (
 
 LOCK TABLES `teachers` WRITE;
 /*!40000 ALTER TABLE `teachers` DISABLE KEYS */;
-INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','00000','female');
+INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','11111'),(2,NULL,'لين','محمود',''),(3,NULL,'هديل','محمد','293480');
 /*!40000 ALTER TABLE `teachers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -340,10 +339,10 @@ CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('student','teacher') NOT NULL DEFAULT 'student',
+  `role` enum('student','teacher','admin') NOT NULL DEFAULT 'student',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -352,7 +351,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'huda','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student'),(2,'sana','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','teacher'),(3,'reem','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student');
+INSERT INTO `users` VALUES (1,'admin','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','admin'),(2,'sana','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','teacher'),(3,'reem','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student'),(5,'noor','$2b$10$HK4/dsfz.J1RkFKtPT.c7uAbE62UkrNzK.7zLwIYPpNjK4ET3BSFK','student'),(6,'huda','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -365,4 +364,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-16 18:46:01
+-- Dump completed on 2025-07-13  0:18:16
