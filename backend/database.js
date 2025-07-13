@@ -146,7 +146,7 @@ export async function idCheck(id , role) {
   
 
   if (result[0].user_id !== null ) 
-    return " تم إنشاء حساب مسبقاً لهذا الرقم " ;
+    return " تم إنشاء حساب مسبقاً لهذا الشخص " ;
 
   return "ok" ;
 }

@@ -128,7 +128,7 @@
             <form action="/admin/deleteTeacher" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المعلم؟');">
               <input type="hidden" name="teacherId" value="<%= teacher.id %>">
               <button type="submit">حذف</button>
-              <% if (session.deleteTeacherError) { %>
+              <% if (session.deleteTeacherError && session.deleteErrorTeacherId == teacher.id ) { %>
               <div class="alert alert-danger"><%= session.deleteTeacherError %></div>
               <% session.deleteTeacherError = null; %>
               <% } %>
@@ -186,7 +186,7 @@
             <% } else if(session.editClassTeacherId != clas.id) { %>
               <form action="/admin/editClassName" method="POST" style="display:inline;">
                 <input type="hidden" name="editClassNameId" value="<%= clas.id %>">
-                <button type="submit">تعديل اسم الصف</button>
+                <button type="submit">تغيير اسم الصف</button>
               </form>
             <% } %>
 
@@ -227,19 +227,30 @@
               <form action="/admin/deleteClass" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف الصف؟');">
                 <input type="hidden" name="classId" value="<%= clas.id %>">
                 <button class="btn-delete" type="submit">حذف</button>
+                
               </form>
               <form action="/admin/viewStudents" method="GET" style="display:inline;">
                 <input type="hidden" name="classId" value="<%= clas.id %>">
                 <button class="btn-view" type="submit">عرض الطلاب</button>
               </form>
+
             <% } %>
 
           </div>
+              <!--رسالة خطأ عند فشل الحذف-->
+              <% if (session.deleteClassError && String(session.deleteErrorClassId) === String(clas.id) ) { %>
+                 <div class="alert alert-danger" ><%= session.deleteClassError %></div>
+                 <% session.deleteClassError = null; %>
+              <% } %>
+
         </div>
+
       <% } %>
     <% }) %>
   </div>
+  
 <% }) %>
+
 
 
 </body>

@@ -194,7 +194,8 @@ export async function updateClassNameById(classId  , class_name ) {
      await executeQuery(`
         UPDATE classes SET class_name = ? 
         WHERE id = ? ` ,[class_name,classId])
-    return {success:true , message :"ok"} }
+    return {success:true , message :"ok"} 
+}
 
 
 
@@ -222,5 +223,30 @@ export async function updateClassTeacherById(classId  , oldTeacherId , newTeache
     console.log("updateClassTeacherById func")
 
     return {success:true , message :"ok"}
+    
+}
+
+
+export async function deleteClassById(classId) {
+
+    //نتأكد من وجود الصف اصلا 
+    const exist = await executeQuery(`
+        SELECT id FROM classes WHERE id = ? ` , [classId]) ; 
+    if(exist.length == 0)
+        return {success : false , message :"هذا الصف غير موجود" }; 
+    
+    //نتأكد اول انه ما فيه اي طلاب 
+    const studentCheck = await executeQuery(`
+        SELECT * FROM students WHERE class_id  = ? ` , [classId]) ; 
+    
+    if(studentCheck.length != 0 )
+        return {success : false , message : "لا يمكن حذف الصف لوجود طلاب فيه"}; 
+
+    //حذف الصف
+    await executeQuery(`
+        DELETE FROM classes WHERE id = ?
+        ` , [classId]) ;
+
+    return {success : true , message : 'ok'}
     
 }

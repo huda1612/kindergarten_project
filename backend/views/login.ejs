@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="loginStyle.css"/>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>تسجل الدخول</title>
@@ -13,13 +13,12 @@
     <nav>
         <div class="school-info">
             <i class="fas fa-school school-icon"></i>
-            <span>روضة الفرح</span>
+            <span>روضة أسراب اليمام الخاصة</span>
         </div>
         <div class="nav-links">
-            <a href="/">الصفحة الرئيسية</a>
-            <a href="/">معلومات تعريفية</a>
-            <a href="/">معلومات الاتصال</a>
-            
+            <a href="#">الصفحة الرئيسية</a>
+            <a href="#">معلومات تعريفية</a>
+            <a href="#">معلومات الاتصال</a>
         </div>
     </nav>
     <div class="wrapper">
@@ -32,21 +31,16 @@
             </div>
 
             <div class="input-box">
-                <input type="password" placeholder="كلمة المرور" id="password" name="password"
+                <input type="password" placeholder="كلمة المرور"  id="password" name="password"
                 required>
                 <i class='bx bxs-lock-alt'></i>
             </div>
-          <% if (session.loginError) { %>
-          <div class="alert alert-danger"> <%= session.loginError %> </div>
-          <% session.loginError = null; %>
-          <% } %> 
-          
 
             <button type="submit" class="btn">دخول </button>
             
 
         </form>
     </div>
-    
+    <script src="loginScript.js"></script>
 </body>
 </html>

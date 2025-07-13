@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
-import {getAllTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById , getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById} from './adminDatabase.js'
+import {getAllTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById , getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById} from './adminDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
 
@@ -45,6 +45,7 @@ app.get('/', (req, res) => {
 
 //login page get
 app.get('/login', (req, res) => {
+  //لمسح نجاح انشاء الحساب بعد الذهاب لصفحة تسجيل الدخول 
   res.render('login' , { session : req.session });
 });
 
@@ -107,6 +108,8 @@ app.post('/login', async (req , res) => {
 
 //register pasge get
 app.get('/register', async (req , res) => {
+  req.session.user = null ; 
+  console.log(req.session.registerSuccess)
    res.render('register', { session: req.session });
 })
 
@@ -114,11 +117,13 @@ app.get('/register', async (req , res) => {
 app.post('/register', async (req , res) => {
   const {id , firstName , lastName , username, password1 , password2  , role } = req.body ;
   const registerResult = await register(id , firstName , lastName , username, password1 , password2  , role) ;
-  if(registerResult.success)
-    res.render('successRegister')  
+  if(registerResult.success){
+    req.session.registerSuccess = true ; 
+    res.redirect('/register')}  
   else {
     req.session.user = null; //للتنظيف من اي جلسة قديمة 
     req.session.registerError = registerResult.message ;
+    req.session.registerSuccess = false ; 
     res.redirect('/register');}
 })
 
@@ -134,7 +139,6 @@ app.get('/admin' , async (req,res ) => {
   const teachers = await getAllTeachersData();
   const gradeLevels = await getGradeLevels();
   const allClassesData = await getAllClassesData() ;
-  //console.log(req.session.editClassTeacherId)
   res.render( 'admin' ,{teachers , gradeLevels , allClassesData , session: req.session  } ) ; 
 
 })
@@ -333,6 +337,7 @@ app.post('/admin/deleteTeacher' , async (req, res ) => {
   if(!result.success){
     req.session.deleteTeacherError = null ;
     req.session.deleteTeacherError = result.Message ;
+     req.session.deleteErrorTeacherId = teacherId ;
     return res.redirect('/admin');
   }
   else  
@@ -491,6 +496,30 @@ app.post('/admin/updateClassTeacherByClassId', async (req, res) => {
     res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
   }
 })
+
+app.post('/admin/deleteClass', async (req, res) => {
+   if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  try{
+  const {classId} = req.body ; 
+  const result = await deleteClassById(classId) ;
+  if(!result.success){
+    req.session.deleteClassError = null ;
+    req.session.deleteClassError = result.message ;
+    req.session.deleteErrorClassId = req.body.classId; 
+    return res.redirect('/admin');
+  }
+  else 
+    res.redirect('/admin') ;
+
+ }catch(err){
+    req.session.deleteClassError = 'حدث خطأ أثناء حذف الصف';
+    res.redirect('/admin');
+ }
+
+})
+
+
 //****************************************************************ِAPI FOR ADMIN PAGE END****************************************************************************************************
 
 
