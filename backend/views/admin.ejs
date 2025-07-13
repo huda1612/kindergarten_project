@@ -162,7 +162,13 @@
         <div class="class-card">
           <h2><%= clas.class_name %></h2>
           <div class="class-info">عدد الطلاب: <%= clas.student_count %></div>
-          <div class="class-info">المعلم المشرف: <%= clas.first_name %> <%= clas.last_name %></div>
+          <div class="class-info">المعلم المشرف: 
+          <%if(clas.first_name === null){%>
+             <span>لا يوجد</span>
+          <%}else {%>
+          <%= clas.first_name %> <%= clas.last_name %>
+          <%}%>
+          </div>
 
           <div class="class-buttons">
 
@@ -195,7 +201,7 @@
                   <input type="hidden" name="oldTeacherId" value="<%= clas.teacher_id %>">
                   <select name="newTeacherId" required>
                   <% teachers
-                    .filter(t => t.id !== clas.teacher_id && !t.class_name)
+                    .filter(t => t.id !== clas.teacher_id)
                     .forEach(t => { %>
                       <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
                   <% }) %>
@@ -225,7 +231,7 @@
                    <input type="hidden" name="classId" value="<%= clas.id %>">
                     <button class="btn-delete" type="submit">حذف</button>
                  </form>
-                 <form action="/admin/viewStudents" method="GET" style="display:inline;">
+                 <form action="/class/:<%=clas.id%>" method="GET" style="display:inline;">
                    <input type="hidden" name="classId" value="<%= clas.id %>">
                    <button class="btn-view" type="submit">عرض الطلاب</button>
                  </form>
@@ -245,6 +251,22 @@
   
 <% }) %>
 
+ <h3>إضافة صف جديد :</h3>
+
+
+ <form id="addClassForm" action="/admin/insertClass" method="POST" >
+    <input type="text" name="className" placeholder="اسم الصف " required>
+    <select name="gradeId" required>
+      <% gradeLevels.forEach(grade => { %>
+        <option value="<%= grade.id %>"><%= grade.name %></option>
+      <% }) %>
+    </select>
+    <button type="submit">إضافة</button>
+ </form>
+ <% if (session.insertClassError) { %>
+    <div class="alert alert-danger"><%= session.insertClassError %></div>
+    <% session.insertClassError = null; %> 
+ <% } %>
 
 
 </body>

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
-import {getAllTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById , getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById} from './adminDatabase.js'
+import {getAllTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById , getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById , insertClass} from './adminDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
 
@@ -518,6 +518,32 @@ app.post('/admin/deleteClass', async (req, res) => {
  }
 
 })
+
+//لاضافة معلم جديد الى قاعدة البيانات 
+app.post('/admin/insertClass' , async (req, res ) => {
+
+if (!req.session.user || req.session.user.role != "admin") 
+  return res.status(401).json({ error: 'Unauthorized' });
+
+try{
+   const { className , gradeId } = req.body; 
+   const result = await insertClass(className , gradeId ) ;
+   
+   if(!result.success){
+    req.session.insertClassError = null ;
+    req.session.insertClassError = result.message ;
+    return res.redirect('/admin')
+  }
+   else{
+     req.session.insertClassError = null ;
+     return res.redirect('/admin')
+   }
+
+}catch(err){
+  console.error('Error loading /admin/insertClass :', err);
+  res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });}
+}
+)
 
 
 //****************************************************************ِAPI FOR ADMIN PAGE END****************************************************************************************************

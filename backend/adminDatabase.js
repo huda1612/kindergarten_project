@@ -202,11 +202,12 @@ export async function updateClassNameById(classId  , class_name ) {
 export async function updateClassTeacherById(classId  , oldTeacherId , newTeacherId) {
     //اتأكد ان المعلمين الجديد والقديم موجودين اصلا
     const teacherExist =await executeQuery(`
-        SELECT id from teachers WHERE id = ? OR id =?
-        `,[newTeacherId , oldTeacherId])
-    if(teacherExist.length != 2)
+        SELECT id from teachers WHERE id = ?
+        `,[newTeacherId ])
+    if(teacherExist.length === 0)
         return {success : false , message : "هذا المعلم غير موجود"} ;
 
+    /*
     //اتأكد ان المعلم الجديد ما اله اي صف 
     const classCheck =await executeQuery(`
         SELECT * FROM classes WHERE teacher_id = ?
@@ -214,6 +215,20 @@ export async function updateClassTeacherById(classId  , oldTeacherId , newTeache
     if(classCheck.length != 0)
           return {success : false , message : "هذا المعلم يدرس صف اخر" }
 
+    */
+
+   //خليه ما بقا بعلم صف لو كان بعلم
+   const oldClassChange =await executeQuery(`
+        SELECT * FROM classes WHERE teacher_id = ?
+        `,[newTeacherId])
+    if(oldClassChange.length != 0 )
+    {
+        await executeQuery(`
+             UPDATE classes SET teacher_id = null
+             WHERE teacher_id = ? 
+        ` , [ newTeacherId]) ;
+
+    }
     //هلأ منحدث المعلم 
     await executeQuery(`
         UPDATE classes SET teacher_id = ? 
@@ -249,4 +264,26 @@ export async function deleteClassById(classId) {
 
     return {success : true , message : 'ok'}
     
+}
+
+
+
+export async function insertClass(className , gradeId ){
+    //نتأكد ان اسم الصف ما فاضي 
+    if(className.trim() === '')
+        return {success : false , message : "يرجى ادخال اسم الصف"}
+    //نتأكد ان المرحله موجوده 
+    const gradeExist = await executeQuery(`
+        SELECT * FROM grade_levels WHERE id = ?
+        `,[gradeId]) ; 
+  //  if(gradeExist.length == 0 )
+    //     return {success : false , message : "هذه المرحلة غير موجودة"}
+    //انشاء الصف
+    await executeQuery(`
+        INSERT INTO classes( grade_level_id , class_name ) VALUES(? , ?)
+        `,[gradeId , className]);
+
+    return {success : true , message :"ok"};
+
+
 }
