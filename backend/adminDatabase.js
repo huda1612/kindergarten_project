@@ -235,8 +235,6 @@ export async function updateClassTeacherById(classId  , oldTeacherId , newTeache
         WHERE id = ? 
         ` , [newTeacherId , classId]) ;
 
-    console.log("updateClassTeacherById func")
-
     return {success:true , message :"ok"}
     
 }
@@ -268,7 +266,7 @@ export async function deleteClassById(classId) {
 
 
 
-export async function insertClass(className , gradeId ){
+export async function insertClass(className , gradeId , TeacherId ){
     //نتأكد ان اسم الصف ما فاضي 
     if(className.trim() === '')
         return {success : false , message : "يرجى ادخال اسم الصف"}
@@ -276,14 +274,26 @@ export async function insertClass(className , gradeId ){
     const gradeExist = await executeQuery(`
         SELECT * FROM grade_levels WHERE id = ?
         `,[gradeId]) ; 
-  //  if(gradeExist.length == 0 )
-    //     return {success : false , message : "هذه المرحلة غير موجودة"}
+    if(gradeExist.length == 0 )
+         return {success : false , message : "هذه المرحلة غير موجودة"}
+
+    //التأكد من ان الاستاذ ما عم يدرس اي صف 
+    const teacherCheck = await executeQuery(`
+        SELECT * FROM classes WHERE teacher_id = ?
+        `,[TeacherId]) ; 
+    if(teacherCheck.length != 0 )
+         return {success : false , message : "هذا المعلم يدرس صف اخر"}
+
+    if(!TeacherId)
+        return {success : false , message : "لا يمكن اضافة صف بدون معلم"}
+ 
     //انشاء الصف
     await executeQuery(`
-        INSERT INTO classes( grade_level_id , class_name ) VALUES(? , ?)
-        `,[gradeId , className]);
+        INSERT INTO classes( teacher_id , grade_level_id , class_name ) VALUES(? , ? , ?)
+        `,[TeacherId , gradeId , className]);
 
     return {success : true , message :"ok"};
 
 
 }
+

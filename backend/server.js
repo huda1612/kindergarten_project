@@ -526,8 +526,8 @@ if (!req.session.user || req.session.user.role != "admin")
   return res.status(401).json({ error: 'Unauthorized' });
 
 try{
-   const { className , gradeId } = req.body; 
-   const result = await insertClass(className , gradeId ) ;
+   const { className , gradeId , TeacherId } = req.body; 
+   const result = await insertClass(className , gradeId , TeacherId ) ;
    
    if(!result.success){
     req.session.insertClassError = null ;

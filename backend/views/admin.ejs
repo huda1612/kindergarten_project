@@ -257,11 +257,27 @@
  <form id="addClassForm" action="/admin/insertClass" method="POST" >
     <input type="text" name="className" placeholder="اسم الصف " required>
     <select name="gradeId" required>
-      <% gradeLevels.forEach(grade => { %>
-        <option value="<%= grade.id %>"><%= grade.name %></option>
-      <% }) %>
+       <option value="" disabled selected hidden> المرحلة الدراسية للصف</option>
+       <% gradeLevels.forEach(grade => { %>
+         <option value="<%= grade.id %>"><%= grade.name %></option>
+       <% }) %>
     </select>
-    <button type="submit">إضافة</button>
+
+    <select name="TeacherId" required>
+       <% const availableTeachers = teachers.filter(t => !t.class_name); %>
+
+       <% if (availableTeachers.length === 0) { %>
+           <option disabled selected hidden>لا يوجد معلمين متاحين حالياً</option>
+       <% } else { %>
+         <option value="" disabled selected hidden> المعلم المسؤول عن الصف</option>
+           <% availableTeachers.forEach(t => { %>
+         <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
+         <% }) %>
+       <% } %>
+    </select>
+
+    <!--<button type="submit">إضافة</button>-->
+    <button type="submit" <%= availableTeachers.length === 0 ? 'disabled' : '' %>>إضافة</button>
  </form>
  <% if (session.insertClassError) { %>
     <div class="alert alert-danger"><%= session.insertClassError %></div>
