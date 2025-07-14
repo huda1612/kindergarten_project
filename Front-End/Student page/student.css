@@ -190,6 +190,7 @@ nav a:hover {
     text-decoration: none;
     margin: 5px 10px;
     border-radius: 12px;
+    
 }
 
 .menu-item:hover, .menu-item.active {
@@ -204,6 +205,7 @@ nav a:hover {
     color: #ff6666;
     font-size: 18px;
 }
+
 
 .menu-item span {
     flex-grow: 1;
@@ -439,11 +441,3 @@ button:hover {
     transform: scale(1.05);
     box-shadow: 0 4px 16px rgba(255, 102, 102, 0.15);
 }
-
-
-
-
-
-
-
-

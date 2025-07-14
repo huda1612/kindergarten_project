@@ -409,5 +409,8 @@ th {
 .activity-item .delete-activity:hover {
     color: #e53935;
 }
-
+a{
+    text-decoration: none;
+    color: black;
+}
 

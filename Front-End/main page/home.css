@@ -94,6 +94,23 @@
             color: #fff;
             transform: scale(1.08);
         }
+        .create-button {
+            background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+            color: #222;
+            padding: 6px 18px;
+            border-radius: 22px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: .2s;
+            font-size: 19px;
+            box-shadow: 0 2px 8px rgba(160, 216, 239, 0.15);
+        }
+
+        .create-button:hover {
+            background: #ff6666;
+            color: #fff;
+            transform: scale(1.08);
+        }
 
         .school-icon {
             font-size: 28px;
