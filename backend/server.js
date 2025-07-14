@@ -3,10 +3,10 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import {authentication , getTheId , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
+import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
-import {getAllTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById , getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById , insertClass} from './adminDatabase.js'
+import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById , insertClass} from './adminDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
 
@@ -99,12 +99,25 @@ app.post('/login', async (req , res) => {
     if(user.role == 'student') {
       console.log(req.session.user);
       res.redirect('/student') ; }
-    else {
+    else 
+    {
+      //اذا معلم اساسي بحوله على صفحة المعلم
+      const teacherRole =await getTeacherRole(userRealId) ; 
+      if(teacherRole === 'main')
+      {
+      req.session.user.teacherRole = 'main'
       console.log(req.session.user);
-      res.redirect('/teacher') ; }
+      res.redirect('/teacher') ;
+      }
+      else if(teacherRole === 'english')
+      {
+      req.session.user.teacherRole = 'english'
+      console.log(req.session.user);
+      res.redirect('/classChoose') ;
+      }
     }
-  }
-})
+    }
+}})
 
 //register pasge get
 app.get('/register', async (req , res) => {
@@ -136,10 +149,13 @@ app.get('/admin' , async (req,res ) => {
   if (!req.session.user || req.session.user.role != 'admin' ) { 
     return res.redirect('/login');
   }
-  const teachers = await getAllTeachersData();
+  const teachers = await getAllMainTeachersData();
+  const engTeachers = await getAllEngTeachersData();
+  const engTeachersClasses = await getEnglishTeachersWithClasses();
   const gradeLevels = await getGradeLevels();
   const allClassesData = await getAllClassesData() ;
-  res.render( 'admin' ,{teachers , gradeLevels , allClassesData , session: req.session  } ) ; 
+
+  res.render( 'admin' ,{teachers ,engTeachers,engTeachersClasses, gradeLevels , allClassesData , session: req.session  } ) ; 
 
 })
 
@@ -184,6 +200,13 @@ app.get('/teacher' , async (req,res ) => {
     res.status(500).send('حدث خطأ في السيرفر');
   }
 })
+
+app.get('/classChoose' ,  async (req,res ) => {
+  if (!req.session.user || !req.session.user.teacher_id || req.session.user.teacherRole !='english' ) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
+  return res.redirect('/login');
+  }
+  res.render('classChoose')
+} )
 
 //**************************************************************** GET ADMIN AND TEACHER AND STUDENT END ********************************************************
 
@@ -395,8 +418,8 @@ if (!req.session.user || req.session.user.role != "admin")
   return res.status(401).json({ error: 'Unauthorized' });
 
 try{
-   const { first_name , last_name , phone } = req.body; 
-   const result = await insertTeacher(first_name , last_name , phone) ;
+   const { first_name , last_name , phone , role } = req.body; 
+   const result = await insertTeacher(first_name , last_name , phone , role) ;
    
    if(!result.success){
     req.session.insertTeacherError = null ;
@@ -453,7 +476,6 @@ app.post('/admin/updateClassName', async (req, res) => {
     res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
   }
 })
-
 
 
 //للتعديل على معلم الصف
@@ -526,9 +548,11 @@ if (!req.session.user || req.session.user.role != "admin")
   return res.status(401).json({ error: 'Unauthorized' });
 
 try{
-   const { className , gradeId , TeacherId } = req.body; 
-   const result = await insertClass(className , gradeId , TeacherId ) ;
-   
+   const { className , gradeId , TeacherId , engTeacherId } = req.body; 
+   //لو ما دخل معلم انجليزي بحطه null
+   const englishTeacherId = engTeacherId && engTeacherId.trim() !== "" ? engTeacherId : null;
+   const result = await insertClass(className , gradeId , TeacherId , englishTeacherId ) ;
+
    if(!result.success){
     req.session.insertClassError = null ;
     req.session.insertClassError = result.message ;

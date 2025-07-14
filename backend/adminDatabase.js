@@ -1,19 +1,22 @@
 import {executeQuery} from './database.js'
 
+
+//****************************************************************TEACHERS*************************************************************************************
 //تابع يرد بيانات جميع المعلمين بالروضة 
 //لكل معلم {id :... , first_name :... , last_name :...  , class_name: .... , phone:.... }
-export async function getAllTeachersData() {
+export async function getAllMainTeachersData() {
     //برد كل المعلمين حتى لو ما عندهم صف محدد ممكن اسم الصف يكون null
     const result = await executeQuery(`
         SELECT t.id, t.first_name, t.last_name, t.phone, c.class_name
         FROM teachers t
         LEFT JOIN classes c ON t.id = c.teacher_id
+         WHERE t.role ='main'
         `)
     return result ; 
 }
 
 //بده تعديل لاتأكد من البيانات المدخله ان صح 
-export async function insertTeacher(first_name , last_name , phone){
+export async function insertTeacher(first_name , last_name , phone , role){
     const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/; // يقبل الحروف العربية والانجليزية ومسافات فقط
      if (
     typeof first_name !== 'string' ||
@@ -26,6 +29,9 @@ export async function insertTeacher(first_name , last_name , phone){
     ) {
       return {success : false , message : "البيانات المدخلة غير صالحة"}
     }
+    //التحقق من الدور 
+    if(role != 'english' && role != 'main')
+      return {success : false , message : "دور المعلم غير صالح"}
     
     if(phone && phone.trim() != '' ){
     //للتأكد من ان رقم الهاتف غير موجود مسبقا
@@ -44,8 +50,8 @@ export async function insertTeacher(first_name , last_name , phone){
     }
 
     await executeQuery(`
-       INSERT INTO teachers (first_name , last_name , phone)
-       VALUES (?, ?, ?) `, [first_name , last_name , phone]);
+       INSERT INTO teachers (first_name , last_name , phone , role)
+       VALUES (?, ?, ? , ?) `, [first_name , last_name , phone , role]);
     return {success : true , message : "ok" }
 }
 
@@ -105,12 +111,20 @@ export async function deleteTeacherById(teacherId) {
     if(exist.length == 0)
         return {success : false , Message :"هذا المعلم غير موجود" }; 
     
-    //نتأكد اول انه ما عم يدرس اي صف 
+    //نتأكد اول انه ما عم يدرس اي صف كمعلم اساسي
     const check = await executeQuery(`
         SELECT * FROM classes WHERE teacher_id = ? ` , [teacherId]) ; 
     
     if(check.length != 0 )
         return {success : false , Message : "لا يمكن حذف المعلم لوجود صف مرتبط به"}; 
+
+    //لو كان معلم انجليزي بفك ربطه مع صفوفه
+    const roleresult = await executeQuery(`SELECT role FROM teachers WHERE id = ? ` , [teacherId]) ;
+    const role = roleresult[0].role ;
+    if(role === 'english'){
+        await executeQuery(`
+        UPDATE classes SET english_teacher_id = null WHERE english_teacher_id=? ` , [teacherId]) ; 
+    }
 
     //لجيب رقم حسابه 
     const userId = await executeQuery(`
@@ -136,6 +150,51 @@ export async function deleteTeacherById(teacherId) {
 
     }
 }
+//****************************************************************ENGTEACHERS*************************************************************************************
+export async function getAllEngTeachersData() {
+    //برد كل المعلمين حتى لو ما عندهم صف محدد ممكن اسم الصف يكون null
+    const result = await executeQuery(`
+      SELECT 
+        t.id ,
+        t.first_name,
+        t.last_name,
+        t.phone
+      FROM teachers t
+      WHERE t.role = 'english'
+      ORDER BY t.id
+        `)
+    return result ; 
+}
+
+export async function getEnglishTeachersWithClasses() {
+  // 1. جلب جميع أساتذة الإنجليزي
+  const englishTeachers = await executeQuery(`
+    SELECT id AS teacher_id
+    FROM teachers
+    WHERE role = 'english'
+  `);
+
+  if (englishTeachers.length === 0) return [];
+
+  // 2. جلب الصفوف المرتبطة بهؤلاء المعلمين
+  const classes = await executeQuery(`
+    SELECT english_teacher_id, class_name
+    FROM classes
+    WHERE english_teacher_id IS NOT NULL
+  `);
+
+  // 3. تجهيز الناتج
+  return englishTeachers.map(t => ({
+    teacher_id: t.teacher_id,
+    classes: classes
+      .filter(c => c.english_teacher_id === t.teacher_id)
+      .map(c => c.class_name)
+  }));
+}
+
+
+//****************************************************************CLASSES*************************************************************************************
+
 
 export async function getGradeLevels() {
     return await executeQuery(`
@@ -266,7 +325,7 @@ export async function deleteClassById(classId) {
 
 
 
-export async function insertClass(className , gradeId , TeacherId ){
+export async function insertClass(className , gradeId , TeacherId , engTeacherId ){
     //نتأكد ان اسم الصف ما فاضي 
     if(className.trim() === '')
         return {success : false , message : "يرجى ادخال اسم الصف"}
@@ -286,11 +345,20 @@ export async function insertClass(className , gradeId , TeacherId ){
 
     if(!TeacherId)
         return {success : false , message : "لا يمكن اضافة صف بدون معلم"}
- 
+    // نتأكد من وجود معلم الانجليزي وانه بدرس انجليزي 
+
+    if(engTeacherId){
+     const engteacherExist = await executeQuery(`
+        SELECT * FROM teachers WHERE id = ?
+        `,[engTeacherId]) ; 
+    if(engteacherExist.length === 0 || engteacherExist[0].role != 'english' )
+        return {success : false , message : "معلم الانجليزي غير صالح او غير موجود"}
+    }
+
     //انشاء الصف
     await executeQuery(`
-        INSERT INTO classes( teacher_id , grade_level_id , class_name ) VALUES(? , ? , ?)
-        `,[TeacherId , gradeId , className]);
+        INSERT INTO classes( teacher_id , grade_level_id , class_name , english_teacher_id) VALUES(? , ? , ? , ?)
+        `,[TeacherId , gradeId , className ,engTeacherId]);             
 
     return {success : true , message :"ok"};
 

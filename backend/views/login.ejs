@@ -35,6 +35,10 @@
                 required>
                 <i class='bx bxs-lock-alt'></i>
             </div>
+          <% if (session.loginError) { %>
+          <div class="alert alert-danger"> <%= session.loginError %> </div>
+          <% session.loginError = null; %>
+          <% } %> 
 
             <button type="submit" class="btn">دخول </button>
             

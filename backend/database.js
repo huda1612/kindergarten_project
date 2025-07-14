@@ -64,6 +64,13 @@ export async function getTheId( userId ){
   return -1 ;
   }
 
+  export async function getTeacherRole( teacherId ){
+    const result = await executeQuery(`
+      SELECT role FROM teachers WHERE id = ?
+      `,[teacherId]) ;
+    return result[0].role ; 
+  }
+
 //*********************************************************LOGIN FUNCTIONS ENDS*************************************************************************
 
 
