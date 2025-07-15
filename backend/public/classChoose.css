@@ -85,8 +85,11 @@
         }
 
         .container {
-            max-width: 400px;
-            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 1200px;
             background: linear-gradient(120deg, #fff 80%, #a0d8ef11 100%);
             padding: 30px;
             border-radius: 18px;
@@ -103,7 +106,8 @@
             border: 3px solid #a0d8ef;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: default;
-            margin-bottom: 25px;
+            width: 220px;
+            box-sizing: border-box;
         }
 
         .class-name {

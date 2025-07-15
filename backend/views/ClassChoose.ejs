@@ -19,22 +19,29 @@
             <span>روضة أسراب اليمام الخاصة</span>
         </div>
         <div class="teacher-info">
-            <span class="teacher-name">الأستاذة سارة أحمد</span>
-            <button class="logout-btn" onclick="alert('تم تسجيل الخروج بنجاح')">تسجيل الخروج</button>
+            <span class="teacher-name"> <%= name_With_Nikname %></span>
+           <a href="/"><button class="logout-btn">تسجيل الخروج</button></a>
         </div>
     </nav>
 
     <div class="page-title">
         اختر الصف الذي ترغب بعرضه
     </div>
+
     <div class="container">
+    <%classes.forEach(clas => { %>
         <div class="class-box">
-            <div class="class-name">الصف الثاني</div>
-            <form action="your_target_page.html" method="GET">
+            <div class="class-name"><%=clas.class_name%> </div>
+            <form action="/englishTeacherClass/<%=clas.id%>" method="GET">
                 <button type="submit" class="select-button">اختيار</button>
             </form>
         </div>
+    <% })%>
     </div>
+
+ 
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
     </body>
     

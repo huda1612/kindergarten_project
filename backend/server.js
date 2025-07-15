@@ -7,6 +7,7 @@ import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
 import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById , insertClass} from './adminDatabase.js'
+import {getEnglishTeacherClasses} from './englishTeacherDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js'
 import session from 'express-session' 
 
@@ -149,6 +150,7 @@ app.get('/admin' , async (req,res ) => {
   if (!req.session.user || req.session.user.role != 'admin' ) { 
     return res.redirect('/login');
   }
+  try {
   const teachers = await getAllMainTeachersData();
   const engTeachers = await getAllEngTeachersData();
   const engTeachersClasses = await getEnglishTeachersWithClasses();
@@ -156,7 +158,10 @@ app.get('/admin' , async (req,res ) => {
   const allClassesData = await getAllClassesData() ;
 
   res.render( 'admin' ,{teachers ,engTeachers,engTeachersClasses, gradeLevels , allClassesData , session: req.session  } ) ; 
-
+  }catch (error) {
+  console.error(error);
+  res.status(500).send('حدث خطأ في السيرفر');
+  }
 })
 
 
@@ -180,33 +185,52 @@ app.get('/student' , async (req,res ) => {
 }
 })
 
+
 //get the teacher page
-app.get('/teacher' , async (req,res ) => {
-  if (!req.session.user || !req.session.user.teacher_id ) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
+app.get('/teacher', async (req, res) => {
+  if (!req.session.user || !req.session.user.teacher_id) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
     return res.redirect('/login');
   }
- try{
-  const teacher_id = req.session.user.teacher_id ; 
-  const full_name = await getTeacherFullName(teacher_id) ; 
-  const name_With_Nikname = await getTeacherNameWithNikname(teacher_id)
-  const student_count = await getStudentCountForTeacher(teacher_id) ; 
-  const absence_count = await getTodayAbsenceCount(teacher_id) ;
-  const attendance_count = student_count - absence_count ;
-  const activity_count = await getTodayActivityCount(teacher_id) ; 
-  const activity_names = await getActivityNames() ;
-  res.render( 'teacher' , { full_name ,name_With_Nikname, student_count , absence_count , attendance_count , activity_count , activity_names })
-  }catch(err){
+  try {
+    const teacher_id = req.session.user.teacher_id;
+    const full_name = await getTeacherFullName(teacher_id);
+    const name_With_Nikname = await getTeacherNameWithNikname(teacher_id,'main')
+    const student_count = await getStudentCountForTeacher(teacher_id);
+    const absence_count = await getTodayAbsenceCount(teacher_id);
+    const attendance_count = student_count - absence_count;
+    const students = await getStudentsByTeacher(teacher_id);
+    const activity_count = await getTodayActivityCount(teacher_id);
+    const activity_names = await getActivityNames();
+    res.render('teacher', { full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activity_names })
+  } catch (err) {
     console.error('Error loading /teacher page:', err);
     res.status(500).send('حدث خطأ في السيرفر');
   }
 })
 
+
+
 app.get('/classChoose' ,  async (req,res ) => {
   if (!req.session.user || !req.session.user.teacher_id || req.session.user.teacherRole !='english' ) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
   return res.redirect('/login');
   }
-  res.render('classChoose')
+  try {
+  const teacher_id = req.session.user.teacher_id;
+  const name_With_Nikname = await getTeacherNameWithNikname(teacher_id , 'english')
+  const classes = await getEnglishTeacherClasses(teacher_id) ;
+  res.render('classChoose' ,{name_With_Nikname , classes}) ;
+
+  }catch (error) {
+  console.error(error);
+  res.status(500).send('حدث خطأ في السيرفر');
+  } 
 } )
+
+app.get('/englishTeacherClass/:classId' ,  async (req,res ) => {
+  const classId = req.params.classId ;
+
+  res.send(`${classId}`)
+})
 
 //**************************************************************** GET ADMIN AND TEACHER AND STUDENT END ********************************************************
 
@@ -326,9 +350,9 @@ const classId = await getClassIdFromSession(req.session.user);
 if (!classId) 
       return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
   
-const { activityName } = req.body;  //بدي من الفرونت يبعتولي بس اسم النشاط اللي بده المعلم يضيفه
+const { name } = req.body;  //بدي من الفرونت يبعتولي بس اسم النشاط اللي بده المعلم يضيفه
 
-await insertTodayDailyActivity(activityName , classId) ; 
+await insertTodayDailyActivity(name , classId) ; 
  res.json({ success: true });
 
 }catch(err){

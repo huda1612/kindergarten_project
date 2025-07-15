@@ -7,10 +7,13 @@ export async function getTeacherFullName(teacherId) {
   return rows[0].first_name  +" "+ rows[0].last_name  ;
 }
 
-export async function getTeacherNameWithNikname(teacherId) {
+export async function getTeacherNameWithNikname(teacherId , role) {
   const rows = await executeQuery('SELECT gender FROM students where id = ? ', [teacherId]  );
   const full_name =await getTeacherFullName(teacherId) ; 
-  return "المربية" +" "+ full_name ;
+  if(role === 'main')
+    return "المربية" +" "+ full_name ;
+  else
+    return "المعلمة"+" "+full_name ;
 }
 
 //تابع لاعرف عدد الطلاب اللي بصف معلم محدد
