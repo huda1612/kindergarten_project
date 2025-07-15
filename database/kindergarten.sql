@@ -54,6 +54,7 @@ CREATE TABLE `activities` (
   `name` varchar(45) NOT NULL,
   `description` text NOT NULL,
   `icon` varchar(100) DEFAULT NULL,
+  `type` enum('main','english') NOT NULL DEFAULT 'main',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -64,7 +65,7 @@ CREATE TABLE `activities` (
 
 LOCK TABLES `activities` WRITE;
 /*!40000 ALTER TABLE `activities` DISABLE KEYS */;
-INSERT INTO `activities` VALUES (1,'الرسم بالألوان','نشاط يتيح للأطفال التعبير عن مشاعرهم بالرسم باستخدام ألوان شمعية أو مائية.','fa-paint-brush'),(2,'القصة المصورة','قراءة قصة قصيرة مع عرض صور مشوّقة لمساعدة الطفل على فهم الأحداث.','fa-book-open');
+INSERT INTO `activities` VALUES (1,'الرسم بالألوان','نشاط يتيح للأطفال التعبير عن مشاعرهم بالرسم باستخدام ألوان شمعية أو مائية.','fa-paint-brush','main'),(2,'القصة المصورة','قراءة قصة قصيرة مع عرض صور مشوّقة لمساعدة الطفل على فهم الأحداث.','fa-book-open','main');
 /*!40000 ALTER TABLE `activities` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -80,12 +81,15 @@ CREATE TABLE `classes` (
   `teacher_id` int DEFAULT NULL,
   `grade_level_id` int NOT NULL,
   `class_name` varchar(45) NOT NULL,
+  `english_teacher_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `teacher_id_idx` (`teacher_id`),
   KEY `fk_class_grade_levels_idx` (`grade_level_id`),
+  KEY `fk_classes_english_teachers_idx` (`english_teacher_id`),
+  CONSTRAINT `fk_classes_english_teachers` FOREIGN KEY (`english_teacher_id`) REFERENCES `teachers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_classes_grade_levels` FOREIGN KEY (`grade_level_id`) REFERENCES `grade_levels` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_classes_teachers` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +98,7 @@ CREATE TABLE `classes` (
 
 LOCK TABLES `classes` WRITE;
 /*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,NULL,1,'A1'),(2,NULL,2,'B1'),(4,2,1,'A2'),(5,1,3,'C1');
+INSERT INTO `classes` VALUES (1,1,1,'A1',3),(2,7,2,'B1',NULL),(4,2,1,'A2',3),(12,13,3,'c3',12),(13,8,2,'t',NULL);
 /*!40000 ALTER TABLE `classes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,6 +114,7 @@ CREATE TABLE `daily_activities` (
   `activity_id` int NOT NULL,
   `class_id` int NOT NULL,
   `date` date NOT NULL,
+  `description` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_daily_activities_activities_idx` (`activity_id`),
   KEY `fk_daily_activities_classes_idx` (`class_id`),
@@ -142,6 +147,7 @@ CREATE TABLE `files` (
   `path` varchar(255) NOT NULL,
   `date` date NOT NULL,
   `description` text,
+  `type` enum('main','english') NOT NULL DEFAULT 'main',
   PRIMARY KEY (`id`),
   KEY `fk_files_classes_idx` (`class_id`),
   KEY `fk_files_daily_activities_idx` (`daily_activities_id`),
@@ -170,7 +176,11 @@ CREATE TABLE `grade_levels` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `min_age` int DEFAULT NULL,
+  `max_age` int DEFAULT NULL,
+  `level_order` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `level_order_UNIQUE` (`level_order`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -180,7 +190,7 @@ CREATE TABLE `grade_levels` (
 
 LOCK TABLES `grade_levels` WRITE;
 /*!40000 ALTER TABLE `grade_levels` DISABLE KEYS */;
-INSERT INTO `grade_levels` VALUES (1,'مرحلة أولى','هذه المرحلة للاطفال في العمر 3 سنوات'),(2,'مرحلة ثانية','المرحلة للاطفال في العمر 4 سنوات'),(3,'مرحلة ثالثة','المرحلة للاطفال في العمر 5 سنوات');
+INSERT INTO `grade_levels` VALUES (1,'مرحلة أولى','هذه المرحلة الاولى للاطفال',2,4,1),(2,'مرحلة ثانية','المرحلة الثانية للاطفال ',3,5,2),(3,'مرحلة ثالثة','المرحلة  الثالثة للاطفال ',4,6,3);
 /*!40000 ALTER TABLE `grade_levels` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -312,10 +322,11 @@ CREATE TABLE `teachers` (
   `first_name` varchar(45) NOT NULL,
   `last_name` varchar(45) NOT NULL,
   `phone` varchar(10) DEFAULT NULL,
+  `role` enum('main','english') NOT NULL DEFAULT 'main',
   PRIMARY KEY (`id`),
   KEY `user_id_idx` (`user_id`),
   CONSTRAINT `fk_teachers_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -324,7 +335,7 @@ CREATE TABLE `teachers` (
 
 LOCK TABLES `teachers` WRITE;
 /*!40000 ALTER TABLE `teachers` DISABLE KEYS */;
-INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','11111'),(2,9,'لين','محمود',''),(7,NULL,'هديل','محمد',''),(8,NULL,'فاطمة','عبد الله','898879'),(9,NULL,'سارة','خالد','876874');
+INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','11111','main'),(2,9,'لين','محمود','','main'),(3,12,'لانا','محمد','56755466','english'),(7,NULL,'هديل','محمد','','main'),(8,NULL,'فاطمة','عبد الله','898879','main'),(12,NULL,'عبير','عبد الغني ','5674567','english'),(13,NULL,'هبه','احمد','','main');
 /*!40000 ALTER TABLE `teachers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -342,7 +353,7 @@ CREATE TABLE `users` (
   `role` enum('student','teacher','admin') NOT NULL DEFAULT 'student',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -351,7 +362,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','admin'),(2,'sana','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','teacher'),(3,'reem','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student'),(5,'noor','$2b$10$HK4/dsfz.J1RkFKtPT.c7uAbE62UkrNzK.7zLwIYPpNjK4ET3BSFK','student'),(6,'huda','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student'),(9,'leen','$2b$10$V5WZnTqOwUv58PRr7yomQOm/QHz4sQopYIT4qIWt5Yhaq949B/Qv.','teacher');
+INSERT INTO `users` VALUES (1,'admin','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','admin'),(2,'sana','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','teacher'),(3,'reem','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student'),(5,'noor','$2b$10$HK4/dsfz.J1RkFKtPT.c7uAbE62UkrNzK.7zLwIYPpNjK4ET3BSFK','student'),(6,'huda','$2b$10$.D/6szFwfkdSvUjXtIXC..8GqsM8y6Dh35SWvMdShhKzygBP9/0Ou','student'),(9,'leen','$2b$10$V5WZnTqOwUv58PRr7yomQOm/QHz4sQopYIT4qIWt5Yhaq949B/Qv.','teacher'),(12,'lana','$2b$10$CKNGukNfihJmmfupASiRXOFpqei0QGroGiwckUxNuHRd6GOYQZYmS','teacher');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -364,4 +375,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-13 15:57:21
+-- Dump completed on 2025-07-15 10:29:31

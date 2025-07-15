@@ -60,10 +60,10 @@
       <tr>
         <th>الاسم</th>
         <th>رقم الهاتف</th>
-        <th>اسم الصف المسؤول عنه</th>
-        <th>تغيير المعلم المسؤول عن الصف </th>
+        <th>اسم الصف المسؤولة عنه</th>
+        <th>تغيير المربية المسؤولة عن الصف </th>
         <th>تعديل البيانات</th>
-        <th>حذف المعلم</th>
+        <th>حذف المربية</th>
 
       </tr>
     </thead>
@@ -77,7 +77,7 @@
                   <span>لا يوجد رقم هاتف</span>
             <%}%>
           </td>
-          <td><%= teacher.class_name || 'غير مرتبط بأي صف حاليًا' %></td>
+          <td><%= teacher.class_name || 'غير مرتبطه بأي صف حاليًا' %></td>
 
           <td>
             <% if (teacher.class_name) { %>
@@ -123,7 +123,7 @@
           </td>
 
           <td>
-              <form action="/admin/deleteTeacher" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المعلم؟');">
+              <form action="/admin/deleteTeacher" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه المربية');">
               <input type="hidden" name="teacherId" value="<%= teacher.id %>">
               <button type="submit">حذف</button>
               <% if (session.deleteTeacherError && session.deleteErrorTeacherId == teacher.id ) { %>
@@ -143,9 +143,9 @@
       <tr>
         <th>الاسم</th>
         <th>رقم الهاتف</th>
-        <th>اسماء الصفوف المسؤول عنها</th>
+        <th>اسماء الصفوف المسؤولة عنها</th>
         <th>تعديل البيانات</th>
-        <th>حذف المعلم</th>
+        <th>حذف المعلمة</th>
 
       </tr>
     </thead>
@@ -195,7 +195,7 @@
           </td>
 
           <td>
-              <form action="/admin/deleteTeacher" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المعلم؟');">
+              <form action="/admin/deleteTeacher" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه المعلمة؟');">
               <input type="hidden" name="teacherId" value="<%= teacher.id %>">
               <button type="submit">حذف</button>
               <% if (session.deleteTeacherError && session.deleteErrorTeacherId == teacher.id ) { %>
@@ -209,15 +209,16 @@
     </tbody>
   </table>
 
-<h3>إضافة معلم جديد :</h3>
+<h3>إضافة معلمة جديدة :</h3>
 
 <form id="addTeacherForm" action="/admin/insertTeacher" method="POST" >
   <input type="text" name="first_name" placeholder="الاسم الأول" required>
   <input type="text" name="last_name" placeholder="الاسم الأخير" required>
   <input type="text" name="phone" placeholder="رقم الهاتف">
   <select name="role" required>
-  <option value="main">معلم اساسي</option>
-  <option value="english">معلم انجليزي</option>
+   <option value="" disabled selected hidden> اختر نوع المعلمة</option>
+  <option value="main">مربية صف</option>
+  <option value="english">معلمة انجليزي</option>
   </select>
   <button type="submit">إضافة</button>
 </form>
@@ -238,7 +239,7 @@
         <div class="class-card">
           <h2><%= clas.class_name %></h2>
           <div class="class-info">عدد الطلاب: <%= clas.student_count %></div>
-          <div class="class-info">المعلم المشرف: 
+          <div class="class-info">المربية المشرفة: 
           <%if(clas.first_name === null){%>
              <span>لا يوجد</span>
           <%}else {%>
@@ -296,7 +297,7 @@
                 <% } else if( session.editClassNameId != clas.id) { %>
                   <form action="/admin/editClassTeacher" method="POST" style="display:inline;">
                     <input type="hidden" name="editClassTeacherId" value="<%= clas.id %>">
-                    <button type="submit">تغيير معلم الصف</button>
+                    <button type="submit">تغيير مربية الصف</button>
                   </form>
                 <% } %>
 
@@ -343,9 +344,9 @@
        <% const availableTeachers = teachers.filter(t => !t.class_name); %>
 
        <% if (availableTeachers.length === 0) { %>
-           <option disabled selected hidden>لا يوجد معلمين متاحين حالياً</option>
+           <option disabled selected hidden>لا يوجد مربيات متاحات حالياً</option>
        <% } else { %>
-         <option value="" disabled selected hidden> المعلم المسؤول عن الصف</option>
+         <option value="" disabled selected hidden> المربية المسؤوله عن الصف</option>
            <% availableTeachers.forEach(t => { %>
          <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
          <% }) %>
@@ -355,9 +356,9 @@
      <select name="engTeacherId" >
 
        <% if (engTeachers.length === 0) { %>
-           <option disabled selected hidden>لا يوجد معلمين انجليزي متاحين حالياً</option>
+           <option disabled selected hidden>لا يوجد معلمات انجليزي متاحات حالياً</option>
        <% } else { %>
-         <option value="" disabled selected hidden> معلم الانجليزي للصف</option>
+         <option value="" disabled selected hidden> معلمة الانجليزي للصف</option>
            <% engTeachers.forEach(t => { %>
          <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
          <% }) %>
