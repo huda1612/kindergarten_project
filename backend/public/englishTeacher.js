@@ -5,7 +5,6 @@ const fileDateForm = document.getElementById('fileDateForm');
 const cencelDateSelectFilebtn = document.getElementById('cencelDateSelectFilebtn');
 const dateSelectFilebtn = document.getElementById('dateSelectFilebtn');
 
-
 showAddFilebtn.addEventListener('click', () =>{
     showAddFilebtn.style.display = 'none';
     addFileForm.style.display = 'block';
@@ -51,57 +50,48 @@ function updateCurrentDate() {
        `اليوم هو ${today.toLocaleDateString('ar-EG', options)}`;
 }
 
-async function loadTodayActivities() {
+async function loadTodayEnglishActivities() {
     try {
-        const response = await fetch("/api/getTodayActivityList");
+        const get_class_id = document.getElementById("get_class_id");
+        const classId = get_class_id.dataset.classId; 
+        const response = await fetch("/api/getTodayEnglishActivityList" ,{
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json"
+             },
+            body: JSON.stringify({ classId: classId })
+             });
+
         if (!response.ok) throw new Error("فشل في تحميل أنشطة اليوم");
 
         const data = await response.json();
-        const NotFilterdDailyActivities = data.dailyActivities || [];
-        const isTeacher = data.role === "teacher";
-
+        const notFilterdDailyActivities = data.dailyActivities || [];
+        //لاعرضله انشطة الانجليزي بس
+        const  dailyActivities = notFilterdDailyActivities.filter(activity => activity.type === 'english');
         const container = document.getElementById("todayActivities");
         container.innerHTML = "";
 
-        let dailyActivities ;
-
-        //اذا كان مربية باخد انشطتها بس
-        if(isTeacher)
-                dailyActivities = NotFilterdDailyActivities.filter(activity => activity.type === 'main');
-        
-        //اذا طالب كل الانشطه
-        else
-            dailyActivities = NotFilterdDailyActivities ; 
-
-        
         if (dailyActivities.length === 0) {
             container.innerHTML = "<p>لا توجد أنشطة مضافة اليوم</p>";
-            if (isTeacher) {
-            const activitySelect = document.getElementById('activitySelect');
-            activitySelect.innerHTML ="<option value='null' selected>لا شيء </option>"
-            }
-            return;
-        }
-
-        //لحط الانشطة بالقائمة عند الملفات
-        
-        if (isTeacher) {
             const activitySelect = document.getElementById('activitySelect');
             activitySelect.innerHTML = "";
             activitySelect.innerHTML ="<option value='null' selected>لا شيء </option>"
-
-            dailyActivities.forEach(act => {
-                const opt = document.createElement("option");
-                opt.value = act.id;
-                opt.textContent = act.name;
-                activitySelect.appendChild(opt);
-            });
+            return;
         }
 
+        const activitySelect = document.getElementById('activitySelect');
+        activitySelect.innerHTML = "";
+        activitySelect.innerHTML ="<option value='null' selected>لا شيء </option>"
 
-        //لنعمل عرض النشاط بقائمة الانشطة
+        dailyActivities.forEach(act => {
+            const opt = document.createElement("option");
+            opt.value = act.id;
+            opt.textContent = act.name;
+            activitySelect.appendChild(opt);
+        });
+
+
         dailyActivities.forEach((act) => {
-
             const div = document.createElement("div");
             div.classList.add("activity-item");
             
@@ -116,40 +106,39 @@ async function loadTodayActivities() {
                 </div>
             `;
 
-            if (isTeacher) {
-                html += `
-                    <button class="delete-btn">
-                        حذف
-                    </button>`;
-            }
+            //اضافة زر الحذف
+             html += `
+                <button class="delete-btn">
+                    حذف
+                </button>`;
+            
+             div.innerHTML = html;
 
-            div.innerHTML = html;
-
-            if (isTeacher) {
-                div.querySelector(".delete-btn").addEventListener("click", async () => {
+            //عند الضغط على زر الحذف
+             div.querySelector(".delete-btn").addEventListener("click", async () => {
                     if (confirm("هل أنت متأكد من حذف النشاط؟")) {
                         try {
                             console.log("ضغط على زر الحذف لنشاط:", act.name);
 
-                            const res = await fetch("/api/deleteDailyActivity", {
+                            const res = await fetch("/api/deleteDailyEnglishActivity", {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json"
                                 },
-                                body: JSON.stringify({ activityName: act.name })
+                                body: JSON.stringify({ activityName: act.name , classId : classId })
                             });
 
                             const result = await res.json();
                             if (result.success) {
-                                 div.remove();
-                                 //احذفه من الملفات
-                                 const activitySelect = document.getElementById('activitySelect');
-                                 const optionToRemove = Array.from(activitySelect.options).find(
-                                 opt => opt.value === act.id || opt.value === String(act.id)
+                                div.remove();
+                                const activitySelect = document.getElementById('activitySelect');
+                                const optionToRemove = Array.from(activitySelect.options).find(
+                                opt => opt.value === act.id || opt.value === String(act.id)
                                 );
                                 if (optionToRemove) {
                                     optionToRemove.remove();
                                 }
+
                             } else {
                                 alert("فشل في حذف النشاط.");
                             }
@@ -159,24 +148,17 @@ async function loadTodayActivities() {
                         }
                     }
                 });
-            }
+            
 
             container.appendChild(div);
-
-        
-
         });
-
-
-    }catch(err) {
+    } catch (err) {
         console.error(err);
         document.getElementById("todayActivities").innerHTML =
             "<p>خطأ في تحميل أنشطة اليوم</p>";
     }
 }
 
-//ممكن اعملها بتعرض مع تاريخ محدد و لما بتكون onload بعرضها بتاؤيخ اليوم
-//بحط زر عرض  تاريخ محدد وعند الضغط عليه بستدعي هالتابع بتاريخ محدد
 async function loadFiles(date) {
     try{ 
      const get_class_id = document.getElementById("get_class_id");
@@ -192,19 +174,15 @@ async function loadFiles(date) {
 
      const data = await response.json();
      const NotFilterdDailyFiles = data.flies || [];
-     const isTeacher = data.role === "teacher";
+
 
      const container = document.getElementById("todayFiles");
      container.innerHTML = "";
 
-     let dailyFiles ;
-        //اذا كان مربية باخد ملفاتها بس
-    if(isTeacher)
-         dailyFiles = NotFilterdDailyFiles.filter(files => files.type === 'main');
+     //لاعرضلها فقط ملفات الانجليزي
+     const dailyFiles = NotFilterdDailyFiles.filter(files => files.type === 'english');
         
-        //اذا طالب كل الملفات
-        else
-            dailyFiles = NotFilterdDailyFiles ; 
+    
         
         if (dailyFiles.length === 0) {
             container.innerHTML = `<p>لا توجد ملفات مضافة لهذا اليوم ${date}</p>`;
@@ -227,18 +205,16 @@ async function loadFiles(date) {
                     </div>
                 </div>
             `
-            if(isTeacher)
-            {
+           
+            
                 html += `
                 <button class="fileDelete-btn">
                 حذف
                 </button>`;
-            }
+            
              div.innerHTML = html;
 
 
-             
-            if(isTeacher){
             div.querySelector(".fileDelete-btn").addEventListener("click", async () => {
                     if (confirm("هل أنت متأكد من حذف الملف ؟")) {
                         try {
@@ -264,7 +240,7 @@ async function loadFiles(date) {
                         }
                     }
                 });
-            }
+            
             container.appendChild(div);
         });
             
@@ -273,6 +249,8 @@ async function loadFiles(date) {
         document.getElementById("todayFiles").innerHTML =
             "<p>خطأ في تحميل ملفات اليوم</p>";
     }}
+
+
 
 
 window.onload = function () {
@@ -298,6 +276,15 @@ window.onload = function () {
         document.getElementById("customActivityField").style.display = "block";
     });
 
+    // ✅ [تم التعليق] اختيار نشاط جاهز
+    /* 
+    document.querySelectorAll(".activity-option").forEach((option) => {
+        option.addEventListener("click", function () {
+            const activityName = this.getAttribute("data-activity");
+            addNewActivity(activityName);
+        });
+    });
+    */
 
     // إضافة نشاط مخصص
     document.getElementById("saveCustomActivity").addEventListener("click", function () {
@@ -329,7 +316,10 @@ window.onload = function () {
         });
     }
 
-    
+    // رفع ملف
+    document.querySelector(".files-section .add-btn").addEventListener("click", function () {
+        alert("سيتم فتح نافذة لاختيار الملفات");
+    });
 };
 
 function toggleActivityOptions() {
@@ -339,8 +329,9 @@ function toggleActivityOptions() {
 
 
 
-document.addEventListener("DOMContentLoaded", async () => {
-    await loadTodayActivities();
+document.addEventListener("DOMContentLoaded", async() => {
+    await loadTodayEnglishActivities();
     const today = new Date().toLocaleDateString('sv-SE'); // يعطي "2025-07-18"
     await loadFiles(today);
+    
 });

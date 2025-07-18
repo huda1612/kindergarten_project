@@ -198,7 +198,7 @@ export async function getEnglishTeachersWithClasses() {
 
 export async function getGradeLevels() {
     return await executeQuery(`
-        SELECT id , name FROM grade_levels 
+        SELECT id , name  FROM grade_levels 
         `) ;
 }
 

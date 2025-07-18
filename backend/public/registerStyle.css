@@ -31,6 +31,7 @@ body {
 }
 
 /* لمسة زخرفية طفولية في الخلفية */
+/*
 body::before {
     content: '';
     position: fixed;
@@ -54,8 +55,9 @@ body::after {
     z-index: 0;
     pointer-events: none;
 }
-
+*/
 /* زخارف إضافية طفولية */
+/*
 body::before {
     content: '';
     position: fixed;
@@ -68,7 +70,7 @@ body::before {
     z-index: 0;
     pointer-events: none;
     animation: float 6s ease-in-out infinite;
-}
+}*/
 
 @keyframes float {
     0%, 100% { transform: translateY(0px); }

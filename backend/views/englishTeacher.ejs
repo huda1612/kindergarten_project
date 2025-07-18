@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
- 
+
 <head>
+
     <meta charset="UTF-8">
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة المعلم</title>
-    <link rel="stylesheet" href="teacher.css">
+
+    <link rel="stylesheet" href="/englishTeacher.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
         const activities = <%- JSON.stringify(activities) %>;
@@ -41,10 +42,7 @@
                 <i class="fas fa-child"></i>
                 <a href="#child"><span>الأطفال</span></a>
             </div>
-            <div class="menu-item">
-                <i class="fas fa-clipboard-check"></i>
-                <a href="/dailyReport"><span> إرسال التقرير اليومي</span></a>
-            </div>
+
             <div class="menu-item">
                 <i class="fas fa-puzzle-piece"></i>
                 <a href="#activty"><span>الأنشطة</span></a>
@@ -90,7 +88,7 @@
                 </div>
                 <div class="box4">
                     <i class="fas fa-puzzle-piece"></i>
-                    <div> عدد الأنشطة</div>
+                    <div> عدد أنشطة الإنجليزي</div>
                     <div class="stat-value">
                         <%= activity_count %>
                     </div>
@@ -129,34 +127,34 @@
                 </table>
             </div>
 
+
             <!-- قسم الأنشطة -->
             <div class="activities-section">
                 <div class="section-title">
-                    <h3>أنشطة اليوم</h3>
+                    <h3>أنشطة الانجليزي اليوم</h3>
                     <button id="activityBtn" class="add-btn" onclick="toggleActivityOptions()">إضافة نشاط</button>
                 </div>
                 <!-- قائمة الأنشطة الجاهزة (مخفية حتى يضغط على زر الإضافة) -->
-                <div id="activityOptions" class="activity-options" > </div>
- 
+                <div id="activityOptions" class="activity-options" >
+
+
+
                 <!--هي بس لاخد رقم الصف بملف الjs-->
-           
+                </div>
                 <div id="get_class_id"
                 data-class-id="<%= classId %>">
                 </div>
-                
+
                 <!-- قائمة الأنشطة المضافة -->
                 <div class="activities-list" id="activitiesList">
                     <!-- سيتم عرض الأنشطة المضافة هنا -->
-                     <div id="todayActivities"></div>
+                    <div id="todayActivities"></div>
                 </div>
-             </div>
-
-
-         <!-- قسم الملفات -->
+            </div>
+            <!-- قسم الملفات -->
         <div class="files-section">
             <div class="section-title">
-                
-                <h3 id="file">ملفات اليوم</h3>
+                <h3 id="file">ملفات الانجليزي لليوم</h3>
 
                 <button class="add-btn" id="fileDatebtn">عرض ملفات يوم اخر</button>
                 <form id="fileDateForm" style="display:none;">
@@ -167,7 +165,7 @@
                     <button type="button" class="add-btn" id="cencelDateSelectFilebtn" >إلغاء</button>
                 </form>
 
-                
+
                 <button class="add-btn" id="showAddFilebtn">رفع ملف</button>
                 <form action="/upload" method="POST" enctype="multipart/form-data" id="addFileForm" style="display:none;">
 
@@ -176,7 +174,7 @@
                     </label>
  
                     <input type="hidden" name="class_id" value="<%=classId%>">
-                    <input type="hidden" name="type" value="main" >
+                    <input type="hidden" name="type" value="english" >
                     <input type="text" placeholder="ادخل وصفاً للملف" name="description" >
 
                     <select id="activitySelect"  name="daily_activity_id">  </select>
@@ -185,7 +183,12 @@
                     <button type="button" class="add-btn" id="cencelAddFilebtn" >إلغاء</button>
                 </form>
 
+
+
+
             </div>
+
+
 
 
             <div class="files-list">
@@ -194,27 +197,19 @@
             </div>
 
 
-
+        </div>
         </div>
 
-        </div>
-
-
-
-        </div>
 
         
     </div>
     </div>
 
-
-
-    <script src="teacher.js"></script>
+    <script src="/englishTeacher.js"></script>
 </body>
 
 </html>
 
-<!--لرفع الملفات عند ضغط الزر-->
 <script>
 //لحطله ايام الاسبوع بالقائمة
 const dateSelect = document.getElementById("flieDateSelect");
@@ -223,8 +218,7 @@ dateSelect.innerHTML = '<option disabled selected>اختر تاريخًا</optio
 for (let i = 0; i < 7; i++) {
   const date = new Date();
   date.setDate(date.getDate() - i);
- // const isoDate = date.toISOString().split('T')[0];
-  const isoDate = date.toLocaleDateString('sv-SE'); // يعطي تنسيق YYYY-MM-DD بالتوقيت المحلي
+  const isoDate = date.toISOString().split('T')[0];
 
   const option = document.createElement("option");
   option.value = isoDate;
@@ -270,6 +264,7 @@ for (let i = 1; i <= 31; i++) {
     yearSelect.appendChild(option);
   });
 
+
 document.getElementById("addFilebtn").addEventListener("click", async () => {
     //بجيب الفورم اول شي
     const form = document.getElementById("addFileForm");
@@ -285,11 +280,10 @@ document.getElementById("addFilebtn").addEventListener("click", async () => {
 
         if (result.success) {
             alert("تم رفع الملف بنجاح!");
-            await loadFiles(new Date().toLocaleDateString('sv-SE'));       
+            await loadFiles(new Date().toLocaleDateString('sv-SE'));
             form.reset();
             form.style.display = "none";
             document.getElementById('showAddFilebtn').style.display ="block";
-        
 
         } else {
             alert("فشل في رفع الملف.");
@@ -306,7 +300,8 @@ document.getElementById("addFilebtn").addEventListener("click", async () => {
 
 <script>
     const container = document.getElementById('activityOptions');
-  
+    const classIdFromServer = <%= classId %>;
+
     activities.forEach(act => {
       const div = document.createElement('div');
       div.classList.add('activity-option');
@@ -341,24 +336,27 @@ document.getElementById("addFilebtn").addEventListener("click", async () => {
         const description = div.querySelector('.description-text').value;
 
         try {
-          const res = await fetch('/api/insertTodayDailyActivity', {
+          const res = await fetch('/api/insertTodayEnglishDailyActivity', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               activityName: act.name,
-              description: description
+              description: description ,
+               classId: classIdFromServer
             })
           });
 
           const data = await res.json();
+          console.log('Response from server:', data);
           if (data.success) {
             alert('تم إضافة النشاط بنجاح');
             div.querySelector('.description-text').value = '';
             div.querySelector('.description-form').style.display = 'none';
-             await loadTodayActivities();
-             document.getElementById("activityOptions").style.display = "none";
+            await loadTodayEnglishActivities();
+            document.getElementById("activityOptions").style.display = "none";
+
           } else {
             alert('فشل الإرسال: ' + data.message);
           }
@@ -373,3 +371,5 @@ document.getElementById("addFilebtn").addEventListener("click", async () => {
   </script>
   
   
+
+

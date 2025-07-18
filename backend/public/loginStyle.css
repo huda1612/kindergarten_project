@@ -26,7 +26,9 @@ body {
     color: var(--text-main);
 }
 
+
 /* لمسة زخرفية طفولية في الخلفية */
+/*
 body::before {
     content: '';
     position: fixed;
@@ -37,8 +39,8 @@ body::before {
     background: radial-gradient(circle at 70% 30%, #a0d8ef55 60%, transparent 100%);
     z-index: 0;
     pointer-events: none;
-}
-
+}*/
+/*
 body::after {
     content: '';
     position: fixed;
@@ -50,7 +52,7 @@ body::after {
     z-index: 0;
     pointer-events: none;
 }
-
+*/
 nav {
     background: var(--nav-bg);
     padding: 12px 32px;

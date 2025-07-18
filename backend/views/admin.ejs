@@ -3,57 +3,437 @@
 <head>
   <meta charset="UTF-8">
   <title>لوحة تحكم المدير</title>
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
-    .class-container {
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.8;
+            padding: 30px;
+            padding-right: 250px;
+        }
+
+       
+        h1, h2, h3 {
+            text-align: right;
+            color: #ff6666;
+            margin-bottom: 20px;
+        }
+
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        thead {
+            background-color: #a0d8ef;
+            color: #333;
+        }
+
+        thead th {
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+
+        tbody td {
+            padding: 12px;
+            font-size: 17px;
+            color: #444;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        
+        td form {
+            display: inline-block;
+        }
+
+        td button,
+        form button {
+            margin: 4px;
+            padding: 6px 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        td button:hover,
+        form button:hover {
+            transform: scale(1.05);
+        }
+
+        /* ألوان الأزرار */
+
+        button.cancel {
+            background-color: #888;
+            color: white;
+        }
+
+        button[type="submit"] {
+            background-color: #ff6666;
+            color: white;
+        }
+
+        .class-container {
+            align-items: center;
+            flex-direction:row;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px; /* تقليل المسافة بين العناصر */
+            margin: 20px 0; /* تقليل المسافة العلوية والسفلية */
+            justify-content: flex-start;
+            margin-top: 20px;
+        }
+
+        .class-card {
+            width: 250px;
+            background-color: #fff;
+            border: 2px solid #a0d8ef;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+            text-align: right;
+            transition: 0.3s;
+            margin: 0 auto;
+        }
+
+        .class-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .class-card h2 {
+            color: #0077aa;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .class-info {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .class-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+       
+        form input[type="text"],
+        form select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 180px;
+            font-size: 16px;
+        }
+
+        form button {
+            padding: 8px 16px;
+            background-color: #ff6666;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            
+        }
+        form button:hover {
+            background-color: #ff6666;
+        }
+        
+        .container {
+            background-color: #ffffff; 
+            padding: 20px;               
+            margin-bottom: 20px;         
+            border-radius: 12px;       
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+            max-width: 1400px;         
+            width: 100%;              
+            margin-left: auto;          
+            margin-right: auto;         
+            margin-top: 70px; 
+
+        }
+  
+        .container h1, .container h3 {
+            color: #ff6666;             
+            margin-bottom: 15px;         
+            font-size: 24px;             
+            text-align: right;           
+        }
+
+
+nav {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+    padding: 12px 32px;
     display: flex;
-    gap: 20px; /* مسافة بين الكروت */
-     flex-wrap: wrap; /* حتى ينزل للسطر اللي بعده إذا امتلأ السطر */
-    }
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-radius: 0 0 18px 18px;
+    z-index: 100;
+    transition: box-shadow 0.3s;
+}
 
-    .class-card {
-      width: 300px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px auto;
-      background-color: #f9f9f9;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      font-family: 'Tahoma', sans-serif;
-    }
+nav.scrolled {
+    box-shadow: 0 8px 24px rgba(160, 216, 239, 0.18);
+}
 
-    .class-card h2 {
-      margin-top: 0;
-      font-size: 22px;
-      color: #333;
-    }
+.school-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 22px;
+    color: #333;
+    font-weight: bold;
+}
 
-    .class-info {
-      margin: 10px 0;
-      font-size: 16px;
-    }
+.school-icon {
+    font-size: 28px;
+    color: #ff6666;
+}
 
-    .class-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-    }
+.teacher-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 
-    .class-buttons button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
+.teacher-name {
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+}
 
-    .btn-edit { background-color: #ffc107; color: #000; }
-    .btn-delete { background-color: #dc3545; color: white; }
-    .btn-view { background-color: #007bff; color: white; }
+.logout-btn {
+    background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+    color: #222;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 22px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(255, 182, 185, 0.15);
+}
+
+.logout-btn:hover {
+    background: #ff6666;
+    color: #fff;
+    transform: scale(1.08);
+}
+
+.btn {
+    background: #fff;
+    color: #222;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 22px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(255, 182, 185, 0.15);
+}
+
+.btn:hover {
+    background: #ff6666;
+    color: #fff;
+    transform: scale(1.08);
+}
+hr {
+    border: 0;
+    height: 2px;
+    background-color: #ff6666;
+    margin: 20px 0;
+    width: 100%; 
+}
+.sidebar {
+    width: 240px;
+    background: linear-gradient(120deg, #fff 80%, #a0d8ef11 100%);
+    box-shadow: 0 6px 18px rgba(160, 216, 239, 0.10);
+    padding: 20px 0;
+    height: calc(100vh - 70px);
+    position: fixed;
+    right: 0;
+    top: 90px;
+    border-radius: 18px 0 0 18px;
+    border: 3px solid #a0d8ef;
+    border-right: none;
+    padding-top: 10px; 
+}
+
+.menu-item {
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s, transform 0.2s;
+    direction: rtl;
+    margin: 5px 10px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: black;
+}
+
+.menu-item:hover {
+    background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+    color: #333;
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(160, 216, 239, 0.15);
+}
+
+.menu-item i {
+    margin-left: 10px;
+    color: #ff6666;
+    font-size: 18px;
+}
+
+.menu-item span {
+    flex-grow: 1;
+    text-align: right;
+    font-weight: bold;
+}
+.stage-title {
+    font-size: 20px;
+    text-align: right;
+    text-decoration: underline;
+    text-underline-offset: 8px;
+    color: #169cd1;
+    margin: 25px 0 10px;
+    font-weight: bold;
+    border-right: 6px solid #a0d8ef;
+    padding-right: 10px;
+    
+}
+.sidebar-header {
+   
+    text-align: center; 
+    padding: 10px 0;
+    color: white; 
+    font-size: 18px; 
+    font-weight: bold; 
+    border-radius: 8px; 
+    margin-bottom: 5px; 
+   margin-right: 25px;
+}
+
+.btn-view {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.btn-delete {
+    background-color: #ff6666;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.showNameFormBtn {
+    background-color: #ffc107;
+    color: black;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.showChangeTeacherBtn {
+    background-color: #ffc107;
+    color: black;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
   </style>
 </head>
 
 <body>
+  <!-- الشريط العلوي -->
+<!-- الشريط العلوي -->
+    <nav>
+        <div class="school-info">
+            <i class="fas fa-school school-icon"></i>
+            <span>روضة أسراب اليمام الخاصة</span>
+        </div>
+        
+        <div class="teacher-info">
+            <span class="teacher-name"> صفحة المدير</span>
+            <a href="/logout"><button class="logout-btn">تسجيل الخروج</button></a>
+        </div>
+    </nav>
+    <!-- القائمة الجانبية - صفحة الإدمن -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>أقسام الصفحة</h2>
+        </div>
+        <a href="#tea" class="menu-item">
+            <i class="fas fa-user-tie"></i>
+            <span>مربيات الصفوف</span>
+        </a>
+        <a href="#eng" class="menu-item">
+            <i class="fas fa-language"></i>
+            <span>معلمات الإنجليزي</span>
+        </a>
+        <a href="#newtea" class="menu-item">
+            <i class="fas fa-user-plus"></i>
+            <span>إضافة معلمة</span>
+        </a>
+        <a href="#class" class="menu-item">
+            <i class="fas fa-list-ul"></i>
+            <span>قائمة الصفوف</span>
+        </a>
+        <a href="#newclass" class="menu-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>إضافة صف</span>
+        </a>
+    </div>
+  
+  <div class ="container" id ="tea">
   <h1>قائمة مربيات الصفوف</h1>
   <table border="1">
     <thead>
@@ -136,7 +516,9 @@
       <% }) %>
     </tbody>
   </table>
+  </div>
 
+  <div class ="container" id ="eng">
   <h1>قائمة معلمات الانجليزي</h1>
     <table border="1">
     <thead>
@@ -208,29 +590,33 @@
       <% }) %>
     </tbody>
   </table>
+  </div>
+ <div id ="newtea"></div>
+ <div class ="container" >
+ <h3 >إضافة معلمة جديدة :</h3>
 
-<h3>إضافة معلمة جديدة :</h3>
-
-<form id="addTeacherForm" action="/admin/insertTeacher" method="POST" >
-  <input type="text" name="first_name" placeholder="الاسم الأول" required>
-  <input type="text" name="last_name" placeholder="الاسم الأخير" required>
-  <input type="text" name="phone" placeholder="رقم الهاتف">
-  <select name="role" required>
-   <option value="" disabled selected hidden> اختر نوع المعلمة</option>
-  <option value="main">مربية صف</option>
-  <option value="english">معلمة انجليزي</option>
-  </select>
-  <button type="submit">إضافة</button>
-</form>
-<% if (session.insertTeacherError) { %>
+ <form id="addTeacherForm" action="/admin/insertTeacher" method="POST" >
+   <input type="text" name="first_name" placeholder="الاسم الأول" required>
+   <input type="text" name="last_name" placeholder="الاسم الأخير" required>
+   <input type="text" name="phone" placeholder="رقم الهاتف">
+   <select name="role" required>
+     <option value="" disabled selected hidden> اختر نوع المعلمة</option>
+     <option value="main">مربية صف</option>
+     <option value="english">معلمة انجليزي</option>
+   </select>
+   <button type="submit">إضافة</button>
+ </form>
+ <% if (session.insertTeacherError) { %>
     <div class="alert alert-danger"><%= session.insertTeacherError %></div>
     <% session.insertTeacherError = null; %> 
-<% } %>
+ <% } %>
+ </div>
 
+ <div class ="container" id ="class">
+ <h1>قائمة الصفوف</h1>
 
-<h1>قائمة الصفوف</h1>
-
-<% gradeLevels.forEach(gradeLevel => { %>
+<%let linecounter = gradeLevels.length %>
+ <% gradeLevels.forEach(gradeLevel => { linecounter--; %>
   <div class="class-container">
     <h2><%= gradeLevel.name %></h2>
 
@@ -249,70 +635,67 @@
 
           <div class="class-buttons">
 
-            <!-- تعديل اسم الصف -->
-            <% if (session.editClassNameId === clas.id) { %>
+
+              <!-- لتغيير اسم الصف-->
+
+              <button type="submit" class="showNameFormBtn">تغيير اسم الصف</button>
+              <div class="NameForm" style="display: none;">
               <form action="/admin/updateClassName" method="POST" style="display:inline-block; margin-left: 10px;">
                 <input type="hidden" name="classId" value="<%= clas.id %>">
                 <input type="text" name="class_name" value="<%= clas.class_name %>" required>
                 <button type="submit">حفظ</button>
+                <button type="button" class="cancelNameFormBtn">إلغاء</button>
               </form>
-              <form action="/admin/cencelUpdateClassName" method="POST" style="display:inline;">
-                <button type="submit">إلغاء</button>
-              </form>
-              <% if (session.updateClassNameError) { %>
-                <div class="alert alert-danger"><%= session.updateClassNameError %></div>
-                <% session.updateClassNameError = null; %>
-              <% } %>
+              </div>
+   
+              <!--رساله الخطأ اذا الاسم موجود او فارغ-->
+              <script>
+              const updateClassNameError = <%- JSON.stringify(updateClassNameError) %>;
+              if (updateClassNameError) {
+              alert(updateClassNameError);
+              }
+              </script>
 
-              <% } else if(session.editClassTeacherId != clas.id) { %>
-                <form action="/admin/editClassName" method="POST" style="display:inline;">
-                  <input type="hidden" name="editClassNameId" value="<%= clas.id %>">
-                  <button type="submit">تغيير اسم الصف</button>
-                </form>
-              <% } %>
+
+
 
               <!-- تغيير معلم الصف -->
-              <% if (session.editClassTeacherId === clas.id ) { %>
-                <form action="/admin/updateClassTeacherByClassId" method="POST" style="display:inline-block; margin-left: 10px;">
-                  <input type="hidden" name="classId" value="<%= clas.id %>">
-                  <input type="hidden" name="oldTeacherId" value="<%= clas.teacher_id %>">
-                  <select name="newTeacherId" required>
-                  <% teachers
-                    .filter(t => t.id !== clas.teacher_id)
-                    .forEach(t => { %>
-                      <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
-                  <% }) %>
-                  </select>
-                  <button type="submit">حفظ</button>
-                </form>
-                <form action="/admin/cencelUpdateClassTeacher" method="POST" style="display:inline;">
-                  <button type="submit">إلغاء</button>
-                </form>
-  
-                <% if (session.updateClassTeacherError) { %>
-                  <div class="alert alert-danger"><%= session.updateClassTeacherError %></div>
-                  <% session.updateClassTeacherError = null; %>
-                <% } %>
 
-                <% } else if( session.editClassNameId != clas.id) { %>
-                  <form action="/admin/editClassTeacher" method="POST" style="display:inline;">
-                    <input type="hidden" name="editClassTeacherId" value="<%= clas.id %>">
-                    <button type="submit">تغيير مربية الصف</button>
+                  <button type="submit" class="showChangeTeacherBtn">تغيير مربية الصف</button>
+                  <div class="teacherChangeForm"  style="display: none;">
+                  <form action="/admin/updateClassTeacherByClassId" method="POST" style="display:inline-block; margin-left: 10px;">
+                    <input type="hidden" name="classId" value="<%= clas.id %>">
+                    <input type="hidden" name="oldTeacherId" value="<%= clas.teacher_id %>">
+                    <select name="newTeacherId" required>
+                    <% teachers
+                      .filter(t => t.id !== clas.teacher_id)
+                      .forEach(t => { %>
+                       <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name + ' ' %><%= t.class_name ? `(مربية  ${t.class_name} )` :'((متفرغة))'%></option>
+                    <% }) %>
+                    </select>
+                    <button type="submit">حفظ</button>
+                    <button type="button" class="cancelChangeTeacherBtn">إلغاء</button>
                   </form>
-                <% } %>
+                  </div>
+
+
+
 
 
                <!-- أزرار حذف وعرض الطلاب تظهر فقط إذا لا نعدل اسم الصف ولا نعدل معلم الصف -->
-               <% if (session.editClassNameId !== clas.id && session.editClassTeacherId !== clas.id) { %>
+                <div id="deleteClassbutton" > 
                  <form action="/admin/deleteClass" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف الصف؟');">
                    <input type="hidden" name="classId" value="<%= clas.id %>">
-                    <button class="btn-delete" type="submit">حذف</button>
+                    <button class="btn-delete" type="submit" onsubmit="return confirm('هل أنت متأكد من حذف الصف؟');">حذف</button>
                  </form>
+                 </div>
+                 <div id="showStudentsbutton" > 
                  <form action="/class/:<%=clas.id%>" method="GET" style="display:inline;">
                    <input type="hidden" name="classId" value="<%= clas.id %>">
                    <button class="btn-view" type="submit">عرض الطلاب</button>
                  </form>
-                <% } %>
+                </div>
+
 
           </div>
                <!--رسالة خطأ عند فشل الحذف-->
@@ -325,11 +708,14 @@
       <% } %>
     <% }) %>
   </div>
-  
-<% }) %>
+    <%if(linecounter){%>
+  <hr>
+  <%}%>
+ <% }) %>
+ </div>
 
+<div class ="container" id ="newclass">
  <h3>إضافة صف جديد :</h3>
-
 
  <form id="addClassForm" action="/admin/insertClass" method="POST" >
     <input type="text" name="className" placeholder="اسم الصف " required>
@@ -344,7 +730,7 @@
        <% const availableTeachers = teachers.filter(t => !t.class_name); %>
 
        <% if (availableTeachers.length === 0) { %>
-           <option disabled selected hidden>لا يوجد مربيات متاحات حالياً</option>
+           <option disabled selected hidden>لا يوجد مربيات متاحات </option>
        <% } else { %>
          <option value="" disabled selected hidden> المربية المسؤوله عن الصف</option>
            <% availableTeachers.forEach(t => { %>
@@ -356,7 +742,7 @@
      <select name="engTeacherId" >
 
        <% if (engTeachers.length === 0) { %>
-           <option disabled selected hidden>لا يوجد معلمات انجليزي متاحات حالياً</option>
+           <option disabled selected hidden>لا يوجد معلمات انجليزي متاحات </option>
        <% } else { %>
          <option value="" disabled selected hidden> معلمة الانجليزي للصف</option>
            <% engTeachers.forEach(t => { %>
@@ -372,7 +758,8 @@
     <div class="alert alert-danger"><%= session.insertClassError %></div>
     <% session.insertClassError = null; %> 
  <% } %>
-
+</div>
+    <script src="admin.js"></script>
 
 </body>
 </html>

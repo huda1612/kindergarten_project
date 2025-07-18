@@ -2,13 +2,20 @@
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
+import multer from 'multer'
+import fs from "fs/promises"; 
+import iconv from'iconv-lite';//لتزبيط اسم الملف العربي لما بينرفع
+
+
+
 import { fileURLToPath } from 'url'
-import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass , insertTodayDailyActivity , register} from './database.js'
-import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames } from './teacherDatabase.js'
+import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass , insertTodayDailyActivity , register , deleteDailyActivity , getFlieListByClass , deleteFile} from './database.js'
+import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames, saveClassFile } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
 import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById , insertClass} from './adminDatabase.js'
-import {getEnglishTeacherClasses} from './englishTeacherDatabase.js'
-import {getClassIdFromSession} from './serverFunctions.js'
+import {getEnglishTeacherClasses , getStudentCountForClass ,getTodayAbsenceCountByClassId , getStudentsByClassId , getTodayEnglishActivityCount , getEnglishActivityNames} from './englishTeacherDatabase.js'
+import {weekActivityCount , allTeachersCount , allStudentsCount , allClassesCount , getMonthAttendanceRate , getAllActivities , getGradeLevelsWithClassCount} from './aboutDatabase.js'
+import {getClassIdFromSession} from './serverFunctions.js' 
 import session from 'express-session' 
 
 // للحصول على المسار الكامل للملف الحالي
@@ -16,7 +23,22 @@ const __filename = fileURLToPath(import.meta.url);
 // للحصول على مسار المجلد الحالي
 const __dirname = path.dirname(__filename);
 
+// تحديد مكان الحفظ للملفات المرفوعه واسم الملف
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // مجلد للتخزين
+  },
+ filename: function (req, file, cb) {
+    // نعيد ترميز الاسم من latin1 إلى utf8 (أغلب الحالات)
+    const buffer = Buffer.from(file.originalname, 'binary');  // أو 'latin1'
+    const decodedName = iconv.decode(buffer, 'utf8');
+    const uniqueName = Date.now() + '-' + decodedName;
 
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 const app = express();
 app.set('view engine' , 'ejs') ;
@@ -31,6 +53,7 @@ app.use(session({
   saveUninitialized: true
 }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static('uploads'));//لتحميل الملفات 
 
 
 //********************************************************************************************************************************************************************
@@ -38,8 +61,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 5.**************************************************************** ROUTES SECTION *********************************************************************************
 //home page
 app.get('/', (req, res) => {
+  console.log(new Date().toISOString().split('T')[0])
   res.render('home'); 
 })
+
+app.get('/about-kindergarten' ,async(req , res) =>{
+  try{
+  const weekActivity = await weekActivityCount();
+  const teachersCount = await allTeachersCount();
+  const studentsCount = await allStudentsCount();  
+  const classesCount = await allClassesCount(); //لازم غير الحكي للصفوف بس بلا المراحل 
+  const monthAttendanceRate = await getMonthAttendanceRate(); //لازم غير الحكي للشهر بدل الاسبوع
+  const AllActivities = await getAllActivities();
+  const gradeLevels = await getGradeLevelsWithClassCount();
+  res.render('aboutKindergarten' , {weekActivity , teachersCount , studentsCount , classesCount , monthAttendanceRate , AllActivities , gradeLevels})
+
+  }catch (error) {
+  console.error(error);
+  res.status(500).send('حدث خطأ في السيرفر');
+}
+});
+
+
 
 
 //**************************************************************** LOGIN AND REGISTER **************************************************************************
@@ -156,8 +199,9 @@ app.get('/admin' , async (req,res ) => {
   const engTeachersClasses = await getEnglishTeachersWithClasses();
   const gradeLevels = await getGradeLevels();
   const allClassesData = await getAllClassesData() ;
-
-  res.render( 'admin' ,{teachers ,engTeachers,engTeachersClasses, gradeLevels , allClassesData , session: req.session  } ) ; 
+  const updateClassNameError = req.session.updateClassNameError || null ;  
+  req.session.updateClassNameError =null ;
+  res.render( 'admin' ,{teachers ,engTeachers,engTeachersClasses, gradeLevels , allClassesData , session: req.session ,  updateClassNameError  } ) ; 
   }catch (error) {
   console.error(error);
   res.status(500).send('حدث خطأ في السيرفر');
@@ -186,6 +230,7 @@ app.get('/student' , async (req,res ) => {
 })
 
 
+
 //get the teacher page
 app.get('/teacher', async (req, res) => {
   if (!req.session.user || !req.session.user.teacher_id) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
@@ -201,12 +246,14 @@ app.get('/teacher', async (req, res) => {
     const students = await getStudentsByTeacher(teacher_id);
     const activity_count = await getTodayActivityCount(teacher_id);
     const activity_names = await getActivityNames();
-    res.render('teacher', { full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activity_names })
+    const classId = await getClassIdFromSession(req.session.user);
+    res.render('teacher', { classId , full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names })
   } catch (err) {
     console.error('Error loading /teacher page:', err);
     res.status(500).send('حدث خطأ في السيرفر');
   }
 })
+
 
 
 
@@ -226,10 +273,32 @@ app.get('/classChoose' ,  async (req,res ) => {
   } 
 } )
 
-app.get('/englishTeacherClass/:classId' ,  async (req,res ) => {
-  const classId = req.params.classId ;
 
-  res.send(`${classId}`)
+
+
+app.get('/englishTeacherClass/:classId' ,  async (req,res ) => {
+   if (!req.session.user || !req.session.user.teacher_id)  //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
+    return res.redirect('/login');
+  
+  try{
+    const classId = req.params.classId ;
+    const teacher_id = req.session.user.teacher_id;
+    const name_With_Nikname = await getTeacherNameWithNikname(teacher_id,'english')
+
+    const student_count = await getStudentCountForClass(classId);
+    const absence_count = await getTodayAbsenceCountByClassId(classId);
+    const attendance_count = student_count - absence_count;
+    const students = await getStudentsByClassId(classId);
+
+    const activity_count = await getTodayEnglishActivityCount(classId); 
+    const activity_names = await getEnglishActivityNames(); //بده تعديل 
+    res.render('englishTeacher',{ classId, name_With_Nikname, student_count, absence_count, attendance_count , activity_count, students,activities: activity_names })
+  }catch (err) {
+    console.error('Error loading /englishTeacherClass/:classId page:', err);
+    res.status(500).send('حدث خطأ في السيرفر');
+  }
+
+
 })
 
 //**************************************************************** GET ADMIN AND TEACHER AND STUDENT END ********************************************************
@@ -283,6 +352,7 @@ app.get('/logout', (req, res) => {
 //******************************************************************API SECTION***************************************************************************************
 
 //هي  ليحصل الفرونت على قائمة باسماء الطلاب بصف المعلم 
+//يمكن بدها حذف هي 
 app.get('/api/getStudentsNames' , async (req, res ) => {
   if (!req.session.user || !req.session.user.teacher_id) {
   return res.status(401).json({ error: 'Unauthorized' });
@@ -313,52 +383,250 @@ app.get('/api/getActivityNames' , async (req, res) => {
   }
 })
 
-//هي  ليحصل الفرونت على قائمة بالانشطة اليوم بالصف سواء للمعلم او للطالب  
+
+
+//هي  ليحصل الفرونت على قائمة بالانشطة اليوم بالصف سواء للمربية او للطالب  
+//مسار للمربية والطالب فقط
 app.get('/api/getTodayActivityList' , async (req, res ) => {
-  if (!req.session.user ) {
+  if (!req.session.user || req.session.user.teacherRole ==='english') {
   return res.status(401).json({ error: 'Unauthorized' });
   }
- 
  try{
   //اول شي بجيب رقم الصف للمستخدم 
- const classId = await getClassIdFromSession(req.session.user);
- if (!classId) 
-      return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
-    
+  const  classId = await getClassIdFromSession(req.session.user);
+  if (!classId) 
+    return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
  
-const TodayActivity = await getTodayActivityListByClass(classId) ;
+const TodayActivity = await getTodayActivityListByClass(classId ) ;
+
 //صار معي مصفوفة اغراض بتعبر عن الانشطه وكل نشاط فيه اسم ووصف وايقونه وتاريخ اليوم
 //[{name: ... , description : ... , icon : ... } , .....]
- res.json(TodayActivity) ;
-
+    res.json({
+    dailyActivities :TodayActivity,
+    role: req.session.user.role , 
+    });
  }catch(err){
   console.error('Error loading /api/getTodayActivityList :', err);
   res.status(500).send('حدث خطأ في قاعدة البيانات');
  }
-
 })
 
-//هي مشان وقت بده المعلم يضيف نشاط جديد 
-app.post('/api/insertTodayDailyActivity' , async (req, res ) => {
 
-if (!req.session.user || req.session.user.role != "teacher") 
+
+//لجلب انشطة اليوم لمعلم الانجليزي فقط
+app.post('/api/getTodayEnglishActivityList' , async (req, res ) => {
+if (!req.session.user || req.session.user.role ==='student' || req.session.user.teacherRole ==='main') {
   return res.status(401).json({ error: 'Unauthorized' });
+  }
+try{
+   const { classId }= req.body ;
+   console.log(classId);
+   const TodayActivity = await getTodayActivityListByClass(classId ) ;
+   res.json({
+    dailyActivities :TodayActivity,
+    });
+}catch(err){
+  console.error('Error loading /api/getTodayActivityList :', err);
+  res.status(500).send('حدث خطأ في قاعدة البيانات');
+ }
+})
+
+
+
+//هي مشان وقت بده المربية تضيف نشاط جديد 
+app.post('/api/insertTodayDailyActivity', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "teacher" || req.session.user.teacherRole !="main" )
+    return res.status(401).json({ success: false, message: 'غير مصرح' })   
 
 try{
 //اول شي بجيب رقم الصف للمستخدم 
-const classId = await getClassIdFromSession(req.session.user);
+const classId = await getClassIdFromSession(req.session.user); 
 if (!classId) 
       return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
   
-const { name } = req.body;  //بدي من الفرونت يبعتولي بس اسم النشاط اللي بده المعلم يضيفه
+const {activityName, description} = req.body;  //بدي من الفرونت يبعتولي بس اسم النشاط اللي بده المعلم يضيفه
 
-await insertTodayDailyActivity(name , classId) ; 
- res.json({ success: true });
+    if (!activityName || !description)
+      return res.status(400).json({ success: false, message: 'البيانات ناقصة' });
 
-}catch(err){
-  console.error('Error loading /api/insertTodayDailyActivity :', err);
-  res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });}
+    await insertTodayDailyActivity(activityName, classId, description);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error in /teacher/addActivity:', err);
+    res.status(500).json({ success: false, message: `${err.message}` });
+  }
+});
+
+
+//هي اضافه نشاط جديد لصف معلم انجليزي نشاط جديد 
+app.post('/api/insertTodayEnglishDailyActivity', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "teacher" || req.session.user.teacherRole !== "english")
+    return res.status(401).json({ success: false, message: 'غير مصرح' })   
+
+try{
+  
+const {activityName, description ,classId} = req.body; 
+
+    if (!activityName || !description || !classId)
+      return res.status(400).json({ success: false, message: 'البيانات ناقصة' });
+    //بدي جيب رقم الصف من الفرونت 
+    await insertTodayDailyActivity(activityName, classId, description);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error in /teacher/addActivity:', err);
+    res.status(500).json({ success: false, message: `${err.message}` });
+  }
+});
+
+app.post('/api/deleteDailyActivity', async (req, res) => {
+  console.log("start delete");
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const classId = await getClassIdFromSession(req.session.user);
+    console.log("عم يشوف ال id");
+
+    if (!classId) {
+      return res.status(404).json({ error: 'لا يوجد صف مرتبط بهذا المستخدم' });
+    }
+
+    const { activityName } = req.body;
+
+    if (!activityName) {
+      return res.status(400).json({ error: 'اسم النشاط غير موجود في الطلب' });
+    }
+
+    await deleteDailyActivity(classId, activityName);
+    console.log("تم حذف النشاط:", activityName);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("Error deleting activity:", err);
+    res.status(500).json({ error: 'فشل في حذف النشاط' });
+  }
+});
+
+//حذف النشاط من استاذ الانجليزي
+app.post('/api/deleteDailyEnglishActivity', async (req, res) => {
+
+  if (!req.session.user || req.session.user.role !='teacher' ||  req.session.user.teacherRole !='english' ) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+
+    const { activityName , classId } = req.body;
+
+    if (!activityName) {
+      return res.status(400).json({ error: 'اسم النشاط غير موجود في الطلب' });
+    }
+
+    await deleteDailyActivity(classId, activityName);
+    console.log("تم حذف النشاط:", activityName);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("Error deleting activity:", err);
+    res.status(500).json({ error: 'فشل في حذف النشاط' });
+  }
+});
+
+
+//لجلب الملفات بيوم محدد
+app.post('/api/getFileList' , async(req , res) =>{
+  if (!req.session.user ) {
+  return res.status(401).json({ error: 'Unauthorized' });
+  }
+ try{
+  //اول شي بجيب رقم الصف للمستخدم 
+const {classId , date} =req.body ;
+ 
+const flies = await getFlieListByClass(classId , date ) ;
+
+    res.json({
+    flies :flies,
+    role: req.session.user.role , 
+    });
+ }catch(err){
+  console.error('Error loading /api/getFileList :', err);
+  res.status(500).send('حدث خطأ في قاعدة البيانات');
+ }
 })
+
+
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file || !req.file.path)
+      return res.json({ success: false, message: "يجب اختيار ملف أولاً" });
+    const { class_id , daily_activity_id  , description , type , date } = req.body;
+    if(!req.file.path)
+      return res.json({success : false , message : "يجب اختيار ملف اولاً"});
+    const filePath = req.file.path;
+    const originalName = req.file.originalname;
+    //رح استخرج اسم الملف من المسار لان عم يتخزن بالداتا كرموز كان
+    const baseName = path.basename(filePath); 
+    const cleanName = baseName.substring(baseName.indexOf('-') + 1);
+
+    await saveClassFile(
+      class_id,
+      daily_activity_id ==='null' ? null : daily_activity_id , 
+      description , 
+      type ,
+      date,
+      cleanName ,
+      filePath
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "خطأ في قواعد البيانات" });
+  }
+});
+
+
+app.post('/api/deleteFile', async (req, res) => {
+  console.log("start delete");
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    
+    const { fileId , classId , filePath} = req.body;
+
+    const result = await deleteFile( fileId , classId );
+    //لحذف الملف من السيرفر لو انحذف من الداتا
+    if(result.success){
+      //اول شي منجيب المسار الحقيقي للملف بالمجلد
+      const uploadsDir = path.join(process.cwd(), "uploads"); // مسار مجلد uploads كامل
+      const fileRealPath = path.join(uploadsDir, path.basename(filePath)); // خذ اسم الملف فقط وأبني المسار
+      if (!fileRealPath.startsWith(uploadsDir)) 
+          return res.status(400).json({ success: false, message: "مسار غير آمن" });
+
+      console.log("Deleting file at path:", fileRealPath);
+      //منحذف الملف من المجلد
+      await fs.unlink(fileRealPath);
+      
+    }
+
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("Error deleting activity:", err);
+    res.status(500).json({ error: 'فشل في حذف الملف' });
+  }
+});
+
+
 //****************************************************************ِAPI FOR ADMIN PAGE****************************************************************************************************
 
 app.post('/admin/updateClassTeacher' , async (req, res ) => {
@@ -464,6 +732,7 @@ try{
 
 //للتعديل على اسم الصف 
 
+/*
 app.post('/admin/editClassName', (req, res) => {
   const { editClassNameId } = req.body;
   req.session.editClassNameId = parseInt(editClassNameId); // نحدد من هو الصف الذي نعدّله
@@ -478,6 +747,7 @@ app.post('/admin/cencelUpdateClassName', async (req, res) => {
   res.redirect('/admin');
  
 })
+*/
 
 app.post('/admin/updateClassName', async (req, res) => {
   if (!req.session.user || req.session.user.role != "admin") 
@@ -486,7 +756,7 @@ app.post('/admin/updateClassName', async (req, res) => {
   const {classId  , class_name , oldTeacherId , newTeacherId} = req.body ;
   const result = await updateClassNameById(classId  , class_name , oldTeacherId , newTeacherId) ;
   if(result.success){
-   req.session.editClassNameId = null ;
+  // req.session.editClassNameId = null ;
    req.session.updateClassNameError = null ;
    res.redirect('/admin');}
   else 
@@ -502,8 +772,9 @@ app.post('/admin/updateClassName', async (req, res) => {
 })
 
 
-//للتعديل على معلم الصف
 
+//للتعديل على معلم الصف
+/*
 app.post('/admin/editClassTeacher', (req, res) => {
   const { editClassTeacherId } = req.body;
   req.session.editClassTeacherId = parseInt(editClassTeacherId); // نحدد من هو الصف الذي نعدّله
@@ -518,6 +789,8 @@ app.post('/admin/cencelUpdateClassTeacher', async (req, res) => {
   res.redirect('/admin');
  
 })
+
+*/
 
 app.post('/admin/updateClassTeacherByClassId', async (req, res) => {
   if (!req.session.user || req.session.user.role != "admin") 

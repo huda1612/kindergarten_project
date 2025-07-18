@@ -29,7 +29,7 @@ CREATE TABLE `absences` (
   PRIMARY KEY (`id`),
   KEY `fk_absences_students_idx` (`student_id`),
   CONSTRAINT `fk_absences_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `absences` (
 
 LOCK TABLES `absences` WRITE;
 /*!40000 ALTER TABLE `absences` DISABLE KEYS */;
-INSERT INTO `absences` VALUES (1,1,'2025-06-03'),(2,2,'2025-06-10'),(3,1,'2025-06-21');
+INSERT INTO `absences` VALUES (1,1,'2025-06-03'),(2,2,'2025-06-10'),(3,1,'2025-06-21'),(4,2,'2025-07-15');
 /*!40000 ALTER TABLE `absences` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -56,7 +56,7 @@ CREATE TABLE `activities` (
   `icon` varchar(100) DEFAULT NULL,
   `type` enum('main','english') NOT NULL DEFAULT 'main',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +65,7 @@ CREATE TABLE `activities` (
 
 LOCK TABLES `activities` WRITE;
 /*!40000 ALTER TABLE `activities` DISABLE KEYS */;
-INSERT INTO `activities` VALUES (1,'الرسم بالألوان','نشاط يتيح للأطفال التعبير عن مشاعرهم بالرسم باستخدام ألوان شمعية أو مائية.','fa-paint-brush','main'),(2,'القصة المصورة','قراءة قصة قصيرة مع عرض صور مشوّقة لمساعدة الطفل على فهم الأحداث.','fa-book-open','main');
+INSERT INTO `activities` VALUES (1,'الرسم بالألوان','نشاط يتيح للأطفال التعبير عن مشاعرهم بالرسم باستخدام ألوان شمعية أو مائية.','fa-paint-brush','main'),(2,'القصة المصورة','قراءة قصة قصيرة مع عرض صور مشوّقة لمساعدة الطفل على فهم الأحداث.','fa-book-open','main'),(3,'أغاني الحروف والكلمات','نشاط بالانجليزي لتعلم الحروف والكلمات','fa-solid fa-music','english');
 /*!40000 ALTER TABLE `activities` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -89,7 +89,7 @@ CREATE TABLE `classes` (
   CONSTRAINT `fk_classes_english_teachers` FOREIGN KEY (`english_teacher_id`) REFERENCES `teachers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_classes_grade_levels` FOREIGN KEY (`grade_level_id`) REFERENCES `grade_levels` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_classes_teachers` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,7 +98,7 @@ CREATE TABLE `classes` (
 
 LOCK TABLES `classes` WRITE;
 /*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,1,1,'A1',3),(2,7,2,'B1',NULL),(4,2,1,'A2',3),(12,13,3,'c3',12),(13,8,2,'t',NULL);
+INSERT INTO `classes` VALUES (1,1,1,'المستقبل',3),(2,7,2,'الزهور',NULL),(4,13,1,'السنافر',3),(12,NULL,3,'النجوم',12),(13,8,2,'الفراشات',NULL),(14,2,1,'العصافير ',12),(15,NULL,1,'الفرح',3),(16,15,1,'المرح',3);
 /*!40000 ALTER TABLE `classes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -120,7 +120,7 @@ CREATE TABLE `daily_activities` (
   KEY `fk_daily_activities_classes_idx` (`class_id`),
   CONSTRAINT `fk_daily_activities_activities` FOREIGN KEY (`activity_id`) REFERENCES `activities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_daily_activities_classes` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -129,6 +129,7 @@ CREATE TABLE `daily_activities` (
 
 LOCK TABLES `daily_activities` WRITE;
 /*!40000 ALTER TABLE `daily_activities` DISABLE KEYS */;
+INSERT INTO `daily_activities` VALUES (1,1,1,'2025-07-15',NULL),(2,2,1,'2025-07-15',NULL),(3,1,2,'2025-07-15','نشاط للرسم '),(5,1,1,'2025-07-16',NULL),(6,3,1,'2025-07-16','ؤ'),(7,1,15,'2025-07-17','رسم حيوانات '),(8,2,15,'2025-07-17','ليلى و الذئب'),(23,1,1,'2025-07-17','رسم الحيوانات'),(25,2,1,'2025-07-17','قصة ليلى والذئب'),(27,3,1,'2025-07-17','اغنية الحروف الابجدية');
 /*!40000 ALTER TABLE `daily_activities` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -142,7 +143,7 @@ DROP TABLE IF EXISTS `files`;
 CREATE TABLE `files` (
   `id` int NOT NULL AUTO_INCREMENT,
   `class_id` int NOT NULL,
-  `daily_activities_id` int DEFAULT NULL,
+  `daily_activity_id` int DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `path` varchar(255) NOT NULL,
   `date` date NOT NULL,
@@ -150,10 +151,10 @@ CREATE TABLE `files` (
   `type` enum('main','english') NOT NULL DEFAULT 'main',
   PRIMARY KEY (`id`),
   KEY `fk_files_classes_idx` (`class_id`),
-  KEY `fk_files_daily_activities_idx` (`daily_activities_id`),
+  KEY `fk_files_daily_activities_idx` (`daily_activity_id`),
   CONSTRAINT `fk_files_classes` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_files_daily_activities` FOREIGN KEY (`daily_activities_id`) REFERENCES `daily_activities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_files_daily_activities` FOREIGN KEY (`daily_activity_id`) REFERENCES `daily_activities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -162,6 +163,7 @@ CREATE TABLE `files` (
 
 LOCK TABLES `files` WRITE;
 /*!40000 ALTER TABLE `files` DISABLE KEYS */;
+INSERT INTO `files` VALUES (2,1,NULL,'style admin.txt','uploads\\1752776871331-style admin.txt','2025-07-16','تجربه2','main'),(14,1,NULL,'index.html','uploads\\1752816161796-index.html','2025-07-18','م','main'),(15,1,NULL,'style.css','uploads\\1752816308881-style.css','2025-07-18','','main'),(23,1,NULL,'صفحة الادمن.txt','uploads\\1752818755037-صفحة الادمن.txt','2025-07-18','','main'),(24,1,NULL,'الملفات.txt','uploads\\1752819513548-الملفات.txt','2025-07-18','','english');
 /*!40000 ALTER TABLE `files` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -190,7 +192,7 @@ CREATE TABLE `grade_levels` (
 
 LOCK TABLES `grade_levels` WRITE;
 /*!40000 ALTER TABLE `grade_levels` DISABLE KEYS */;
-INSERT INTO `grade_levels` VALUES (1,'مرحلة أولى','هذه المرحلة الاولى للاطفال',2,4,1),(2,'مرحلة ثانية','المرحلة الثانية للاطفال ',3,5,2),(3,'مرحلة ثالثة','المرحلة  الثالثة للاطفال ',4,6,3);
+INSERT INTO `grade_levels` VALUES (1,'مرحلة أولى','في هذه المرحلة، نوفّر بيئة دافئة وآمنة تساعد الطفل على التأقلم مع الجو المدرسي. نركّز على تطوير المهارات الحسية والحركية، وتعزيز الشعور بالاستقلال والثقة من خلال اللعب الموجه والأنشطة الاجتماعية التي تزرع بذور الفضول والاستكشاف.',2,4,1),(2,'مرحلة ثانية','هنا يبدأ الطفل بالتعبير عن نفسه والتفاعل مع محيطه بشكل أعمق. نقدم برامج تدمج التعليم باللعب لتنمية مهارات التواصل، التمييز البصري والسمعي، والتعرف على الحروف والأرقام بأساليب ممتعة ومحفّزة، مع التركيز على تنمية الإبداع والتعاون.',3,5,2),(3,'مرحلة ثالثة','نجهّز الطفل للانتقال السلس إلى المرحلة الابتدائية من خلال مناهج تركز على القراءة المبكرة، الكتابة، والمهارات الحسابية. ندمج الأنشطة التعليمية بالتجريب والمشاركة، وننمي لديه حبّ التعلم، المسؤولية، والانضباط الذاتي بطريقة مشوّقة ومحببة.',4,6,3);
 /*!40000 ALTER TABLE `grade_levels` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -263,7 +265,7 @@ CREATE TABLE `notes` (
   PRIMARY KEY (`id`),
   KEY `fk_notes_students_idx` (`student_id`),
   CONSTRAINT `fk_notes_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,7 +274,7 @@ CREATE TABLE `notes` (
 
 LOCK TABLES `notes` WRITE;
 /*!40000 ALTER TABLE `notes` DISABLE KEYS */;
-INSERT INTO `notes` VALUES (1,1,'كانت الطالبه نشيطة اليوم','2025-06-10'),(2,2,'هذا اول غياب للطالبه يرجى التبرير','2025-06-10'),(3,1,'الطالبة لم تركز اليوم في الدروس يرجى الانتباه','2025-06-21'),(4,2,'الطالبه تغيب لاول مره اليوم','2025-06-21');
+INSERT INTO `notes` VALUES (1,1,'كانت الطالبه نشيطة اليوم','2025-06-10'),(2,2,'هذا اول غياب للطالبه يرجى التبرير','2025-06-10'),(3,1,'الطالبة لم تركز اليوم في الدروس يرجى الانتباه','2025-06-21'),(4,2,'الطالبه تغيب لاول مره اليوم','2025-06-21'),(5,1,'الطالبة كانت نشيطة اليوم','2025-07-15'),(6,2,'يرجى تبرير الغياب الاخير للطالبة','2025-07-15');
 /*!40000 ALTER TABLE `notes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -326,7 +328,7 @@ CREATE TABLE `teachers` (
   PRIMARY KEY (`id`),
   KEY `user_id_idx` (`user_id`),
   CONSTRAINT `fk_teachers_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -335,7 +337,7 @@ CREATE TABLE `teachers` (
 
 LOCK TABLES `teachers` WRITE;
 /*!40000 ALTER TABLE `teachers` DISABLE KEYS */;
-INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','11111','main'),(2,9,'لين','محمود','','main'),(3,12,'لانا','محمد','56755466','english'),(7,NULL,'هديل','محمد','','main'),(8,NULL,'فاطمة','عبد الله','898879','main'),(12,NULL,'عبير','عبد الغني ','5674567','english'),(13,NULL,'هبه','احمد','','main');
+INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','11111','main'),(2,9,'لين','محمود','099237642','main'),(3,12,'لانا','محمد','56755466','english'),(7,NULL,'هديل','محمد','06938753','main'),(8,NULL,'فاطمة','عبد الله','898879','main'),(12,NULL,'عبير','عبد الغني ','5674567','english'),(13,NULL,'هبه','احمد','','main'),(15,NULL,'سارة','خالد','3242342','main'),(16,NULL,'براءه','حمد','','main'),(17,NULL,'هلا','حمود','','main');
 /*!40000 ALTER TABLE `teachers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -375,4 +377,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-15 10:29:31
+-- Dump completed on 2025-07-18  9:28:25

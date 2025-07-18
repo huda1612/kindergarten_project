@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
- 
+
 <head>
     <meta charset="UTF-8">
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة المعلم</title>
     <link rel="stylesheet" href="teacher.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
         const activities = <%- JSON.stringify(activities) %>;
-    </script>
+      </script>
 </head>
 
 <body>
@@ -25,7 +24,7 @@
             <span class="teacher-name">
                 <%= name_With_Nikname %>
             </span>
-            <a href="/logout"><button class="logout-btn">تسجيل الخروج</button></a>
+            <a href="../main page/home.html"><button class="logout-btn">تسجيل الخروج</button></a>
         </div>
     </nav>
 
@@ -129,6 +128,7 @@
                 </table>
             </div>
 
+
             <!-- قسم الأنشطة -->
             <div class="activities-section">
                 <div class="section-title">
@@ -136,173 +136,49 @@
                     <button id="activityBtn" class="add-btn" onclick="toggleActivityOptions()">إضافة نشاط</button>
                 </div>
                 <!-- قائمة الأنشطة الجاهزة (مخفية حتى يضغط على زر الإضافة) -->
-                <div id="activityOptions" class="activity-options" > </div>
- 
-                <!--هي بس لاخد رقم الصف بملف الjs-->
-           
-                <div id="get_class_id"
-                data-class-id="<%= classId %>">
+                <div id="activityOptions" class="activity-options" >
+
+
+
+
+
                 </div>
-                
+
+
+
                 <!-- قائمة الأنشطة المضافة -->
                 <div class="activities-list" id="activitiesList">
                     <!-- سيتم عرض الأنشطة المضافة هنا -->
-                     <div id="todayActivities"></div>
                 </div>
-             </div>
-
-
-         <!-- قسم الملفات -->
+            </div>
+            <!-- قسم الملفات -->
         <div class="files-section">
             <div class="section-title">
-                
                 <h3 id="file">ملفات اليوم</h3>
-
-                <button class="add-btn" id="fileDatebtn">عرض ملفات يوم اخر</button>
-                <form id="fileDateForm" style="display:none;">
-                    <select id ="day" name="day"> </select>
-                    <select id ="month" name="month"> </select>
-                    <select id ="year" name="year"> </select>
-                    <button type="button"class="add-btn"  id="dateSelectFilebtn" >عرض</button>
-                    <button type="button" class="add-btn" id="cencelDateSelectFilebtn" >إلغاء</button>
-                </form>
-
-                
-                <button class="add-btn" id="showAddFilebtn">رفع ملف</button>
-                <form action="/upload" method="POST" enctype="multipart/form-data" id="addFileForm" style="display:none;">
-
-                    <label class="add-btn" >
-                    <input type="file" name="file" id="file" required />
-                    </label>
- 
-                    <input type="hidden" name="class_id" value="<%=classId%>">
-                    <input type="hidden" name="type" value="main" >
-                    <input type="text" placeholder="ادخل وصفاً للملف" name="description" >
-
-                    <select id="activitySelect"  name="daily_activity_id">  </select>
-                    <select id ="flieDateSelect" name="date"> </select>
-                    <button type="button"class="add-btn"  id="addFilebtn" >رفع</button>
-                    <button type="button" class="add-btn" id="cencelAddFilebtn" >إلغاء</button>
-                </form>
-
+                <button class="add-btn">رفع ملف</button>
             </div>
-
-
             <div class="files-list">
-                <div id="todayFiles"></div>
+                <div class="file-item">
+                    <span>صور نشاط الرسم.pdf</span>
 
+                </div>
+                <div class="file-item">
+                    <span>قائمة الحضور.xlsx</span>
+
+                </div>
             </div>
-
-
-
+        </div>
         </div>
 
-        </div>
-
-
-
-        </div>
 
         
     </div>
     </div>
-
-
 
     <script src="teacher.js"></script>
 </body>
 
 </html>
-
-<!--لرفع الملفات عند ضغط الزر-->
-<script>
-//لحطله ايام الاسبوع بالقائمة
-const dateSelect = document.getElementById("flieDateSelect");
-dateSelect.innerHTML = '<option disabled selected>اختر تاريخًا</option>';
-
-for (let i = 0; i < 7; i++) {
-  const date = new Date();
-  date.setDate(date.getDate() - i);
- // const isoDate = date.toISOString().split('T')[0];
-  const isoDate = date.toLocaleDateString('sv-SE'); // يعطي تنسيق YYYY-MM-DD بالتوقيت المحلي
-
-  const option = document.createElement("option");
-  option.value = isoDate;
-  option.textContent = isoDate;
-  dateSelect.appendChild(option);
-}
-
-//قائمة عرض توايخ السنه
-const daySelect = document.getElementById("day");
-const monthSelect = document.getElementById("month");
-const yearSelect = document.getElementById("year");
-
-// تعبئة الأيام (1 إلى 31)
-for (let i = 1; i <= 31; i++) {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = i;
-    daySelect.appendChild(option);
-  }
-
-  // أسماء الشهور بالعربي
-  const monthNames = [
-    "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-    "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-  ];
-
-  // تعبئة الشهور
-  monthNames.forEach((month, index) => {
-    const option = document.createElement("option");
-    option.value = index + 1; // القيم من 1 إلى 12
-    option.textContent = month;
-    monthSelect.appendChild(option);
-  });
-
-  // تعبئة السنوات (السنة الحالية والسنة الماضية فقط)
-  const thisYear = new Date().getFullYear();
-  const years = [thisYear, thisYear - 1];
-
-  years.forEach(year => {
-    const option = document.createElement("option");
-    option.value = year;
-    option.textContent = year;
-    yearSelect.appendChild(option);
-  });
-
-document.getElementById("addFilebtn").addEventListener("click", async () => {
-    //بجيب الفورم اول شي
-    const form = document.getElementById("addFileForm");
-    const formData = new FormData(form);
-
-    try {
-        const res = await fetch("/upload", {
-            method: "POST",
-            body: formData
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-            alert("تم رفع الملف بنجاح!");
-            await loadFiles(new Date().toLocaleDateString('sv-SE'));       
-            form.reset();
-            form.style.display = "none";
-            document.getElementById('showAddFilebtn').style.display ="block";
-        
-
-        } else {
-            alert("فشل في رفع الملف.");
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("حدث خطأ أثناء رفع الملف.");
-    }
-});
-
-</script>
-
 
 <script>
     const container = document.getElementById('activityOptions');
@@ -357,14 +233,12 @@ document.getElementById("addFilebtn").addEventListener("click", async () => {
             alert('تم إضافة النشاط بنجاح');
             div.querySelector('.description-text').value = '';
             div.querySelector('.description-form').style.display = 'none';
-             await loadTodayActivities();
-             document.getElementById("activityOptions").style.display = "none";
           } else {
             alert('فشل الإرسال: ' + data.message);
           }
         } catch (err) {
           console.error(err);
-          alert(`حدث خطأ أثناء الإرسال :${err.message}`);
+          alert('حدث خطأ أثناء الإرسال');
         }
       });
   
@@ -373,3 +247,35 @@ document.getElementById("addFilebtn").addEventListener("click", async () => {
   </script>
   
   
+
+
+<!-- <script>
+    async function loadActivities() {
+        try {
+            const response = await fetch('/api/getActivityNames');
+            if (!response.ok) throw new Error('Failed to load activities');
+
+            const activities = await response.json();
+            const container = document.getElementById('activityOptions');
+            container.innerHTML = ''; // نفرغ الحاوية قبل الإضافة
+
+            activities.forEach(act => {
+                const div = document.createElement('div');
+                div.classList.add('activity-option');
+                div.setAttribute('data-activity', act.name);
+
+                div.innerHTML = `
+            <i class="fas ${act.icon}"></i>
+            <span>${act.name}</span>
+          `;
+
+                container.appendChild(div);
+            });
+        } catch (err) {
+            console.error(err);
+            document.getElementById('activityOptions').innerHTML = '<p>خطأ في تحميل الأنشطة</p>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadActivities);
+</script> -->

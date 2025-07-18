@@ -185,16 +185,30 @@ export async function nameCheck(id , role , firstName , lastName) {
 
 //*********************************************************CLASS FUNCTIONS SECTION******************************************************************
 
-export async function getTodayActivityListByClass(classId) {
+
+export async function getTodayActivityListByClass(classId ) {
   const rows = await executeQuery(`
-      SELECT a.name, a.description, a.icon
+      SELECT a.id , a.name, d.description, a.icon , a.type
       FROM daily_activities d
       JOIN activities a ON d.activity_id = a.id
-      WHERE d.class_id = ? AND d.date = CURRENT_DATE `, [classId]);
+      WHERE d.class_id = ? AND d.date = CURRENT_DATE  `, [classId]);
       return rows;
 }
+export async function getFlieListByClass(classId , date ){
+  const date2 = date ;
+  const row = await executeQuery(`
+   SELECT f.id, f.daily_activity_id , f.name , f.path , f.date , f.description , f.type,
+   a.name AS activity_name
+   FROM files f
+   LEFT JOIN daily_activities d ON f.daily_activity_id = d.id
+   LEFT JOIN activities a ON d.activity_id = a.id
+   WHERE f.class_id = ?
+   AND f.date >= ? AND f.date < DATE_ADD(?, INTERVAL 1 DAY)
+    `,[classId , date , date2]);
+  return row ;
+}
 //تابع لاضافة نشاط يومي جديد للصف
-export async function insertTodayDailyActivity(activityName, classId ) {
+export async function insertTodayDailyActivity(activityName, classId , description) {
   try{
     const [activity] = await executeQuery(
             'SELECT id FROM activities WHERE name = ?',
@@ -206,16 +220,48 @@ export async function insertTodayDailyActivity(activityName, classId ) {
 
     const existing = await executeQuery(
       'SELECT id FROM daily_activities WHERE activity_id = ? AND class_id = ? AND date = CURRENT_DATE',
-      [activityId, classId] );
+      [activityId, classId ] );
     if (existing.length > 0) throw new Error("النشاط مسجل بالفعل اليوم لهذا الصف");
 
     return await executeQuery(`
-      INSERT INTO daily_activities (activity_id, class_id, date)
-      VALUES (?, ?, CURRENT_DATE) `, [activityId, classId]);
+      INSERT INTO daily_activities (activity_id, class_id, date , description )
+      VALUES (?, ?, CURRENT_DATE , ?) `, [activityId, classId , description]);
     }catch(err){
     console.error("فشل إضافة النشاط:", err.message);
     throw err;
   }
+}
+
+//تابع حذف نشاط يومي 
+// تابع حذف نشاط يومي حسب اسم النشاط و classId
+export async function deleteDailyActivity(classId, activityName) {
+  // 1. جيب ID النشاط من اسمه
+  const activityRow = await executeQuery(`
+    SELECT id FROM activities WHERE name = ?`,
+    [activityName]
+  );
+
+  if (activityRow.length === 0) {
+    throw new Error("النشاط غير موجود");
+  }
+
+  const activityId = activityRow[0].id;
+
+  // 2. احذف من daily_activities
+  await executeQuery(`
+    DELETE FROM daily_activities WHERE class_id = ? AND date = CURRENT_DATE AND activity_id = ?`,
+    [classId, activityId]
+  );
+}
+
+
+export async function deleteFile( fileId , classId) {
+
+  await executeQuery(`
+    DELETE FROM files WHERE class_id = ? AND id = ? `,
+    [classId, fileId]
+  );
+  return {success : true} ;
 }
 
 //*********************************************************CLASS FUNCTIONS END**********************************************************************
