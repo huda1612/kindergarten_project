@@ -70,11 +70,24 @@ app.get('/about-kindergarten' ,async(req , res) =>{
   const weekActivity = await weekActivityCount();
   const teachersCount = await allTeachersCount();
   const studentsCount = await allStudentsCount();  
-  const classesCount = await allClassesCount(); //لازم غير الحكي للصفوف بس بلا المراحل 
-  const monthAttendanceRate = await getMonthAttendanceRate(); //لازم غير الحكي للشهر بدل الاسبوع
+  const classesCount = await allClassesCount(); 
+  const monthAttendanceRate = await getMonthAttendanceRate(); 
   const AllActivities = await getAllActivities();
   const gradeLevels = await getGradeLevelsWithClassCount();
   res.render('aboutKindergarten' , {weekActivity , teachersCount , studentsCount , classesCount , monthAttendanceRate , AllActivities , gradeLevels})
+
+  }catch (error) {
+  console.error(error);
+  res.status(500).send('حدث خطأ في السيرفر');
+}
+});
+
+app.get('/kindergarten-environment' ,async(req , res) =>{
+  try{
+  const mainTeachers = await getAllMainTeachersData();
+  const englishTeachers = await getAllEngTeachersData();
+  
+  res.render('kindergartenEnvironment' , {mainTeachers , englishTeachers})
 
   }catch (error) {
   console.error(error);
@@ -663,6 +676,7 @@ app.post('/admin/deleteTeacher' , async (req, res ) => {
  }
 })
 
+
 //لتحديد المعلم اللي بدنا نعدل على بياناته مشان يفتحله حقول للتعديل 
 app.post('/admin/editTeacher', (req, res) => {
   const { editTeacherId } = req.body;
@@ -670,28 +684,31 @@ app.post('/admin/editTeacher', (req, res) => {
   res.redirect('/admin');
 });
 
+
 //لتعديل بيانات معلم 
 app.post('/admin/updateTeacher', async (req, res) => {
   if (!req.session.user || req.session.user.role != "admin") 
     return res.status(401).json({ error: 'Unauthorized' });
   try{
-  const {teacherId , first_name , last_name , phone} = req.body ;
-  const result = await updateTeacherById(teacherId ,first_name , last_name , phone) ;
+  const {teacherId , first_name , last_name , phone , certificate , description } = req.body ;
+  const result = await updateTeacherById(teacherId ,first_name , last_name , phone , certificate , description ) ;
   if(result.success){
    req.session.editTeacherId = null ;
    req.session.updateTeacherError = null ;
    res.redirect('/admin');}
   else 
   {
-    req.session.updateTeacherError = null ;
+  req.session.updateTeacherError = null ;
     req.session.updateTeacherError = result.message ;
+
     return res.redirect('/admin');
   }
   }catch(err){
     console.error('Error loading /admin/updateTeacher :', err);
     res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
   }
-})
+}) ;
+
 
 app.post('/admin/cencelUpdateTeacher', async (req, res) => {
   if (!req.session.user || req.session.user.role != "admin") 
@@ -710,8 +727,8 @@ if (!req.session.user || req.session.user.role != "admin")
   return res.status(401).json({ error: 'Unauthorized' });
 
 try{
-   const { first_name , last_name , phone , role } = req.body; 
-   const result = await insertTeacher(first_name , last_name , phone , role) ;
+   const { first_name , last_name , phone , role ,  certificate , description } = req.body; 
+   const result = await insertTeacher(first_name , last_name , phone , role ,  certificate , description) ;
    
    if(!result.success){
     req.session.insertTeacherError = null ;

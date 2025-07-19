@@ -323,12 +323,14 @@ CREATE TABLE `teachers` (
   `user_id` int DEFAULT NULL,
   `first_name` varchar(45) NOT NULL,
   `last_name` varchar(45) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `certificate` varchar(255) DEFAULT NULL,
   `phone` varchar(10) DEFAULT NULL,
   `role` enum('main','english') NOT NULL DEFAULT 'main',
   PRIMARY KEY (`id`),
   KEY `user_id_idx` (`user_id`),
   CONSTRAINT `fk_teachers_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -337,7 +339,7 @@ CREATE TABLE `teachers` (
 
 LOCK TABLES `teachers` WRITE;
 /*!40000 ALTER TABLE `teachers` DISABLE KEYS */;
-INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','11111','main'),(2,9,'لين','محمود','099237642','main'),(3,12,'لانا','محمد','56755466','english'),(7,NULL,'هديل','محمد','06938753','main'),(8,NULL,'فاطمة','عبد الله','898879','main'),(12,NULL,'عبير','عبد الغني ','5674567','english'),(13,NULL,'هبه','احمد','','main'),(15,NULL,'سارة','خالد','3242342','main'),(16,NULL,'براءه','حمد','','main'),(17,NULL,'هلا','حمود','','main');
+INSERT INTO `teachers` VALUES (1,2,'سنا','أحمد','خبرة تزيد عن 7 سنوات في التعليم المبكر','بكالوريوس مناهج تعليم','34534','main'),(2,9,'لين','محمود','خبرة 5 سنوات','بكالوريوس في رياض الأطفال','099237642','main'),(3,12,'لانا','محمد','خبيرة في التعليم المبكر وتهتم بتنمية الجانب الاجتماعي والعاطفي لدى الطفل','بكالوريوس في رياض الأطفال','55555','english'),(7,NULL,'هديل','محمد','خبرة 5 سنوات في التدريس','بكالوريوس في رياض الأطفال','06938753','main'),(8,NULL,'فاطمة','عبد الله',NULL,'بكالوريوس في رياض الأطفال','898879','main'),(12,NULL,'عبير','عبد الغني ',NULL,'بكالوريوس في رياض الأطفال','5674567','english'),(13,NULL,'هبه','احمد',NULL,'بكالوريوس في رياض الأطفال','','main'),(15,NULL,'سارة','خالد',NULL,'بكالوريوس في رياض الأطفال','3242342','main'),(16,NULL,'براءه','حمد','تعتمد أسلوباً تفاعلياً يدمج بين التعلم واللعب،','بكالوريوس في رياض الأطفال','','main'),(17,NULL,'هلا','حمود',NULL,NULL,'','main'),(18,NULL,'بتول','عبد الغني','لديها خبرة سنتين في تدريس الأطفال والتعامل معهم','بكالوريوس معلم صف','89435784','main');
 /*!40000 ALTER TABLE `teachers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -377,4 +379,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-18  9:28:25
+-- Dump completed on 2025-07-19 23:07:14

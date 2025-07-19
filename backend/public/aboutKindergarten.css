@@ -6,6 +6,14 @@
     box-sizing: border-box;
     font-family: 'Tajawal', sans-serif;
 }
+p{
+    text-align: center;
+    color: #ff6666;
+    margin-top: 25px;
+    font-size: 40px;
+    font-weight: bold;
+   
+}
 
 html {
     scroll-behavior: smooth;

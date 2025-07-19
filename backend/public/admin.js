@@ -1,4 +1,130 @@
+//زر نقل الصف
+  document.addEventListener('DOMContentLoaded', () => {
+    const classTransbtns = document.querySelectorAll('.classTransbtn');
 
+    classTransbtns.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.teacherRow');
+        const formDiv = card.querySelector('.classTransForm');
+
+        button.style.display = 'none';
+        formDiv.style.display = 'block';
+      });
+    });
+  });
+
+  //زر الغاء نقل الصف 
+  document.addEventListener('DOMContentLoaded', () => {
+    const cencelClassTransbtn = document.querySelectorAll('.cencelClassTransbtn');
+
+    cencelClassTransbtn.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.teacherRow');
+        const formDiv = card.querySelector('.classTransForm');
+        const classTransbtn = card.querySelector('.classTransbtn');
+
+        formDiv.style.display = 'none';
+        classTransbtn.style.display = 'inline-block';
+      });
+    });
+  });
+  
+  //************************************************************
+  //عرض تفاصيل معلم 
+  document.addEventListener('DOMContentLoaded', () => {
+    const teacherInfoBtns = document.querySelectorAll('.teacherInfoBtn');
+
+    teacherInfoBtns.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.teacherInfoRow');
+        const div = card.querySelector('.teacherInfoDiv');
+
+        button.style.display = 'none';
+        div.style.display = 'block';
+      });
+    });
+  });
+
+  // الغاء عرض تفاصيل معلم  
+  document.addEventListener('DOMContentLoaded', () => {
+    const cencelTeacherInfoBtn = document.querySelectorAll('.cencelTeacherInfoBtn');
+
+    cencelTeacherInfoBtn.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.teacherInfoRow');
+        const div = card.querySelector('.teacherInfoDiv');
+        const teacherInfoBtn = card.querySelector('.teacherInfoBtn');
+
+        div.style.display = 'none';
+        teacherInfoBtn.style.display = 'inline-block';
+      });
+    });
+  });
+  //********************************************************************
+ /*
+ document.addEventListener("DOMContentLoaded", () => {
+  const saveTeacherDatabtn = document.querySelectorAll('.saveTeacherDatabtn');
+
+  saveTeacherDatabtn.forEach(button => {
+  button.addEventListener('click', () => {
+  const updateTeacherErrordiv = document.getElementById("updateTeacherError");
+  const updateTeacherError =updateTeacherErrordiv.dataset.updateTeacherError;   
+  if(updateTeacherError)alert(updateTeacherError);})
+  })
+
+<td class="teacherDate">
+  <% const hasError = session.updateTeacherError && session.updateTeacherErrorId == teacher.id; %>
+
+  <button type="submit" class="updateTeacherDatabtn" style= "<%= hasError ? 'display:none;' : '' %>">تعديل</button>
+
+  <form action="/admin/updateTeacher" method="POST" style = "<%= hasError ? '' : 'display:none;' %> ; margin-left:10px; " class="teacherDataForm">
+    <input type="hidden" name="teacherId" value="<%= teacher.id %>">
+    <input type="text" name="first_name" value="<%= teacher.first_name %>" required>
+    <input type="text" name="last_name" value="<%= teacher.last_name %>" required>
+    <input type="text" name="phone" value="<%= teacher.phone %>" >
+    <button type="submit" class="saveTeacherDatabtn">حفظ</button>   
+    <button type="button" class="cencelUpdateTeacherDatabtn" >إلغاء</button> 
+    <% if (hasError) { %>
+      <p style="color:red;"><%= updateTeacherError %></p>
+    <% } %>
+  </form>
+</td>
+
+});
+*/
+/*
+  //زر تعديل بيانات معلم
+  document.addEventListener('DOMContentLoaded', () => {
+    const updateTeacherDatabtn = document.querySelectorAll('.updateTeacherDatabtn');
+
+    updateTeacherDatabtn.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.teacherDate');
+        const formDiv = card.querySelector('.teacherDataForm');
+
+        button.style.display = 'none';
+        formDiv.style.display = 'block';
+      });
+    });
+  });
+
+  //زر الغاء تعديل بيانات معلم 
+  document.addEventListener('DOMContentLoaded', () => {
+    const cencelUpdateTeacherDatabtn = document.querySelectorAll('.cencelUpdateTeacherDatabtn');
+
+    cencelUpdateTeacherDatabtn.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.teacherDate');
+        const formDiv = card.querySelector('.teacherDataForm');
+        const updateTeacherDatabtn = card.querySelector('.updateTeacherDatabtn');
+
+        formDiv.style.display = 'none';
+        updateTeacherDatabtn.style.display = 'inline-block';
+      });
+    });
+  });
+  */
+  
   document.addEventListener('DOMContentLoaded', () => {
     const showNameButtons = document.querySelectorAll('.showNameFormBtn');
     const cancelNameButtons = document.querySelectorAll('.cancelNameFormBtn');

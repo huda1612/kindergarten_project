@@ -389,6 +389,20 @@ hr {
     font-size: 14px;
     cursor: pointer;
 }
+.classTransbtn {
+    background-color: #ff6666;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.teacherInfoBtn,
+.cencelTeacherInfoBtn {
+  font-size: 13px;
+  padding: 4px 8px;
+}
   </style>
 </head>
 
@@ -439,6 +453,7 @@ hr {
     <thead>
       <tr>
         <th>الاسم</th>
+        <th>التفاصيل</th>
         <th>رقم الهاتف</th>
         <th>اسم الصف المسؤولة عنه</th>
         <th>تغيير المربية المسؤولة عن الصف </th>
@@ -451,6 +466,16 @@ hr {
       <% teachers.forEach(teacher => { %>
         <tr>
           <td><%= teacher.first_name %> <%= teacher.last_name %></td>
+          <td class="teacherInfoRow">
+            <button type="button" class="teacherInfoBtn">عرض التفاصيل</button>
+            <div class="teacherInfoDiv" style="display: none;">
+            <%- teacher.certificate || "لا يوجد شهادة" %><br>
+            <%- teacher.description || "لا يوجد وصف" %><br>
+            <button type="button" class="cencelTeacherInfoBtn"> إلغاء العرض</button>
+            </div>
+            
+          </td>
+
           <td><% if(teacher.phone){ %>
             <%= teacher.phone %>
             <% } else { %>
@@ -459,9 +484,10 @@ hr {
           </td>
           <td><%= teacher.class_name || 'غير مرتبطه بأي صف حاليًا' %></td>
 
-          <td>
+          <td class="teacherRow">
             <% if (teacher.class_name) { %>
-              <form action="/admin/updateClassTeacher" method="POST">
+              <button type="button" class="classTransbtn">نقل صفه لمعلم اخر</button>
+              <form action="/admin/updateClassTeacher" method="POST" style="display: none;" class="classTransForm">
                 <input type="hidden" name="oldTeacherId" value="<%= teacher.id %>">
                 <select name="newTeacherId" required>
                   <% teachers
@@ -471,20 +497,25 @@ hr {
                   <% }) %>
                 </select>
                 <button type="submit">تغيير</button>
+                <button type="button" class="cencelClassTransbtn">إلغاء</button>
               </form>
+
             <% } else { %>
               <span>بانتظار تعيين صف</span>
             <% } %>
           </td>
 
+          
           <td>
              <% if (session.editTeacherId === teacher.id) { %>
               <!-- نموذج التعديل يظهر فقط لهذا المعلم -->
               <form action="/admin/updateTeacher" method="POST" style="display:inline-block; margin-left: 10px;">
                  <input type="hidden" name="teacherId" value="<%= teacher.id %>">
-                 <input type="text" name="first_name" value="<%= teacher.first_name %>" required>
-                 <input type="text" name="last_name" value="<%= teacher.last_name %>" required>
-                 <input type="text" name="phone" value="<%= teacher.phone %>" >
+                 <input type="text" placeholder="الاسم الأول" name="first_name" value="<%= teacher.first_name %>" required>
+                 <input type="text" placeholder="الاسم الأخير" name="last_name" value="<%= teacher.last_name %>" required>
+                 <input type="text" placeholder="الشهادة" name="certificate" value="<%= teacher.certificate %>" >
+                 <input type="text" placeholder="الوصف" name="description" value="<%= teacher.description %>" >
+                 <input type="text" placeholder="رقم الهاتف" name="phone" value="<%= teacher.phone %>" >
                  <button type="submit">حفظ</button>    
               </form>
               <form action="/admin/cencelUpdateTeacher" method="post" style="display:inline;">
@@ -524,6 +555,7 @@ hr {
     <thead>
       <tr>
         <th>الاسم</th>
+        <th>التفاصيل</th>
         <th>رقم الهاتف</th>
         <th>اسماء الصفوف المسؤولة عنها</th>
         <th>تعديل البيانات</th>
@@ -535,6 +567,14 @@ hr {
       <% engTeachers.forEach(teacher => { %>
         <tr>
           <td><%= teacher.first_name %> <%= teacher.last_name %></td>
+          <td class="teacherInfoRow">
+            <button type="button" class="teacherInfoBtn">عرض التفاصيل</button>
+            <div class="teacherInfoDiv" style="display: none;">
+            <%- teacher.certificate || "لا يوجد شهادة" %><br>
+            <%- teacher.description || "لا يوجد وصف" %><br>
+            <button type="button" class="cencelTeacherInfoBtn"> إلغاء العرض</button>
+            </div>
+            </td>
           <td><% if(teacher.phone){ %>
             <%= teacher.phone %>
             <% } else { %>
@@ -558,6 +598,8 @@ hr {
                  <input type="hidden" name="teacherId" value="<%= teacher.id %>">
                  <input type="text" name="first_name" value="<%= teacher.first_name %>" required>
                  <input type="text" name="last_name" value="<%= teacher.last_name %>" required>
+                 <input type="text" placeholder="الشهادة" name="certificate" value="<%= teacher.certificate %>" >
+                 <input type="text" placeholder="الوصف" name="description" value="<%= teacher.description %>" >
                  <input type="text" name="phone" value="<%= teacher.phone %>" >
                  <button type="submit">حفظ</button>    
               </form>
@@ -598,6 +640,8 @@ hr {
  <form id="addTeacherForm" action="/admin/insertTeacher" method="POST" >
    <input type="text" name="first_name" placeholder="الاسم الأول" required>
    <input type="text" name="last_name" placeholder="الاسم الأخير" required>
+   <input type="text" placeholder="الشهادة" name="certificate"  >
+   <input type="text" placeholder="الوصف" name="description" >
    <input type="text" name="phone" placeholder="رقم الهاتف">
    <select name="role" required>
      <option value="" disabled selected hidden> اختر نوع المعلمة</option>
@@ -732,7 +776,7 @@ hr {
        <% if (availableTeachers.length === 0) { %>
            <option disabled selected hidden>لا يوجد مربيات متاحات </option>
        <% } else { %>
-         <option value="" disabled selected hidden> المربية المسؤوله عن الصف</option>
+         <option value="" disabled selected hidden> مربية الصف</option>
            <% availableTeachers.forEach(t => { %>
          <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
          <% }) %>

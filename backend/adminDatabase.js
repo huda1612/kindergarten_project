@@ -7,7 +7,7 @@ import {executeQuery} from './database.js'
 export async function getAllMainTeachersData() {
     //برد كل المعلمين حتى لو ما عندهم صف محدد ممكن اسم الصف يكون null
     const result = await executeQuery(`
-        SELECT t.id, t.first_name, t.last_name, t.phone, c.class_name
+        SELECT t.id, t.first_name, t.last_name,t.certificate , t.description , t.phone, c.class_name 
         FROM teachers t
         LEFT JOIN classes c ON t.id = c.teacher_id
          WHERE t.role ='main'
@@ -16,7 +16,7 @@ export async function getAllMainTeachersData() {
 }
 
 //بده تعديل لاتأكد من البيانات المدخله ان صح 
-export async function insertTeacher(first_name , last_name , phone , role){
+export async function insertTeacher(first_name , last_name , phone , role ,  certificate , description){
     const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/; // يقبل الحروف العربية والانجليزية ومسافات فقط
      if (
     typeof first_name !== 'string' ||
@@ -33,6 +33,14 @@ export async function insertTeacher(first_name , last_name , phone , role){
     if(role != 'english' && role != 'main')
       return {success : false , message : "دور المعلمة غير صالح"}
     
+    if (!isNaN(certificate) && certificate.trim() !== "") {
+      return {success : false , message :"حقل الشهادة لا يجب أن يكون أرقام فقط"};
+    }
+
+    if (!isNaN(description) && description.trim() !== "") {
+        return {success : false , message :"الوصف لا يجب أن يكون أرقام فقط"};
+    }
+
     if(phone && phone.trim() != '' ){
     //للتأكد من ان رقم الهاتف غير موجود مسبقا
     const checkPhone = await executeQuery(`
@@ -50,8 +58,8 @@ export async function insertTeacher(first_name , last_name , phone , role){
     }
 
     await executeQuery(`
-       INSERT INTO teachers (first_name , last_name , phone , role)
-       VALUES (?, ?, ? , ?) `, [first_name , last_name , phone , role]);
+       INSERT INTO teachers (first_name , last_name , phone , role , certificate , description )
+       VALUES (?, ?, ? , ? , ? , ?) `, [first_name , last_name , phone , role ,  certificate , description]);
     return {success : true , message : "ok" }
 }
 
@@ -63,7 +71,7 @@ export async function updateClassTeacher(oldTeacherId , newTeacherId)
         ` , [newTeacherId , oldTeacherId]) ;
 }
 
-export async function updateTeacherById(teacherId ,first_name , last_name , phone) {
+export async function updateTeacherById(teacherId ,first_name , last_name , phone , certificate , description ) {
     const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/; // يقبل الحروف العربية والانجليزية ومسافات فقط
      if (
     typeof first_name !== 'string' ||
@@ -76,6 +84,15 @@ export async function updateTeacherById(teacherId ,first_name , last_name , phon
     ) {
       return {success : false , message : "البيانات المدخلة غير صالحة"}
     }
+
+    if (!isNaN(certificate) && certificate.trim() !== "") {
+      return {success : false , message :"حقل الشهادة لا يجب أن يكون أرقام فقط"};
+    }
+
+    if (!isNaN(description) && description.trim() !== "") {
+        return {success : false , message :"الوصف لا يجب أن يكون أرقام فقط"};
+    }
+
     
     if(phone && phone.trim() != '' ){
     //للتأكد من ان رقم الهاتف غير موجود مسبقا
@@ -94,9 +111,9 @@ export async function updateTeacherById(teacherId ,first_name , last_name , phon
 
     }
     await executeQuery(`
-        UPDATE teachers SET first_name = ? , last_name = ? , phone = ?
+        UPDATE teachers SET first_name = ? , last_name = ? , phone = ? ,  certificate =?  , description =?
         WHERE id = ? 
-        `,[first_name , last_name , phone , teacherId]);
+        `,[first_name , last_name , phone ,  certificate , description , teacherId ]);
 
     return {success : true , message : "ok" } ;
 

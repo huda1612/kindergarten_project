@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بيئتنا التعليمية</title>
+    <link rel="stylesheet" href="kindergartenEnvironment.css" />
+    <script defer src="student.js"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <nav id="mainNav">
+        <div class="school-icon">
+            <i class="fas fa-school school-icon"></i>
+            <span> روضة أسراب اليمام الخاصة </span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="active">الصفحة الرئيسية</a>
+            <a href="#staff">طاقمنا التعليمي</a>
+            <a href="#departments">أقسام الروضة</a>
+            <a href="#round">جولة بمبنى الروضة</a>
+            <a href="/about-kindergarten" class="login-button learning-btn">خدماتنا التعليمية</a>
+            <a href="/login" class="login-button">تسجيل الدخول</a>
+            <a href="/register" class="signup-button">إنشاء حساب</a>
+        </div>
+    </nav>
+    
+    <p> بيئتنا التعليمية 👩‍🏫</p>
+    
+
+    <section id="staff" class="staff-section">
+        <div class="container">
+            <h1><i class="fas fa-chalkboard-teacher"></i>   طاقمنا التعليمي   </h1>
+            <p class="description">نفخر بفريق من المربيات المؤهلات ذوات الخبرة في التعامل مع الأطفال</p>
+            <div class="staff-container">
+                
+                <%mainTeachers.forEach( mainteacher => {%>
+                    <div class="staff-box">
+                        
+                    <h3><i class="fas fa-user" title="معلمة أساسية"></i> المربية:<%=mainteacher.first_name%> <%=mainteacher.last_name%> </h3>
+                    <%if(mainteacher.certificate || mainteacher.description){%>
+                    <p><%if(mainteacher.certificate ) {%>
+                    <%=mainteacher.certificate%>
+
+                    <%}%>
+                    <br>
+                    <%if(mainteacher.description ) {%>
+                    <%=mainteacher.description%>
+                    <%}%>
+                    </p>
+                    <%}else{%>
+                        <p>لا يوجد وصف</p>
+                    <%}%>
+
+                    </div>
+                <%})%>
+
+            </div>
+
+            <div class="staff-container2">
+                    <%englishTeachers.forEach( englishteacher => {%>
+                    <div class="staff-box">
+                    <h3><i class="fas fa-font" title="معلمة إنجليزي"></i> معلمة الإنجليزي:<%=englishteacher.first_name%> <%=englishteacher.last_name%> </h3>
+                    <%if(englishteacher.certificate || englishteacher.description){%>
+                    <p><%if(englishteacher.certificate ) {%>
+                    <%=englishteacher.certificate%>
+                    <%}%>
+                    <br>
+                    </p>
+                    <p><%if(englishteacher.description ) {%>
+                    <%=englishteacher.description%>
+                    <%}%>
+                    </p>
+                    <%}else{%>
+                        <p>لا يوجد وصف</p>
+                    <%}%>
+
+                    </div>
+                    <%})%>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="departments" class="departments-section">
+        <div class="container">
+            <h1><i class="fas fa-building"></i> أقسام الروضة</h1>
+            <p class="description">تعرف على المرافق المتنوعة التي تم إعدادها خصيصاً لراحة وتعليم الأطفال</p>
+    
+            <div class="departments-container">
+    
+                <div class="department-box dept-blue">
+                    <h3><i class="fas fa-chalkboard"></i> الغرف التعليمية</h3>
+                    <p>
+                        هي المساحات الرئيسية التي يقضي فيها الأطفال معظم وقتهم، مُجهَّزة بوسائل تعليمية متنوعة مثل السبورات الذكية، والطاولات المريحة، والأرفف الملونة التي تحتوي على الكتب والقصص التعليمية.
+                        تُنظَّم فيها الأنشطة الأكاديمية اليومية كتعليم الحروف، والأرقام، والمفاهيم العلمية البسيطة بأساليب تفاعلية.
+                    </p>
+                </div>
+    
+                <div class="department-box dept-yellow">
+                    <h3><i class="fas fa-paint-brush"></i> غرفة الأنشطة</h3>
+                    <p>
+                        مكان مخصص للإبداع والاكتشاف، يحتوي على مواد للرسم، التلوين، والصلصال. تُقام فيه أنشطة جماعية مثل المسرحيات الصغيرة أو ورش الفنون لتشجيع العمل التعاوني.
+                    </p>
+                </div>
+    
+                <div class="department-box dept-orange">
+                    <h3><i class="fas fa-gamepad"></i> غرفة الألعاب</h3>
+                    <p>
+                        فضاء آمن مليء بالألعاب التربوية مثل المكعبات، الألغاز، وأركان التمثيل. تنمّي المهارات الحركية والاجتماعية عبر ألعاب تنافسية وأجهزة رياضية صغيرة.
+                    </p>
+                </div>
+    
+                <div class="department-box dept-purple">
+                    <h3><i class="fas fa-restroom"></i> الحمام والمُشَرَّب</h3>
+                    <p>
+                        منطقة مجهزة بمراحيض وحنفيات منخفضة الارتفاع ورسومات جذابة. تحتوي على مشرب نظيف مزود بكؤوس خاصة ولوحات إرشادية لتعليم الأطفال آداب النظافة.
+                    </p>
+                </div>
+    
+            </div>
+        </div>
+    </section>
+
+    <section id="round" class="round-section">
+        <div class="container">
+            <h1><i class="fas fa-compass"></i> جولة تعريفية بالروضة </h1>
+            <p class="description">
+                ندعوكم لاكتشاف بيئتنا التعليمية من خلال هذه الجولة التفاعلية، حيث يمكنكم التعرف على مرافق الروضة وتجربة الأجواء التعليمية التي نوفرها لأطفالنا.
+            </p>
+    
+            <div class="video-wrapper">
+                <iframe src="https://app.seekbeak.com/v/0Vq2B0LOqXY" allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+    
+    
+
+</body>
+        
+</html>
