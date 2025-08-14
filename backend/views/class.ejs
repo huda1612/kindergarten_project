@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>طلاب الصف رقم <%= classId %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c9e7f2 100%);
+      min-height: 100vh;
+      line-height: 1.8;
+      padding: 30px;
+      padding-top: 70px;
+    }
+
+    nav {
+      background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+      padding:  8px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 0 0 18px 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      font-weight: bold;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      transition: box-shadow 0.3s;
+      line-height: 1.2;
+      height: 65px;
+    }
+
+    .school-icon {
+      font-size: 28px;
+      color: #ff6666;
+      
+    }
+
+    .school-icon i {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff6666;
+    }
+
+    .school-icon span {
+      font-size: 22px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-weight: bold;
+     
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #333;
+      font-size: 15px;
+      padding: 3px 10px;
+      border-radius: 22px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    nav a:hover {
+      background-color: #fff6f6;
+      color: #ff6666;
+    }
+
+    h3 {
+      font-size: x-large;
+      text-align: right;
+      color: #ff6666;
+      margin-top: 25px;
+    }
+
+    h2 {
+      font-size: xx-large;
+      font-weight: bold;
+      text-align: center;
+      color: #ff6666;
+      margin-top: 25px;
+    }
+
+    h1 {
+      font-size: 50px; /* تكبير الحجم */
+  font-weight: bold;
+      text-align: center;
+      color: #ff6666;
+      margin-top: 25px;
+    }
+
+    .alert {
+      margin: 10px auto;
+      width: 90%;
+      padding: 10px 12px ;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #a94442;
+      border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .actions,
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content:flex-start;
+      gap: 15px;
+      margin: 30px auto;
+      width: 100%;
+    }
+    .actions h3 {
+  margin: 0;
+  white-space: nowrap; /* يمنع النص من النزول لسطر جديد */
+}
+
+.actions form {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* يخلي عناصر الفورم تلف لو الشاشة صغيرة */
+}
+    
+
+    input[type="text"],
+    input[type="date"],
+    select {
+      padding: 10px;
+      border: 2px solid #a0d8ef;
+      border-radius: 12px;
+      background: #f8fafc;
+      flex: 1;
+      min-width: 180px;
+      transition: 0.3s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #ff6666;
+      box-shadow: 0 0 8px rgba(255, 102, 102, 0.15);
+      outline: none;
+    }
+
+    button {
+      background: linear-gradient(90deg, #ffb6b9 60%, #a0d8ef 100%);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ff6666;
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px auto;
+      background-color: #ffffff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    th,
+    td {
+      border: 2px solid #a0d8ef;
+      padding: 14px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    th {
+      background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+      color: #333;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 1400px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 30px;
+
+    }
+
+    /* back button style */
+    .back-button {
+      background-color: #ffe5e7;
+      color: #ff6666;
+      font-size: 18px;
+      padding: 4px 8px;
+      width: 40px;            /* عرض ثابت صغير */
+     height: 32px; 
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: #ffb6b9;
+      color: #fff;
+    }
+    .back-button i {
+  font-size: 18px; /* حجم الأيقونة متوازن */
+}
+
+    /* نقل طالب header */
+    #transferStudentForm {
+  display: none;          /* يبقى مخفي بالبداية */
+  gap: 10px;              /* مسافة بين العناصر */
+  align-items: center;    /* محاذاة عمودية */
+  flex-wrap: wrap;        /* لو الشاشة صغيرة يلف */
+}
+
+    .transfer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  flex-wrap: wrap;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+
+    .transfer-header h3 {
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- شريط التنقل -->
+  <nav>
+    <div class="school-icon">
+      <i class="fas fa-school"></i>
+      <span>روضة دار الفرح الخاصة</span>
+    </div>
+
+    <div class="nav-links">
+      <% if (session.user && session.user.role === 'admin') { %>
+        <% if (!isMaxLevel) { %>
+          <form action="/admin/class/<%= classId %>/promote" method="POST"
+            onsubmit="return confirm('هل تريد ترقية جميع طلاب الصف إلى المستوى التالي؟');">
+            <button type="submit">ترقية الصف</button>
+          </form>
+        <% } else { %>
+          <div class="alert alert-error">الصف في أعلى مستوى ولا يمكن ترقيته</div>
+        <% } %>
+    
+        <% if (session.promoteClassError) { %>
+          <div class="alert alert-error"><%= session.promoteClassError %></div>
+          <% session.promoteClassError = null; %>
+        <% } %>
+    
+        <% if (session.promoteClassSuccess) { %>
+          <div class="alert alert-success"><%= session.promoteClassSuccess %></div>
+          <% session.promoteClassSuccess = null; %>
+        <% } %>
+      <% } %>
+    
+      <% if (session.user && session.user.role === 'admin') { %>
+        <a href="/admin" class="back-button"><i class="fas fa-arrow-left"></i></a>
+      <% } else { %>
+        <a href="/teacher" class="back-button"><i class="fas fa-arrow-left"></i></a>
+      <% } %>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1> صف <%= className %></h1>
+    <h2>درجة الصف : <%= gradeLevelId %></h2>
+  </div>
+
+  <div class="container">
+    <div class="actions">
+      <h3>إضافة طالب جديد :</h3>
+      <form id="addStudentForm" action="/admin/class/<%= classId %>/insertStudent" method="POST">
+        <input type="text" name="first_name" placeholder="الاسم الأول" required />
+        <input type="text" name="last_name" placeholder="الاسم الأخير" required />
+        <input type="date" name="birth_date" placeholder="تاريخ الميلاد" required />
+        <select name="gender" required>
+          <option value="" disabled selected>الجنس</option>
+          <option value="male">ذكر</option>
+          <option value="female">أنثى</option>
+        </select>
+        <button type="submit">إضافة</button>
+      </form>
+    </div>
+
+    <% if (session.insertStudentError) { %>
+    <div class="alert alert-error"><%= session.insertStudentError %></div>
+    <% session.insertStudentError = null; %>
+    <% } %>
+  </div>
+
+  <% if (session.user && session.user.role === 'admin') { %>
+    <div class="container">
+      <div class="transfer-header">
+        <h3>نقل طالب :</h3>
+        <button type="button" id="showTransferFormBtn"><i class="fas fa-random"></i> نقل الطالب</button>
+      </div>
+  
+      <% if (session.transferStudentError) { %>
+        <div class="alert alert-error"><%= session.transferStudentError %></div>
+        <% session.transferStudentError = null; %>
+      <% } %>
+  
+      <% if (session.transferStudentSuccess) { %>
+        <div class="alert alert-success"><%= session.transferStudentSuccess %></div>
+        <% session.transferStudentSuccess = null; %>
+      <% } %>
+  
+      <form action="/admin/class/<%= classId %>/transferStudent" method="POST" style="display:none;" id="transferStudentForm">
+        <label for="studentId">اختر الطالب:</label>
+        <select name="studentId" id="studentId" required>
+          <% students_data.forEach(student => { %>
+            <option value="<%= student.id %>"><%= student.first_name %> <%= student.last_name %></option>
+          <% }); %>
+        </select>
+  
+        <label for="newClassId">اختر الصف الجديد:</label>
+        <select name="newClassId" id="newClassId" required>
+          <% classes.forEach(cls => { %>
+            <option value="<%= cls.id %>" <%= cls.id == classId ? 'disabled' : '' %>><%= cls.class_name %></option>
+          <% }); %>
+        </select>
+  
+        <button type="submit">نقل الطالب</button>
+        <button type="button" id="cancelTransfer">إلغاء</button>
+      </form>
+    </div>
+  <% } %>
+ 
+  <div class="container">
+  <h3> قائمة طلاب صف <%= className %></h3>
+  <table>
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>الجنس</th>
+        <th>تاريخ الميلاد</th>
+        <th>تعديل</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (students_data.length === 0) { %>
+      <tr>
+        <td colspan="5">لا يوجد طلاب في هذا الصف.</td>
+      </tr>
+      <% } else { %>
+      <% students_data.forEach(student => { %>
+      <tr>
+        <td><%= student.first_name %> <%= student.last_name %></td>
+        <td><%= student.gender === 'male' ? 'ذكر' : 'أنثى' %></td>
+        <td><%= student.birth_date ? new Date(student.birth_date).toISOString().split('T')[0] : '' %></td>
+        <td>
+          <% if (session.editStudentId === student.id) { %>
+          <form action="/admin/class/<%= classId %>/updateStudent" method="POST" style="display:inline-block;">
+            <input type="hidden" name="studentId" value="<%= student.id %>" />
+            <input type="hidden" name="class_id" value="<%= classId %>" />
+
+            <input type="text" name="first_name" value="<%= student.first_name %>" required />
+            <input type="text" name="last_name" value="<%= student.last_name %>" required />
+            <input type="date" name="birth_date"
+              value="<%= student.birth_date ? new Date(student.birth_date).toISOString().split('T')[0] : '' %>" required />
+
+            <select name="gender" required>
+              <option value="male" <%= student.gender === 'male' ? 'selected' : '' %>>ذكر</option>
+              <option value="female" <%= student.gender === 'female' ? 'selected' : '' %>>أنثى</option>
+            </select>
+
+            <button type="submit">حفظ</button>
+          </form>
+          <form action="/admin/class/<%= classId %>/cancelUpdateStudent" method="POST" style="display:inline;">
+            <button type="submit">إلغاء</button>
+          </form>
+
+          <% if (session.updateStudentError) { %>
+          <div class="alert alert-error"><%= session.updateStudentError %></div>
+          <% session.updateStudentError = null; %>
+          <% } %>
+          <% } else { %>
+          <form action="/admin/class/<%= classId %>/editStudent" method="POST" style="display:inline;">
+            <input type="hidden" name="editStudentId" value="<%= student.id %>" />
+            <button type="submit">تعديل</button>
+          </form>
+          <% } %>
+        </td>
+        <td>
+          <form action="/admin/class/<%= classId %>/deleteStudent" method="POST"
+            onsubmit="return confirm('هل أنت متأكد من حذف هذا الطالب؟');" style="display:inline;">
+            <input type="hidden" name="studentId" value="<%= student.id %>" />
+            <input type="hidden" name="classId" value="<%= classId %>" />
+            <button type="submit">حذف</button>
+
+            <% if (session.deleteStudentError) { %>
+            <p style="color:red;"><%= session.deleteStudentError %></p>
+            <% } %>
+          </form>
+        </td>
+      </tr>
+      <% }); %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const btnShow = document.getElementById('showTransferFormBtn');
+  const form = document.getElementById('transferStudentForm');
+  const btnCancel = document.getElementById('cancelTransfer');
+
+  if (btnShow && form && btnCancel) {
+    btnShow.addEventListener('click', () => {
+      form.style.display = 'flex';
+      btnShow.style.display = 'none';
+    });
+
+    btnCancel.addEventListener('click', () => {
+      form.style.display = 'none';
+      btnShow.style.display = 'inline-block';
+    });
+  }
+</script>
+</body>
+
+</html>

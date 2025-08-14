@@ -102,3 +102,13 @@ export async function getTodayNoteByStudentId(studentId) {
   return rows[0]?.content || null;
 }
 
+export async function getNotesByStudentIdInDateRange(studentId, startDate, endDate) {
+  const query = `
+    SELECT DATE(date) AS date, content
+    FROM notes
+    WHERE student_id = ? AND DATE(date) BETWEEN ? AND ?
+    ORDER BY DATE(date) ASC
+  `;
+  const rows = await executeQuery(query, [studentId, startDate, endDate]);
+  return rows;
+}

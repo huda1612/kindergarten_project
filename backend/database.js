@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 const pool = mysql.createPool({
   host: '127.0.0.1' ,
   user: 'root',
-  password: '1234',
+  password: 'nona2003',
   database: 'kindergarten'
   
 }).promise();
@@ -186,14 +186,29 @@ export async function nameCheck(id , role , firstName , lastName) {
 //*********************************************************CLASS FUNCTIONS SECTION******************************************************************
 
 
-export async function getTodayActivityListByClass(classId ) {
-  const rows = await executeQuery(`
-      SELECT a.id , a.name, d.description, a.icon , a.type
+export async function getTodayActivityListByClass(classId, date = null, type = 'main') {
+  const targetDate = date || 'CURRENT_DATE';
+  let query, params;
+  if (targetDate === 'CURRENT_DATE') {
+    query = `
+      SELECT d.id, a.name, d.description, a.icon, a.type
       FROM daily_activities d
       JOIN activities a ON d.activity_id = a.id
-      WHERE d.class_id = ? AND d.date = CURRENT_DATE  `, [classId]);
-      return rows;
+      WHERE d.class_id = ? AND d.date = CURRENT_DATE AND a.type = ?`;
+    params = [classId, type];
+  } else {
+    query = `
+      SELECT d.id, a.name, d.description, a.icon, a.type
+      FROM daily_activities d
+      JOIN activities a ON d.activity_id = a.id
+      WHERE d.class_id = ? AND DATE(d.date) = ? AND a.type = ?`;
+    params = [classId, targetDate, type];
+  }
+  const rows = await executeQuery(query, params);
+  return rows;
 }
+
+
 export async function getFlieListByClass(classId , date ){
   const date2 = date ;
   const row = await executeQuery(`
@@ -208,24 +223,24 @@ export async function getFlieListByClass(classId , date ){
   return row ;
 }
 //تابع لاضافة نشاط يومي جديد للصف
-export async function insertTodayDailyActivity(activityName, classId , description) {
+export async function insertTodayDailyActivity(activityName, classId , description , date) {
   try{
     const [activity] = await executeQuery(
             'SELECT id FROM activities WHERE name = ?',
-            [activityName]
+            [activityName ]
         );
         if (!activity) throw new Error("النشاط غير موجود");
 
         const activityId = activity.id;
 
     const existing = await executeQuery(
-      'SELECT id FROM daily_activities WHERE activity_id = ? AND class_id = ? AND date = CURRENT_DATE',
-      [activityId, classId ] );
+      'SELECT id FROM daily_activities WHERE activity_id = ? AND class_id = ?  AND date = ?',
+      [activityId, classId , date] );
     if (existing.length > 0) throw new Error("النشاط مسجل بالفعل اليوم لهذا الصف");
 
     return await executeQuery(`
       INSERT INTO daily_activities (activity_id, class_id, date , description )
-      VALUES (?, ?, CURRENT_DATE , ?) `, [activityId, classId , description]);
+      VALUES (?, ?,? , ?) `, [activityId, classId , date, description]);
     }catch(err){
     console.error("فشل إضافة النشاط:", err.message);
     throw err;
@@ -234,7 +249,7 @@ export async function insertTodayDailyActivity(activityName, classId , descripti
 
 //تابع حذف نشاط يومي 
 // تابع حذف نشاط يومي حسب اسم النشاط و classId
-export async function deleteDailyActivity(classId, activityName) {
+export async function deleteDailyActivity(classId, activityName,date) {
   // 1. جيب ID النشاط من اسمه
   const activityRow = await executeQuery(`
     SELECT id FROM activities WHERE name = ?`,
@@ -249,8 +264,8 @@ export async function deleteDailyActivity(classId, activityName) {
 
   // 2. احذف من daily_activities
   await executeQuery(`
-    DELETE FROM daily_activities WHERE class_id = ? AND date = CURRENT_DATE AND activity_id = ?`,
-    [classId, activityId]
+    DELETE FROM daily_activities WHERE class_id = ? AND DATE(date) = ? AND activity_id = ?`,
+    [classId, date, activityId]
   );
 }
 
@@ -264,8 +279,8 @@ export async function deleteFile( fileId , classId) {
   return {success : true} ;
 }
 
-//*********************************************************CLASS FUNCTIONS END**********************************************************************
 
+//*********************************************************CLASS FUNCTIONS END**********************************************************************
 
 
 

@@ -88,10 +88,9 @@ export async function getClassIdByTeacherId(teacherId) {
 //تابع لرد قائمة اسماء الانشطه الممكنه 
 export async function getActivityNames(){
   const rows = await executeQuery('SELECT name , icon FROM activities WHERE type="main"')
-  //برد مصفوفة فيها كل كائن عباره عن اسم وايقونه 
-
-return rows ;
+  return rows ;
 }
+
 
 export async function saveClassFile(class_id,daily_activity_id , description , type ,date,originalName ,filePath    ) {
   await executeQuery(`

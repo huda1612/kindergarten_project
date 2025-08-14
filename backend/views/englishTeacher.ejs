@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
         const activities = <%- JSON.stringify(activities) %>;
-    </script>
+      </script>
 </head>
 
 <body>
@@ -19,7 +19,7 @@
     <nav>
         <div class="school-info">
             <i class="fas fa-school school-icon"></i>
-            <span>روضة أسراب اليمام الخاصة</span>
+            <span>روضة دار الفرح الخاصة</span>
         </div>
 
         <div class="teacher-info">
@@ -27,6 +27,11 @@
                 <%= name_With_Nikname %>
             </span>
             <a href="/logout"><button class="logout-btn">تسجيل الخروج</button></a>
+
+            <a href="/classChoose" title="عودة إلى صفوفي" style="margin-inline-end: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fas fa-arrow-left"></i>
+                
+            </a>
         </div>
     </nav>
 
@@ -60,6 +65,9 @@
                 <h2>مرحبا بك، <%= name_With_Nikname %>
                 </h2>
                 <p id="current-date">اليوم هو الأحد، 15 أكتوبر 2023</p>
+                <% if (typeof className !== 'undefined' && className) { %>
+                    <p style="margin-top:6px; font-weight:bold; color:#555;">الصف: <%= className %></p>
+                  <% } %>
             </div>
 
             <!-- المربعات الإحصائية -->
@@ -131,20 +139,44 @@
             <!-- قسم الأنشطة -->
             <div class="activities-section">
                 <div class="section-title">
-                    <h3>أنشطة الانجليزي اليوم</h3>
-                    <button id="activityBtn" class="add-btn" onclick="toggleActivityOptions()">إضافة نشاط</button>
+                    <h3>أنشطة الإنجليزي اليوم</h3>
+                    <button id="showActivitiesByDateBtn" class="add-btn">عرض أنشطة يوم آخر</button>
+                    <form id="activitiesByDateForm" style="display:none; margin:10px 0;">
+                        <select id="engActsDay"></select>
+                        <select id="engActsMonth"></select>
+                        <select id="engActsYear"></select>
+                        <button type="button" id="showActivitiesBtn" class="add-btn">عرض</button>
+                        <button type="button" id="cancelShowActivitiesBtn" class="add-btn">إلغاء</button>
+                      </form>
+                    <button id="addActivityBtn" class="add-btn">إضافة نشاط</button>
                 </div>
-                <!-- قائمة الأنشطة الجاهزة (مخفية حتى يضغط على زر الإضافة) -->
-                <div id="activityOptions" class="activity-options" >
-
-
-
+            
+                
+            
+                <!-- فورم إضافة نشاط جديد -->
+                <div id="addActivityForm" style="display:none; margin: 15px 0; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+                    <label for="activityDate">اختر التاريخ:</label>
+                    <select id="activityDate"></select>
+                    <br />
+                    <label for="activityDesc">وصف النشاط (اختياري):</label>
+                    <textarea id="activityDesc" rows="2" style="width: 100%;"></textarea>
+                    <br />
+                    
+                    <!-- قائمة الأنشطة المتاحة -->
+                    <div style="margin: 15px 0;">
+                        <label>اختر النشاط:</label>
+                        <div id="activityOptions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                            <!-- سيتم ملء هذا القسم بالأنشطة المتاحة -->
+                        </div>
+                    </div>
+                    
+                    <button id="cancelActivityBtn" class="add-btn" type="button">إلغاء</button>
+                </div>
+            
                 <!--هي بس لاخد رقم الصف بملف الjs-->
+                <div id="get_class_id" data-class-id="<%= classId %>">
                 </div>
-                <div id="get_class_id"
-                data-class-id="<%= classId %>">
-                </div>
-
+            
                 <!-- قائمة الأنشطة المضافة -->
                 <div class="activities-list" id="activitiesList">
                     <!-- سيتم عرض الأنشطة المضافة هنا -->
@@ -170,6 +202,7 @@
                 <form action="/upload" method="POST" enctype="multipart/form-data" id="addFileForm" style="display:none;">
 
                     <label class="add-btn" >
+                        <i class="fas fa-upload "> اختيار ملف</i> 
                     <input type="file" name="file" id="file" required />
                     </label>
  
