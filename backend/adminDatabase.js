@@ -175,7 +175,9 @@ export async function getAllEngTeachersData() {
         t.id ,
         t.first_name,
         t.last_name,
-        t.phone
+        t.phone ,
+        t.description ,
+        t.certificate
       FROM teachers t
       WHERE t.role = 'english'
       ORDER BY t.id

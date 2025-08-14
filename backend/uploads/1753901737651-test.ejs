@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نجاح التسجيل</title>
+  <style>
+    .modal {
+      display: flex;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 30px 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px #0002;
+      min-width: 270px;
+      text-align: center;
+    }
+    .modal-content button {
+      margin-top: 10px;
+      padding: 8px 18px;
+      background: #ff6666;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 15px; color: black;">تم إنشاء الحساب بنجاح</h2>
+      <button onclick="window.location.href='/login'">تسجيل الدخول</button>
+    </div>
+  </div>
+</body>
+</html>

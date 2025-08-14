@@ -412,7 +412,7 @@ hr {
     <nav>
         <div class="school-info">
             <i class="fas fa-school school-icon"></i>
-            <span>روضة أسراب اليمام الخاصة</span>
+            <span>روضة دار الفرح الخاصة</span>
         </div>
         
         <div class="teacher-info">
@@ -486,7 +486,7 @@ hr {
 
           <td class="teacherRow">
             <% if (teacher.class_name) { %>
-              <button type="button" class="classTransbtn">نقل صفه لمعلم اخر</button>
+              <button type="button" class="classTransbtn">نقل صفها لمربية اخرى</button>
               <form action="/admin/updateClassTeacher" method="POST" style="display: none;" class="classTransForm">
                 <input type="hidden" name="oldTeacherId" value="<%= teacher.id %>">
                 <select name="newTeacherId" required>
