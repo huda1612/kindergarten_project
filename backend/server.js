@@ -9,19 +9,22 @@ import iconv from'iconv-lite';//لتزبيط اسم الملف العربي لم
 
 
 import { fileURLToPath } from 'url'
-import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass , insertTodayDailyActivity , register , deleteDailyActivity , getFlieListByClass , deleteFile} from './database.js'
+import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass,deleteDailyActivity , insertTodayDailyActivity , register , getFlieListByClass ,deleteFile} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames, saveClassFile } from './teacherDatabase.js'
-import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId } from './studentDatabase.js'
-import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById  , deleteClassById , insertClass} from './adminDatabase.js'
+import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
+import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById , updateClassEnglishTeacherById , deleteClassById , insertClass} from './adminDatabase.js'
+import { getAllClasses , getMaxGradeLevel, getClassInfo, getStudentsByClass, deleteStudent, addStudent, transferStudentToClass, updateStudent, promoteEntireClass } from './classDatabase.js';
 import {getEnglishTeacherClasses , getStudentCountForClass ,getTodayAbsenceCountByClassId , getStudentsByClassId , getTodayEnglishActivityCount , getEnglishActivityNames} from './englishTeacherDatabase.js'
 import {weekActivityCount , allTeachersCount , allStudentsCount , allClassesCount , getMonthAttendanceRate , getAllActivities , getGradeLevelsWithClassCount} from './aboutDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js' 
 import session from 'express-session' 
 
+
 // للحصول على المسار الكامل للملف الحالي
 const __filename = fileURLToPath(import.meta.url);
 // للحصول على مسار المجلد الحالي
 const __dirname = path.dirname(__filename);
+
 
 // تحديد مكان الحفظ للملفات المرفوعه واسم الملف
 const storage = multer.diskStorage({
@@ -235,13 +238,22 @@ app.get('/student' , async (req,res ) => {
   const teacher_Name = await getTeacherNameByStudentId(student_id);
   const absenceCount = await getAbsenceCountByStudentId(student_id);
   const today_Note = await getTodayNoteByStudentId(student_id);
-  res.render( 'student' , {full_name, name_With_Nikname , class_Name ,teacher_Name , absenceCount, today_Note})
+  // جلب درجة الصف
+  let gradeLevelId = null;
+  let gradeLevelName = null;
+  try {
+    const classId = await getClassIdFromSession(req.session.user);
+    const classInfo = classId ? await getClassInfo(classId) : null;
+    gradeLevelId = classInfo?.grade_level_id ?? null;
+    gradeLevelName = classInfo?.grade_level_name ?? null;
+  } catch (e) { console.warn('تعذر جلب درجة الصف:', e); }
+
+  res.render('student', { full_name, name_With_Nikname, class_Name, teacher_Name, absenceCount, today_Note, gradeLevelId, gradeLevelName })
  }catch (error) {
   console.error(error);
   res.status(500).send('حدث خطأ في السيرفر');
 }
 })
-
 
 
 //get the teacher page
@@ -259,8 +271,14 @@ app.get('/teacher', async (req, res) => {
     const students = await getStudentsByTeacher(teacher_id);
     const activity_count = await getTodayActivityCount(teacher_id);
     const activity_names = await getActivityNames();
+    console.log("🚀 الأنشطة المرسلة للواجهة:", activity_names);
     const classId = await getClassIdFromSession(req.session.user);
-    res.render('teacher', { classId , full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names })
+    let className = null;
+    if (classId) {
+      const classInfo = await getClassInfo(classId);
+      className = classInfo?.class_name || null;
+    }
+    res.render('teacher', { classId , className, full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names })
   } catch (err) {
     console.error('Error loading /teacher page:', err);
     res.status(500).send('حدث خطأ في السيرفر');
@@ -290,30 +308,31 @@ app.get('/classChoose' ,  async (req,res ) => {
 
 
 app.get('/englishTeacherClass/:classId' ,  async (req,res ) => {
-   if (!req.session.user || !req.session.user.teacher_id)  //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
-    return res.redirect('/login');
-  
-  try{
-    const classId = req.params.classId ;
-    const teacher_id = req.session.user.teacher_id;
-    const name_With_Nikname = await getTeacherNameWithNikname(teacher_id,'english')
+  if (!req.session.user || !req.session.user.teacher_id)  //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
+   return res.redirect('/login');
+ 
+ try{
+   const classId = req.params.classId ;
+   const teacher_id = req.session.user.teacher_id;
+   const name_With_Nikname = await getTeacherNameWithNikname(teacher_id,'english')
 
-    const student_count = await getStudentCountForClass(classId);
-    const absence_count = await getTodayAbsenceCountByClassId(classId);
-    const attendance_count = student_count - absence_count;
-    const students = await getStudentsByClassId(classId);
+   const student_count = await getStudentCountForClass(classId);
+   const absence_count = await getTodayAbsenceCountByClassId(classId);
+   const attendance_count = student_count - absence_count;
+   const students = await getStudentsByClassId(classId);
 
-    const activity_count = await getTodayEnglishActivityCount(classId); 
-    const activity_names = await getEnglishActivityNames(); //بده تعديل 
-    res.render('englishTeacher',{ classId, name_With_Nikname, student_count, absence_count, attendance_count , activity_count, students,activities: activity_names })
-  }catch (err) {
-    console.error('Error loading /englishTeacherClass/:classId page:', err);
-    res.status(500).send('حدث خطأ في السيرفر');
-  }
+   const activity_count = await getTodayEnglishActivityCount(classId); 
+   const activity_names = await getEnglishActivityNames(); //بده تعديل 
+   const classInfo = await getClassInfo(classId);
+   const className = classInfo?.class_name || null;
+   res.render('englishTeacher',{ classId, className, name_With_Nikname, student_count, absence_count, attendance_count , activity_count, students,activities: activity_names })
+ }catch (err) {
+   console.error('Error loading /englishTeacherClass/:classId page:', err);
+   res.status(500).send('حدث خطأ في السيرفر');
+ }
 
 
 })
-
 //**************************************************************** GET ADMIN AND TEACHER AND STUDENT END ********************************************************
 
 
@@ -400,44 +419,90 @@ app.get('/api/getActivityNames' , async (req, res) => {
 
 //هي  ليحصل الفرونت على قائمة بالانشطة اليوم بالصف سواء للمربية او للطالب  
 //مسار للمربية والطالب فقط
-app.get('/api/getTodayActivityList' , async (req, res ) => {
-  if (!req.session.user || req.session.user.teacherRole ==='english') {
-  return res.status(401).json({ error: 'Unauthorized' });
+app.get('/api/getTodayActivityList', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
- try{
-  //اول شي بجيب رقم الصف للمستخدم 
-  const  classId = await getClassIdFromSession(req.session.user);
-  if (!classId) 
-    return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
- 
-const TodayActivity = await getTodayActivityListByClass(classId ) ;
 
-//صار معي مصفوفة اغراض بتعبر عن الانشطه وكل نشاط فيه اسم ووصف وايقونه وتاريخ اليوم
-//[{name: ... , description : ... , icon : ... } , .....]
+  try {
+    const { date } = req.query; // إضافة استقبال التاريخ من الطلب
+    const classId = await getClassIdFromSession(req.session.user);
+    if (!classId)
+      return res.status(404).json({ error: 'لا يوجد صف مرتبط بهذا المستخدم' });
+
+    // إذا كان هناك تاريخ محدد، استخدمه، وإلا استخدم اليوم الحالي
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const role = req.session.user.role || req.session.user.type || "student";
+
+    if (role === 'student') {
+      const [mainActivities, englishActivities] = await Promise.all([
+        getTodayActivityListByClass(classId, targetDate, 'main'),
+        getTodayActivityListByClass(classId, targetDate, 'english'),
+      ]);
+
+      return res.json({
+        dailyActivitiesMain: mainActivities,
+        dailyActivitiesEnglish: englishActivities,
+        role,
+      });
+    }
+
+    const type = req.session.user.teacherRole === 'english' ? 'english' : 'main';
+    const TodayActivity = await getTodayActivityListByClass(classId, targetDate, type);
+
     res.json({
-    dailyActivities :TodayActivity,
-    role: req.session.user.role , 
+      dailyActivities: TodayActivity,
+      role,
     });
- }catch(err){
-  console.error('Error loading /api/getTodayActivityList :', err);
-  res.status(500).send('حدث خطأ في قاعدة البيانات');
- }
-})
 
+  } catch (err) {
+    console.error('Error loading /api/getTodayActivityList :', err);
+    res.status(500).send('حدث خطأ في قاعدة البيانات');
+  }
+});
 
+app.get('/api/student/weekly-notes', async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.role !== 'student' || !req.session.user.student_id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const studentId = req.session.user.student_id;
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 6);
+
+    const fmt = (d) => d.toISOString().split('T')[0];
+    const rows = await getNotesByStudentIdInDateRange(studentId, fmt(startDate), fmt(endDate));
+
+    const map = new Map(rows.map(r => [r.date, r.content]));
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      const key = fmt(d);
+      days.push({ date: key, content: map.get(key) || null });
+    }
+
+    res.json({ days });
+  } catch (err) {
+    console.error('Error /api/student/weekly-notes:', err);
+    res.status(500).json({ error: 'حدث خطأ في قاعدة البيانات' });
+  }
+});
 
 //لجلب انشطة اليوم لمعلم الانجليزي فقط
 app.post('/api/getTodayEnglishActivityList' , async (req, res ) => {
-if (!req.session.user || req.session.user.role ==='student' || req.session.user.teacherRole ==='main') {
-  return res.status(401).json({ error: 'Unauthorized' });
-  }
-try{
-   const { classId }= req.body ;
-   console.log(classId);
-   const TodayActivity = await getTodayActivityListByClass(classId ) ;
-   res.json({
-    dailyActivities :TodayActivity,
-    });
+  if (!req.session.user || req.session.user.role ==='student' || req.session.user.teacherRole ==='main') {
+    return res.status(401).json({ error: 'Unauthorized' });
+    }
+  try{
+     const { classId, date }= req.body ;
+     console.log(classId);
+     const TodayActivity = await getTodayActivityListByClass(classId, date, 'english') ;
+     res.json({
+      dailyActivities :TodayActivity,
+      });
 }catch(err){
   console.error('Error loading /api/getTodayActivityList :', err);
   res.status(500).send('حدث خطأ في قاعدة البيانات');
@@ -457,12 +522,12 @@ const classId = await getClassIdFromSession(req.session.user);
 if (!classId) 
       return res.status(404).json({ error: ' لا يوجد صف مرتبط بهذا المستخدم او لا يوجد رقم لهذا المستخدم' });
   
-const {activityName, description} = req.body;  //بدي من الفرونت يبعتولي بس اسم النشاط اللي بده المعلم يضيفه
+const {activityName, description , date} = req.body;  //بدي من الفرونت يبعتولي بس اسم النشاط اللي بده المعلم يضيفه
 
-    if (!activityName || !description)
+    if (!activityName || !description  || !date)
       return res.status(400).json({ success: false, message: 'البيانات ناقصة' });
 
-    await insertTodayDailyActivity(activityName, classId, description);
+    await insertTodayDailyActivity(activityName, classId, description , date);
 
     res.json({ success: true });
   } catch (err) {
@@ -472,6 +537,8 @@ const {activityName, description} = req.body;  //بدي من الفرونت يب
 });
 
 
+
+
 //هي اضافه نشاط جديد لصف معلم انجليزي نشاط جديد 
 app.post('/api/insertTodayEnglishDailyActivity', async (req, res) => {
   if (!req.session.user || req.session.user.role !== "teacher" || req.session.user.teacherRole !== "english")
@@ -479,12 +546,13 @@ app.post('/api/insertTodayEnglishDailyActivity', async (req, res) => {
 
 try{
   
-const {activityName, description ,classId} = req.body; 
-
-    if (!activityName || !description || !classId)
-      return res.status(400).json({ success: false, message: 'البيانات ناقصة' });
-    //بدي جيب رقم الصف من الفرونت 
-    await insertTodayDailyActivity(activityName, classId, description);
+  const {activityName, description, classId, date} = req.body; 
+  const targetDate = date || new Date().toISOString().split('T')[0];
+  
+  if (!activityName || !classId)
+    return res.status(400).json({ success: false, message: 'البيانات ناقصة' });
+  //بدي جيب رقم الصف من الفرونت 
+  await insertTodayDailyActivity(activityName, classId, description || '', targetDate);
 
     res.json({ success: true });
   } catch (err) {
@@ -496,9 +564,10 @@ const {activityName, description ,classId} = req.body;
 app.post('/api/deleteDailyActivity', async (req, res) => {
   console.log("start delete");
 
-  if (!req.session.user) {
+  if (!req.session.user || req.session.user.role !== 'teacher' ) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
 
   try {
     const classId = await getClassIdFromSession(req.session.user);
@@ -508,13 +577,13 @@ app.post('/api/deleteDailyActivity', async (req, res) => {
       return res.status(404).json({ error: 'لا يوجد صف مرتبط بهذا المستخدم' });
     }
 
-    const { activityName } = req.body;
+    const { activityName,date } = req.body;
 
-    if (!activityName) {
-      return res.status(400).json({ error: 'اسم النشاط غير موجود في الطلب' });
+    if (!activityName || !date) {
+      return res.status(400).json({ error: 'اسم النشاط أو التتاريخ غير موجود في الطلب' });
     }
 
-    await deleteDailyActivity(classId, activityName);
+    await deleteDailyActivity(classId, activityName, date);
     console.log("تم حذف النشاط:", activityName);
 
     res.json({ success: true });
@@ -533,13 +602,14 @@ app.post('/api/deleteDailyEnglishActivity', async (req, res) => {
   }
   try {
 
-    const { activityName , classId } = req.body;
+    const { activityName , classId, date } = req.body;
+const targetDate = date || new Date().toISOString().split('T')[0];
 
-    if (!activityName) {
-      return res.status(400).json({ error: 'اسم النشاط غير موجود في الطلب' });
-    }
+if (!activityName) {
+  return res.status(400).json({ error: 'اسم النشاط غير موجود في الطلب' });
+}
 
-    await deleteDailyActivity(classId, activityName);
+await deleteDailyActivity(classId, activityName, targetDate);
     console.log("تم حذف النشاط:", activityName);
 
     res.json({ success: true });
@@ -809,6 +879,7 @@ app.post('/admin/cencelUpdateClassTeacher', async (req, res) => {
 
 */
 
+//لتغيير مربية الصف
 app.post('/admin/updateClassTeacherByClassId', async (req, res) => {
   if (!req.session.user || req.session.user.role != "admin") 
     return res.status(401).json({ error: 'Unauthorized' });
@@ -832,6 +903,33 @@ app.post('/admin/updateClassTeacherByClassId', async (req, res) => {
     res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
   }
 })
+
+//لتغيير معلمة الانجليزي للصف 
+app.post('/admin/updateClassEnglishTeacherByClassId', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin") 
+    return res.status(401).json({ error: 'Unauthorized' });
+  try{
+  const {classId , newTeacherId} = req.body ;
+  const result = await updateClassEnglishTeacherById(classId , newTeacherId) ;
+ 
+ if(result.success){
+   req.session.editClassEnglishTeacherId = null ;
+   req.session.editClassEnglishTeacherId = null ;
+   res.redirect('/admin');}
+  else 
+  {
+    req.session.editClassEnglishTeacherId = null ;
+    req.session.editClassEnglishTeacherId = result.message ;
+    return res.redirect('/admin');
+  }
+
+  }catch(err){
+    console.error('Error loading /admin/updateClassEnglishTeacherByClassId :', err);
+    res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
+  }
+})
+
+
 
 app.post('/admin/deleteClass', async (req, res) => {
    if (!req.session.user || req.session.user.role != "admin") 
@@ -885,6 +983,319 @@ try{
 
 
 //****************************************************************ِAPI FOR ADMIN PAGE END****************************************************************************************************
+
+//*****************************************************************for class page************************************************************************************************************ */
+
+// عرض صفحة الصف
+app.get('/admin/class/:classId', async (req, res) => {
+  try {
+    // Authorization: allow admin or this class's main teacher only
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    const user = req.session.user;
+    const classIdNum = Number(req.params.classId);
+    let allowed = false;
+    if (user.role === 'admin') {
+      allowed = true;
+    } else if (user.role === 'teacher' && user.teacherRole === 'main') {
+      const ownClassId = await getClassIdFromSession(user);
+      if (Number(ownClassId) === classIdNum) allowed = true;
+    }
+    if (!allowed) {
+      return res.redirect('/login');
+    }
+
+    const classId = req.params.classId;
+
+    const students_data = await getStudentsByClass(classId);
+    const classes = await getAllClasses();
+
+    const classInfo = await getClassInfo(classId);
+    const gradeLevelId = classInfo?.grade_level_id || 0;
+    const className = classInfo?.class_name || `رقم ${classId}`;
+
+    const maxLevel = await getMaxGradeLevel();
+    const isMaxLevel = gradeLevelId >= maxLevel;
+
+    const transferStudentError = req.session.transferStudentError || null;
+    const transferStudentSuccess = req.session.transferStudentSuccess || null;
+
+    req.session.transferStudentError = null;
+    req.session.transferStudentSuccess = null;
+
+    res.render('class', {
+      students_data,
+      classes,
+      classId,
+      className,
+      gradeLevelId,
+      isMaxLevel,
+      session: {
+        ...req.session,
+        transferStudentError,
+        transferStudentSuccess
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('حدث خطأ في السيرفر');
+  }
+});
+
+
+
+
+
+
+
+// حذف طالب من صفحة الصف
+app.post('/admin/class/:classId/deleteStudent', async (req, res) => {
+  // Authorization: allow admin or this class's main teacher only
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'غير مصرح' });
+  }
+  const user = req.session.user;
+  const classIdParam = Number(req.params.classId);
+  let allowed = false;
+  if (user.role === 'admin') {
+    allowed = true;
+  } else if (user.role === 'teacher' && user.teacherRole === 'main') {
+    const ownClassId = await getClassIdFromSession(user);
+    if (Number(ownClassId) === classIdParam) allowed = true;
+  }
+  if (!allowed) {
+    return res.status(401).json({ error: 'غير مصرح' });
+  }
+
+  const { studentId } = req.body;
+  const classId = req.params.classId;
+
+  try {
+    const result = await deleteStudent(studentId);
+
+    if (!result.success) {
+      req.session.deleteStudentError = result.message;
+      req.session.deleteErrorStudentId = studentId;
+      return res.redirect(`/admin/class/${classId}`);
+    }
+
+    req.session.deleteStudentError = null;
+    req.session.deleteErrorStudentId = null;
+    return res.redirect(`/admin/class/${classId}`);
+  } catch (error) {
+    console.error("خطأ حذف الطالب:", error);
+    req.session.deleteStudentError = 'حدث خطأ غير متوقع أثناء حذف الطالب';
+    req.session.deleteErrorStudentId = studentId;
+    return res.redirect(`/admin/class/${classId}`);
+  }
+});
+
+
+// تحديد الطالب لتعديل بياناته
+// تحديد الطالب لتعديل بياناته (فتح الحقول)
+app.post('/admin/class/:classId/editStudent', async (req, res) => {
+  // Authorization: allow admin or this class's main teacher only
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const user = req.session.user;
+  const classIdParam = Number(req.params.classId);
+  let allowed = false;
+  if (user.role === 'admin') {
+    allowed = true;
+  } else if (user.role === 'teacher' && user.teacherRole === 'main') {
+    const ownClassId = await getClassIdFromSession(user);
+    if (Number(ownClassId) === classIdParam) allowed = true;
+  }
+  if (!allowed) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { editStudentId } = req.body;
+  const classId = req.params.classId;
+  req.session.editStudentId = parseInt(editStudentId);
+  res.redirect(`/admin/class/${classId}`);
+});
+
+// تحديث بيانات الطالب
+app.post('/admin/class/:classId/updateStudent', async (req, res) => {
+  // Authorization: allow admin or this class's main teacher only
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const user = req.session.user;
+  const classIdParam = Number(req.params.classId);
+  let allowed = false;
+  if (user.role === 'admin') {
+    allowed = true;
+  } else if (user.role === 'teacher' && user.teacherRole === 'main') {
+    const ownClassId = await getClassIdFromSession(user);
+    if (Number(ownClassId) === classIdParam) allowed = true;
+  }
+  if (!allowed) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const classId = req.params.classId;
+  const { studentId, first_name, last_name, birth_date, gender } = req.body;
+
+  try {
+    const result = await updateStudent(studentId, {
+      first_name,
+      last_name,
+      birth_date,
+      gender,
+      class_id: classId
+    });
+
+    if (result.success) {
+      req.session.editStudentId = null;
+      req.session.updateStudentError = null;
+      res.redirect(`/admin/class/${classId}`);
+    } else {
+      req.session.updateStudentError = null;
+      req.session.updateStudentError = result.message;
+      return res.redirect(`/admin/class/${classId}`);
+    }
+  } catch (err) {
+    console.error('Error loading /admin/class/:classId/updateStudent:', err);
+    res.status(400).json({ error: err.message || "حدث خطأ في تحديث بيانات الطالب" });
+  }
+});
+
+// إلغاء تعديل الطالب
+app.post('/admin/class/:classId/cancelUpdateStudent', async (req, res) => {
+  // Authorization: allow admin or this class's main teacher only
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const user = req.session.user;
+  const classIdParam = Number(req.params.classId);
+  let allowed = false;
+  if (user.role === 'admin') {
+    allowed = true;
+  } else if (user.role === 'teacher' && user.teacherRole === 'main') {
+    const ownClassId = await getClassIdFromSession(user);
+    if (Number(ownClassId) === classIdParam) allowed = true;
+  }
+  if (!allowed) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const classId = req.params.classId;
+  req.session.editStudentId = null;
+  res.redirect(`/admin/class/${classId}`);
+});
+
+
+//إضافة طالب جديد
+app.post('/admin/class/:classId/insertStudent', async (req, res) => {
+  // Authorization: allow admin or this class's main teacher only
+  if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
+  const user = req.session.user;
+  const classIdParam = Number(req.params.classId);
+  let allowed = false;
+  if (user.role === 'admin') {
+    allowed = true;
+  } else if (user.role === 'teacher' && user.teacherRole === 'main') {
+    const ownClassId = await getClassIdFromSession(user);
+    if (Number(ownClassId) === classIdParam) allowed = true;
+  }
+  if (!allowed) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const classId = req.params.classId;
+    const { first_name, last_name, birth_date, gender, user_id } = req.body;
+
+    const studentData = {
+      first_name,
+      last_name,
+      birth_date,
+      gender,
+      class_id: classId,
+      user_id: user_id || null,
+    };
+
+    const result = await addStudent(studentData);
+
+    if (!result.success) {
+      req.session.insertStudentError = null;
+      req.session.insertStudentError = result.message;
+      return res.redirect(`/admin/class/${classId}`);
+    } else {
+      req.session.insertStudentError = null;
+      return res.redirect(`/admin/class/${classId}`);
+    }
+  } catch (err) {
+    console.error('Error loading /admin/class/:classId/insertStudent :', err);
+    res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
+  }
+});
+
+//نقل  الطالب من صف إلى صف
+app.post('/admin/class/:classId/transferStudent', async (req, res) => {
+  if (!req.session.user || req.session.user.role != "admin")
+    return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const { studentId, newClassId } = req.body;
+    const result = await transferStudentToClass(Number(studentId), Number(newClassId));
+
+    if (!result.success) {
+      // في حال فشل النقل، خزّن الرسالة في session لعرضها في الصفحة لاحقًا
+      req.session.transferStudentError = result.message;
+      return res.redirect(`/admin/class/${req.params.classId}`);
+    }
+    console.log("نقل الطالب:", { studentId, newClassId });
+
+    // إذا نجح النقل، يمكن تخزين رسالة نجاح أيضًا إن أردت
+    req.session.transferStudentSuccess = result.message;
+    res.redirect(`/admin/class/${newClassId}`);
+  } catch (err) {
+    console.error("خطأ في الراوت:", err);
+    req.session.transferStudentError = 'حدث خطأ أثناء نقل الطالب';
+    res.redirect(`/admin/class/${req.params.classId}`);
+  }
+});
+
+//ترقية الصف
+app.post('/admin/class/:classId/promote', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const classId = Number(req.params.classId);
+  if (isNaN(classId)) {
+    req.session.promoteClassError = "رقم الصف غير صالح";
+    return res.redirect(`/admin/class/${req.params.classId}`);
+  }
+
+  try {
+    const result = await promoteEntireClass(classId);
+
+    if (!result.success) {
+      req.session.promoteClassError = result.message;
+      return res.redirect(`/admin/class/${req.params.classId}`);
+    }
+
+    req.session.promoteClassSuccess = result.message;
+    return res.redirect(`/admin/class/${result.newClassId || classId}`);
+  } catch (err) {
+    console.error("خطأ في ترقية الصف:", err);
+    req.session.promoteClassError = "حدث خطأ أثناء ترقية الصف";
+    return res.redirect(`/admin/class/${req.params.classId}`);
+  }
+});
+
+
+
+
+
+
+
+
+//*********************************************************************the end of class page *********************************************************************************************** */
 
 
 //****************************************************************API SECTION END*************************************************************************************

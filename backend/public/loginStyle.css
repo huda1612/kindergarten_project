@@ -255,3 +255,20 @@ nav a:hover {
     40% { transform: translateY(-10px); }
     60% { transform: translateY(-5px); }
 } 
+
+
+
+.register-link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.register-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}

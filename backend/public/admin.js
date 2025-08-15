@@ -124,6 +124,9 @@
     });
   });
   */
+
+
+ //لتغيير اسم الصف
   
   document.addEventListener('DOMContentLoaded', () => {
     const showNameButtons = document.querySelectorAll('.showNameFormBtn');
@@ -136,10 +139,14 @@
         const deleteBtn = card.querySelector('#deleteClassbutton');
         const showStudentsBtn = card.querySelector('#showStudentsbutton');
         const changeTeacherBtn = card.querySelector('.showChangeTeacherBtn')
+        const changeEnglishBtn = card.querySelector('.showChangeEnglishBtn')
+
+
 
         button.style.display = 'none';
         formDiv.style.display = 'block';
          changeTeacherBtn.style.display ='none'
+         changeEnglishBtn.style.display ='none'
         if (deleteBtn) deleteBtn.style.display = 'none';
         if (showStudentsBtn) showStudentsBtn.style.display = 'none';
       });
@@ -153,10 +160,11 @@
         const deleteBtn = card.querySelector('#deleteClassbutton');
         const showStudentsBtn = card.querySelector('#showStudentsbutton');
         const changeTeacherBtn = card.querySelector('.showChangeTeacherBtn')
+        const changeEnglishBtn = card.querySelector('.showChangeEnglishBtn')
 
         formDiv.style.display = 'none';
         changeTeacherBtn.style.display ='block'
-
+        changeEnglishBtn.style.display ='block'
         if (showBtn) showBtn.style.display = 'inline-block';
         if (deleteBtn) deleteBtn.style.display = 'inline-block';
         if (showStudentsBtn) showStudentsBtn.style.display = 'inline-block';
@@ -165,7 +173,7 @@
   });
 
 
-//لتغيير المعلم
+//لتغيير ألمربية
   
   document.addEventListener('DOMContentLoaded', () => {
     const showChangeTeacherButtons = document.querySelectorAll('.showChangeTeacherBtn');
@@ -178,11 +186,14 @@
         const deleteBtn = card.querySelector('#deleteClassbutton');
         const showStudentsBtn = card.querySelector('#showStudentsbutton');
         const showNameBtn = card.querySelector('.showNameFormBtn')
+        const changeEnglishBtn = card.querySelector('.showChangeEnglishBtn')
+
 
 
         formDiv.style.display = 'block';
         button.style.display = 'none';
         showNameBtn.style.display = 'none';
+        changeEnglishBtn.style.display ='none'
         if (deleteBtn) deleteBtn.style.display = 'none';
         if (showStudentsBtn) showStudentsBtn.style.display = 'none';
       });
@@ -196,10 +207,12 @@
         const deleteBtn = card.querySelector('#deleteClassbutton');
         const showStudentsBtn = card.querySelector('#showStudentsbutton');
         const showNameBtn = card.querySelector('.showNameFormBtn')
+        const changeEnglishBtn = card.querySelector('.showChangeEnglishBtn')
 
 
         formDiv.style.display = 'none';
         showNameBtn.style.display = 'block';
+        changeEnglishBtn.style.display ='block'
 
         if (showBtn) showBtn.style.display = 'inline-block';
         if (deleteBtn) deleteBtn.style.display = 'inline-block';
@@ -209,3 +222,54 @@
   });
 
 
+
+
+
+//لتغيير معلمة الانجليزي
+  document.addEventListener('DOMContentLoaded', () => {
+    const showChangeEnglishButtons = document.querySelectorAll('.showChangeEnglishBtn');
+    const cancelChangEnglishButtons = document.querySelectorAll('.cancelChangEnglishBtn');
+
+    showChangeEnglishButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.class-card');
+        const formDiv = card.querySelector('.englishChangeForm');
+        const deleteBtn = card.querySelector('#deleteClassbutton');
+        const showStudentsBtn = card.querySelector('#showStudentsbutton');
+        const showNameBtn = card.querySelector('.showNameFormBtn')
+        const changeTeacherBtn = card.querySelector('.showChangeTeacherBtn')
+
+
+        formDiv.style.display = 'block';
+        button.style.display = 'none';
+        showNameBtn.style.display = 'none';
+        changeTeacherBtn.style.display ='none';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+        if (showStudentsBtn) showStudentsBtn.style.display = 'none';
+      });
+    });
+
+
+
+
+    cancelChangEnglishButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.class-card');
+        const formDiv = card.querySelector('.englishChangeForm');
+        const showBtn = card.querySelector('.showChangeTeacherBtn');
+        const showEnglishBtn = card.querySelector('.showChangeEnglishBtn');
+        const deleteBtn = card.querySelector('#deleteClassbutton');
+        const showStudentsBtn = card.querySelector('#showStudentsbutton');
+        const showNameBtn = card.querySelector('.showNameFormBtn')
+
+
+        formDiv.style.display = 'none';
+        showNameBtn.style.display = 'block';
+
+        if (showBtn) showBtn.style.display = 'inline-block';
+        if (showEnglishBtn) showEnglishBtn.style.display = 'inline-block';
+        if (deleteBtn) deleteBtn.style.display = 'inline-block';
+        if (showStudentsBtn) showStudentsBtn.style.display = 'inline-block';
+      });
+    });
+  });

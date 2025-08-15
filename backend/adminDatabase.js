@@ -211,6 +211,31 @@ export async function getEnglishTeachersWithClasses() {
   }));
 }
 
+export async function updateClassEnglishTeacherById(classId  , newTeacherId) {
+    //اتأكد ان المعلمه الجديده موجوده اصلا
+    const teacherExist =await executeQuery(`
+        SELECT id , role from teachers WHERE id = ? 
+        `,[newTeacherId ])
+    if(teacherExist.length === 0)
+        return {success : false , message : "هذه المعلمة غير موجودة"} ;
+    else //اذا موجوده اتأكد  انها معلمة انجليزي
+    {
+        if(teacherExist[0].role != 'english')
+            return {success : false , message : "هذه المعلمة ليست معلمة انجليزي"} ;
+
+    }
+
+
+    //هلأ منحدث المعلمة 
+    await executeQuery(`
+        UPDATE classes SET  english_teacher_id = ? 
+        WHERE id = ? 
+        ` , [newTeacherId , classId]) ;
+
+    return {success:true , message :"ok"}
+    
+}
+
 
 //****************************************************************CLASSES*************************************************************************************
 
@@ -283,7 +308,7 @@ export async function updateClassTeacherById(classId  , oldTeacherId , newTeache
         SELECT id from teachers WHERE id = ?
         `,[newTeacherId ])
     if(teacherExist.length === 0)
-        return {success : false , message : "هذا المعلمة غير موجود"} ;
+        return {success : false , message : "هذه المربية غير موجودة"} ;
 
     /*
     //اتأكد ان المعلمة الجديد ما الها اي صف 
