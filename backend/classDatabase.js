@@ -152,13 +152,13 @@ export async function addStudent(studentData) {
     }
 
     // إدخال الطالب
-    await executeQuery(
+    const insertResult = await executeQuery(
       `INSERT INTO students (first_name, last_name, birth_date, gender, class_id, user_id)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [first_name.trim(), last_name.trim(), birth_date, genderValue, class_id, user_id]
     );
 
-    return { success: true, message: "تم إضافة الطالب بنجاح" };
+    return { success: true, message: "تم إضافة الطالب بنجاح", studentId: insertResult.insertId };
   } catch (err) {
     console.error("خطأ في إضافة الطالب:", err);
     return { success: false, message: "حدث خطأ أثناء إضافة الطالب" };
@@ -332,4 +332,21 @@ export async function promoteEntireClass(class_id) {
     console.error("خطأ في ترقية الصف:", err);
     return { success: false, message: "حدث خطأ أثناء ترقية الصف" };
   }
+}
+
+// جلب قائمة أولياء الأمور لإضافتهم في نموذج إضافة الطالب
+export async function getGuardiansForStudentForm() {
+  const result = await executeQuery(`
+    SELECT 
+      g.id,
+      g.first_name,
+      g.last_name,
+      g.phone,
+      COUNT(gs.student_id) as children_count
+    FROM guardians g
+    LEFT JOIN guardians_students gs ON g.id = gs.guardian_id
+    GROUP BY g.id, g.first_name, g.last_name, g.phone
+    ORDER BY g.first_name, g.last_name
+  `);
+  return result;
 }

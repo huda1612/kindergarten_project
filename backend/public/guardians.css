@@ -1,0 +1,165 @@
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .close-button {
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .close-button:hover,
+  .close-button:focus {
+    color: #ff6666;
+    text-decoration: none;
+  }
+  
+  .modal-content h2 {
+    color: #ff6666;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 28px;
+  }
+  
+  .search-input {
+    width: calc(100% - 20px);
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 2px solid #a0d8ef;
+    border-radius: 12px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+  }
+  
+  .search-input:focus {
+    border-color: #ff6666;
+    outline: none;
+    box-shadow: 0 0 8px rgba(255, 102, 102, 0.15);
+  }
+  
+  .students-checkboxes {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  .student-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px dashed #e0e0e0;
+    transition: background-color 0.2s ease;
+  }
+  
+  .student-item:last-child {
+    border-bottom: none;
+  }
+  
+  .student-item:hover {
+    background-color: #eaf7fc;
+  }
+  
+  .student-info {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+  }
+  
+  .student-info input[type="checkbox"] {
+    margin-left: 15px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #a0d8ef; /* Modern checkbox color */
+  }
+  
+  .student-info label {
+    font-size: 18px;
+    color: #333;
+    cursor: pointer;
+  }
+  
+  .relation-select-container {
+    flex-shrink: 0;
+    margin-right: 15px;
+  }
+  
+  .relation-select {
+    padding: 8px 12px;
+    border: 2px solid #a0d8ef;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .relation-select:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+  }
+  
+  .save-button {
+    background: linear-gradient(90deg, #ffb6b9 60%, #a0d8ef 100%);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+  }
+  
+  .save-button:hover {
+    background: #ff6666;
+    color: #fff;
+    transform: scale(1.05);
+  }
+  
+  .no-results {
+    text-align: center;
+    color: #777;
+    padding: 20px;
+  }

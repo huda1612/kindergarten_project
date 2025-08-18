@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة أولياء الأمور</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/guardians.css"> <!-- رابط ملف CSS الخاص بالـ Modal -->
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal&display=swap');
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      margin: 0;
+      background-color: #f4f7f6;
+      color: #333;
+      padding-top: 60px;
+      
+
+    }
+
+
+    /* الشريط العلوي */
+    nav {
+      width: 96%;
+      position: fixed;
+      top: 0;
+      background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      border-radius: 0 0 18px 18px;
+      z-index: 100;
+      transition: box-shadow 0.3s;
+    }
+
+    nav.scrolled {
+      box-shadow: 0 8px 24px rgba(160, 216, 239, 0.18);
+    }
+
+    .school-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 22px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .school-icon {
+      font-size: 28px;
+      color: #ff6666;
+    }
+
+
+    .logout-btn {
+      background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+      color: #222;
+      border: none;
+      padding: 6px 18px;
+      border-radius: 22px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: .2s;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(255, 182, 185, 0.15);
+    }
+
+    .logout-btn:hover {
+      background: #ff6666;
+      color: #fff;
+      transform: scale(1.08);
+    }
+
+    .container {
+      padding: 30px;
+      max-width: 1200px;
+      margin: 20px auto;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #ff6666;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .messages {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .messages li {
+      padding: 10px 20px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    .messages .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .messages .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background-color: #fdfdfd;
+    }
+
+    form div {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    form label {
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="tel"],
+    form input[type="number"],
+    form select {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    form input[type="text"]:focus,
+    form input[type="email"]:focus,
+    form input[type="tel"]:focus,
+    form input[type="number"]:focus,
+    form select:focus {
+      border-color: #a0d8ef;
+      outline: none;
+      box-shadow: 0 0 5px rgba(160, 216, 239, 0.5);
+    }
+
+    form button {
+      background-color: #a0d8ef;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-weight: bold;
+      margin-top: 20px;
+      /* Adjust for alignment */
+    }
+
+    form button:hover {
+      background-color: #7ac0e6;
+      transform: translateY(-2px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+      /* Ensures border-radius applies to table */
+    }
+
+    table thead {
+      background-color: #a0d8ef; 
+      color: #333;
+    }
+
+    table th,
+    table td {
+      padding: 15px;
+      text-align: right;
+      border-bottom: 1px solid #eee;
+      border-right: 1px solid #ccc; 
+    }
+
+    table th:last-child,
+    table td:last-child {
+      border-right: none; 
+    }
+
+    table th {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    table tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    table tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    table td button {
+      background-color: #a0d8ef;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    table td button:hover {
+      background-color: #7ac0e6;
+    }
+
+    table td form {
+      margin: 0;
+      padding: 0;
+      border: none;
+      background-color: transparent;
+      box-shadow: none;
+      display: inline;
+      /* To keep buttons on the same line */
+    }
+
+    table td form button[type="submit"] {
+      background-color: #ff6666;
+    }
+
+    table td form button[type="submit"]:hover {
+      background-color: #cc0000;
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div class="school-info">
+      <i class="fas fa-school school-icon"></i>
+      <span>روضة دار الفرح الخاصة</span>
+    </div>
+
+    <a href="/admin"><i class="fas fa-arrow-left"></i></a>
+
+  </nav>
+
+  <div class="container">
+    <h1>إدارة أولياء الأمور</h1>
+  </div>
+
+  <div class="container">
+    <h3>قائمة أولياء الأمور</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم الأول</th>
+          <th>الاسم الأخير</th>
+          <th>رقم الهاتف</th>
+          <th>البريد الإلكتروني</th>
+          <th>العنوان</th>
+          <th>عدد الأبناء</th>
+          <th>أسماء الأبناء (العلاقة)</th>
+          <th>ربط الطلاب</th> <!-- عمود جديد -->
+          <th>تعديل</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (guardians.length===0) { %>
+          <tr>
+            <td colspan="10">لا يوجد أولياء أمور مسجلون بعد.</td>
+          </tr>
+          <% } else { %>
+            <% guardians.forEach(guardian=> { %>
+              <tr>
+                <td>
+                  <%= guardian.first_name %>
+                </td>
+                <td>
+                  <%= guardian.last_name %>
+                </td>
+                <td>
+                  <%= guardian.phone || 'غير محدد' %>
+                </td>
+                <td>
+                  <%= guardian.email || 'غير محدد' %>
+                </td>
+                <td>
+                  <%= guardian.address || 'غير محدد' %>
+                </td>
+                <td>
+                  <%= guardian.children_count %>
+                </td>
+                <td>
+                  <%= guardian.children_names || 'لا يوجد' %>
+                </td>
+                <td>
+                  <button onclick="openLinkStudentModal(<%= guardian.id %>)">ربط الطلاب</button>
+                </td>
+                <td>
+                  <% if (session.editGuardianId===guardian.id) { %>
+                    <form action="/admin/guardians/updateGuardian" method="POST" style="display:inline;">
+                      <input type="hidden" name="guardianId" value="<%= guardian.id %>" />
+                      <div>
+                        <label for="editFirstName_<%= guardian.id %>">الاسم الأول:</label>
+                        <input type="text" id="editFirstName_<%= guardian.id %>" name="first_name"
+                          value="<%= guardian.first_name %>" required />
+                      </div>
+                      <div>
+                        <label for="editLastName_<%= guardian.id %>">الاسم الأخير:</label>
+                        <input type="text" id="editLastName_<%= guardian.id %>" name="last_name"
+                          value="<%= guardian.last_name %>" required />
+                      </div>
+                      <div>
+                        <label for="editPhone_<%= guardian.id %>">رقم الهاتف:</label>
+                        <input type="tel" id="editPhone_<%= guardian.id %>" name="phone"
+                          value="<%= guardian.phone || '' %>" />
+                      </div>
+                      <div>
+                        <label for="editEmail_<%= guardian.id %>">البريد الإلكتروني:</label>
+                        <input type="email" id="editEmail_<%= guardian.id %>" name="email"
+                          value="<%= guardian.email || '' %>" />
+                      </div>
+                      <div>
+                        <label for="editAddress_<%= guardian.id %>">العنوان:</label>
+                        <input type="text" id="editAddress_<%= guardian.id %>" name="address"
+                          value="<%= guardian.address || '' %>" />
+                      </div>
+                      <button type="submit">حفظ التعديلات</button>
+                      <form action="/admin/guardians" method="GET" style="display:inline;">
+                        <button type="submit">إلغاء</button>
+                      </form>
+                    </form>
+                    <% } else { %>
+                      <form action="/admin/guardians/editGuardian" method="POST" style="display:inline;">
+                        <input type="hidden" name="editGuardianId" value="<%= guardian.id %>" />
+                        <button type="submit">تعديل</button>
+                      </form>
+                      <% } %>
+                </td>
+                <td>
+                  <form action="/admin/guardians/deleteGuardian" method="POST"
+                    onsubmit="return confirm('هل أنت متأكد من حذف ولي الأمر هذا وجميع روابطه بالطلاب؟');"
+                    style="display:inline;">
+                    <input type="hidden" name="guardianId" value="<%= guardian.id %>" />
+                    <button type="submit">حذف</button>
+                  </form>
+                </td>
+              </tr>
+              <% }); %>
+                <% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="container">
+
+
+    <% if (insertGuardianError) { %>
+      <ul class="messages">
+        <li class="error">
+          <%= insertGuardianError %>
+        </li>
+      </ul>
+      <% } %>
+        <% if (updateGuardianError) { %>
+          <ul class="messages">
+            <li class="error">
+              <%= updateGuardianError %>
+            </li>
+          </ul>
+          <% } %>
+            <% if (deleteGuardianError) { %>
+              <ul class="messages">
+                <li class="error">
+                  <%= deleteGuardianError %>
+                </li>
+              </ul>
+              <% } %>
+                <% if (linkStudentError) { %>
+                  <ul class="messages">
+                    <li class="error">
+                      <%= linkStudentError %>
+                    </li>
+                  </ul>
+                  <% } %>
+
+                    <h3>إضافة ولي أمر جديد</h3>
+                    <form action="/admin/guardians/insertGuardian" method="POST">
+                      <div>
+                        <label for="firstName">الاسم الأول:</label>
+                        <input type="text" id="firstName" name="first_name" required>
+                      </div>
+                      <div>
+                        <label for="lastName">الاسم الأخير:</label>
+                        <input type="text" id="lastName" name="last_name" required>
+                      </div>
+                      <div>
+                        <label for="phone">رقم الهاتف:</label>
+                        <input type="tel" id="phone" name="phone">
+                      </div>
+                      <div>
+                        <label for="email">البريد الإلكتروني:</label>
+                        <input type="email" id="email" name="email">
+                      </div>
+                      <div>
+                        <label for="address">العنوان:</label>
+                        <input type="text" id="address" name="address">
+                      </div>
+                      <button type="submit">إضافة ولي أمر</button>
+                    </form>
+  </div>
+
+
+  <!-- Student Linking Modal -->
+  <div id="linkStudentsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeLinkStudentModal()">&times;</span>
+      <h2>ربط الطلاب بولي الأمر</h2>
+      <input type="hidden" id="currentGuardianId">
+      <input type="text" id="studentSearchInput" class="search-input" placeholder="ابحث عن طالب بالاسم...">
+      <div id="studentsCheckboxes" class="students-checkboxes">
+        <!-- الطلاب سيتم تحميلهم هنا بواسطة JavaScript -->
+      </div>
+      <button class="save-button" onclick="saveStudentLinks()">حفظ الروابط</button>
+    </div>
+  </div>
+
+  <script src="/guardians.js"></script> <!-- رابط ملف JavaScript الخاص بالـ Modal -->
+</body>
+
+</html>

@@ -12,8 +12,9 @@ import { fileURLToPath } from 'url'
 import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass,deleteDailyActivity , insertTodayDailyActivity , register , getFlieListByClass ,deleteFile} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames, saveClassFile } from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
-import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById , updateClassEnglishTeacherById , deleteClassById , insertClass} from './adminDatabase.js'
-import { getAllClasses , getMaxGradeLevel, getClassInfo, getStudentsByClass, deleteStudent, addStudent, transferStudentToClass, updateStudent, promoteEntireClass } from './classDatabase.js';
+import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById , updateClassEnglishTeacherById , deleteClassById , insertClass ,getAllGuardiansData,getStudentsWithLinkingStatus,linkStudentToGuardian, 
+        unlinkStudentFromGuardian,insertGuardian , updateGuardianById ,deleteGuardianById} from './adminDatabase.js'
+import { getAllClasses , getMaxGradeLevel, getClassInfo, getStudentsByClass, deleteStudent, addStudent, transferStudentToClass, updateStudent, promoteEntireClass,getGuardiansForStudentForm } from './classDatabase.js';
 import {getEnglishTeacherClasses , getStudentCountForClass ,getTodayAbsenceCountByClassId , getStudentsByClassId , getTodayEnglishActivityCount , getEnglishActivityNames} from './englishTeacherDatabase.js'
 import {weekActivityCount , allTeachersCount , allStudentsCount , allClassesCount , getMonthAttendanceRate , getAllActivities , getGradeLevelsWithClassCount} from './aboutDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js' 
@@ -333,6 +334,8 @@ app.get('/englishTeacherClass/:classId' ,  async (req,res ) => {
 
 
 })
+
+
 //**************************************************************** GET ADMIN AND TEACHER AND STUDENT END ********************************************************
 
 
@@ -982,40 +985,254 @@ try{
 )
 
 
+
+//للاولياء***************************
+
+
+
 //****************************************************************ِAPI FOR ADMIN PAGE END****************************************************************************************************
+//*****************************************************************GUARDIANS PAGE************************************************************************************************************ */
+
+// عرض صفحة أولياء الأمور
+app.get('/admin/guardians', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.redirect('/login');
+  }
+  
+  try {
+    const guardians = await getAllGuardiansData();
+    
+    const insertGuardianError = req.session.insertGuardianError || null;
+    const updateGuardianError = req.session.updateGuardianError || null;
+    const deleteGuardianError = req.session.deleteGuardianError || null;
+    const linkStudentError = req.session.linkStudentError || null;
+    
+    // تنظيف رسائل الخطأ من الجلسة
+    req.session.insertGuardianError = null;
+    req.session.updateGuardianError = null;
+    req.session.deleteGuardianError = null;
+    req.session.linkStudentError = null;
+    
+    res.render('guardians', {
+      guardians,
+      session: req.session,
+      insertGuardianError,
+      updateGuardianError,
+      deleteGuardianError,
+      linkStudentError
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('حدث خطأ في السيرفر');
+  }
+});
+
+// API لربط الطلاب بولي أمر محدد
+app.get('/admin/guardians/getStudentsForLinking/:guardianId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ success: false, message: 'غير مصرح' });
+  }
+  try {
+    const guardianId = req.params.guardianId;
+    const students = await getStudentsWithLinkingStatus(guardianId);
+    res.json({ success: true, students });
+  } catch (error) {
+    console.error('Error fetching students for linking:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء جلب الطلاب للربط' });
+  }
+});
+
+// API لتحديث روابط الطلاب لولي أمر محدد
+app.post('/admin/guardians/updateStudentLinks', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ success: false, message: 'غير مصرح' });
+  }
+  try {
+    const { guardianId, studentLinks } = req.body;
+
+    // جلب الروابط الحالية لهذا الولي
+    const currentLinks = await getStudentsWithLinkingStatus(guardianId);
+    const currentLinkedStudentIds = new Set(currentLinks.filter(s => s.linked_to_current_guardian).map(s => String(s.id)));
+
+    // الطلاب الجديدة للربط
+    const newStudentIdsSet = new Set(studentLinks.map(s => String(s.studentId)));
+
+    // تحديد الطلاب للإلغاء ربطهم
+    for (const studentId of currentLinkedStudentIds) {
+      if (!newStudentIdsSet.has(studentId)) {
+        await unlinkStudentFromGuardian(Number(studentId), Number(guardianId));
+      }
+    }
+
+    // تحديد الطلاب للربط
+    for (const studentLink of studentLinks) {
+      const studentId = String(studentLink.studentId);
+      if (!currentLinkedStudentIds.has(studentId)) {
+        await linkStudentToGuardian(Number(studentId), Number(guardianId), studentLink.relation);
+      }
+    }
+
+    res.json({ success: true, message: 'تم تحديث روابط الطلاب بنجاح' });
+  } catch (error) {
+    console.error('Error updating student links:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء تحديث روابط الطلاب' });
+  }
+});
+
+// إضافة ولي أمر جديد
+app.post('/admin/guardians/insertGuardian', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    const { first_name, last_name, phone, email, address } = req.body;
+    const result = await insertGuardian(first_name, last_name, phone, email, address);
+    
+    if (!result.success) {
+      req.session.insertGuardianError = result.message;
+    }
+    
+    res.redirect('/admin/guardians');
+  } catch (error) {
+    console.error('Error inserting guardian:', error);
+    req.session.insertGuardianError = 'حدث خطأ أثناء إضافة ولي الأمر';
+    res.redirect('/admin/guardians');
+  }
+});
+
+// تحديد ولي الأمر للتعديل
+app.post('/admin/guardians/editGuardian', (req, res) => {
+  const { editGuardianId } = req.body;
+  req.session.editGuardianId = parseInt(editGuardianId);
+  res.redirect('/admin/guardians');
+});
+
+// إلغاء تعديل ولي الأمر
+app.post('/admin/guardians/cancelUpdateGuardian', (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  req.session.editGuardianId = null;
+  res.redirect('/admin/guardians');
+});
+
+// تحديث بيانات ولي الأمر
+app.post('/admin/guardians/updateGuardian', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    const { guardianId, first_name, last_name, phone, email, address } = req.body;
+    const result = await updateGuardianById(guardianId, first_name, last_name, phone, email, address);
+    
+    if (result.success) {
+      req.session.editGuardianId = null;
+      req.session.updateGuardianError = null;
+    } else {
+      req.session.updateGuardianError = result.message;
+    }
+    
+    res.redirect('/admin/guardians');
+  } catch (error) {
+    console.error('Error updating guardian:', error);
+    req.session.updateGuardianError = 'حدث خطأ أثناء تحديث بيانات ولي الأمر';
+    res.redirect('/admin/guardians');
+  }
+});
+
+// حذف ولي أمر
+app.post('/admin/guardians/deleteGuardian', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    const { guardianId } = req.body;
+    const result = await deleteGuardianById(guardianId);
+    
+    if (!result.success) {
+      req.session.deleteGuardianError = result.message;
+    }
+    
+    res.redirect('/admin/guardians');
+  } catch (error) {
+    console.error('Error deleting guardian:', error);
+    req.session.deleteGuardianError = 'حدث خطأ أثناء حذف ولي الأمر';
+    res.redirect('/admin/guardians');
+  }
+});
+
+// ربط طالب بولي أمر (القديم، سيتم استبداله)
+app.post('/admin/guardians/linkStudent', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    const { studentId, guardianId, relation } = req.body;
+    const result = await linkStudentToGuardian(studentId, guardianId, relation);
+    
+    if (!result.success) {
+      req.session.linkStudentError = result.message;
+    }
+    
+    res.redirect('/admin/guardians');
+  } catch (error) {
+    console.error('Error linking student to guardian:', error);
+    req.session.linkStudentError = 'حدث خطأ أثناء ربط الطالب بولي الأمر';
+    res.redirect('/admin/guardians');
+  }
+});
+
+// إلغاء ربط طالب من ولي أمر (القديم، سيتم استبداله)
+app.post('/admin/guardians/unlinkStudent', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    const { studentId, guardianId } = req.body;
+    const result = await unlinkStudentFromGuardian(studentId, guardianId);
+    
+    if (!result.success) {
+      req.session.linkStudentError = result.message;
+    }
+    
+    res.redirect('/admin/guardians');
+  } catch (error) {
+    console.error('Error unlinking student from guardian:', error);
+    req.session.linkStudentError = 'حدث خطأ أثناء إلغاء ربط الطالب من ولي الأمر';
+    res.redirect('/admin/guardians');
+  }
+});
+
+//*****************************************************************GUARDIANS PAGE END********************************************************************************************************
+
 
 //*****************************************************************for class page************************************************************************************************************ */
 
 // عرض صفحة الصف
 app.get('/admin/class/:classId', async (req, res) => {
   try {
-    // Authorization: allow admin or this class's main teacher only
-    if (!req.session.user) {
-      return res.redirect('/login');
-    }
-    const user = req.session.user;
-    const classIdNum = Number(req.params.classId);
-    let allowed = false;
-    if (user.role === 'admin') {
-      allowed = true;
-    } else if (user.role === 'teacher' && user.teacherRole === 'main') {
-      const ownClassId = await getClassIdFromSession(user);
-      if (Number(ownClassId) === classIdNum) allowed = true;
-    }
-    if (!allowed) {
-      return res.redirect('/login');
-    }
-
     const classId = req.params.classId;
 
     const students_data = await getStudentsByClass(classId);
     const classes = await getAllClasses();
+    const guardians = await getGuardiansForStudentForm();
 
+    // جلب بيانات الصف (الاسم ودرجة الصف)
     const classInfo = await getClassInfo(classId);
+
     const gradeLevelId = classInfo?.grade_level_id || 0;
     const className = classInfo?.class_name || `رقم ${classId}`;
 
+    // جلب أعلى مستوى
     const maxLevel = await getMaxGradeLevel();
+
+    // تحديد إذا كان الصف في أعلى مستوى
     const isMaxLevel = gradeLevelId >= maxLevel;
 
     const transferStudentError = req.session.transferStudentError || null;
@@ -1027,10 +1244,11 @@ app.get('/admin/class/:classId', async (req, res) => {
     res.render('class', {
       students_data,
       classes,
+      guardians,
       classId,
-      className,
-      gradeLevelId,
-      isMaxLevel,
+      className,     // هنا اسم الصف
+      gradeLevelId,  // ودرجة الصف (مستوى الصف)
+      isMaxLevel,    // تمرير القيمة للواجهة
       session: {
         ...req.session,
         transferStudentError,
@@ -1191,22 +1409,49 @@ app.post('/admin/class/:classId/cancelUpdateStudent', async (req, res) => {
 
 //إضافة طالب جديد
 app.post('/admin/class/:classId/insertStudent', async (req, res) => {
-  // Authorization: allow admin or this class's main teacher only
-  if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
-  const user = req.session.user;
-  const classIdParam = Number(req.params.classId);
-  let allowed = false;
-  if (user.role === 'admin') {
-    allowed = true;
-  } else if (user.role === 'teacher' && user.teacherRole === 'main') {
-    const ownClassId = await getClassIdFromSession(user);
-    if (Number(ownClassId) === classIdParam) allowed = true;
-  }
-  if (!allowed) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.session.user || req.session.user.role !== "admin")
+    return res.status(401).json({ error: 'Unauthorized' });
 
   try {
     const classId = req.params.classId;
-    const { first_name, last_name, birth_date, gender, user_id } = req.body;
+    const {
+      first_name,
+      last_name,
+      birth_date,
+      gender,
+      user_id,
+      guardian_id, // This can be an ID or 'new_guardian'
+      relation,
+      new_guardian_first_name,
+      new_guardian_last_name,
+      new_guardian_phone,
+      new_guardian_email,
+      new_guardian_address
+    } = req.body;
+
+    let actual_guardian_id = guardian_id;
+
+    // If a new guardian is to be added (check if new guardian fields are provided)
+    if (new_guardian_first_name && new_guardian_first_name.trim() !== '' && new_guardian_last_name && new_guardian_last_name.trim() !== '') {
+      // The validation for new_guardian_first_name/last_name is already inside insertGuardian
+      // but it's good to have a basic check here for user feedback before DB operation
+      
+      const newGuardianResult = await insertGuardian(
+        new_guardian_first_name,
+        new_guardian_last_name,
+        new_guardian_phone,
+        new_guardian_email,
+        new_guardian_address
+      );
+
+      if (!newGuardianResult.success) {
+        req.session.insertStudentError = `فشل إضافة ولي الأمر الجديد: ${newGuardianResult.message}`;
+        return res.redirect(`/admin/class/${classId}`);
+      }
+      actual_guardian_id = newGuardianResult.guardianId;
+    }
+    // If an existing guardian was selected, actual_guardian_id is already set from guardian_id.
+    // If no guardian was selected (neither existing nor new), actual_guardian_id will remain as guardian_id (empty string).
 
     const studentData = {
       first_name,
@@ -1220,10 +1465,23 @@ app.post('/admin/class/:classId/insertStudent', async (req, res) => {
     const result = await addStudent(studentData);
 
     if (!result.success) {
-      req.session.insertStudentError = null;
       req.session.insertStudentError = result.message;
       return res.redirect(`/admin/class/${classId}`);
     } else {
+      // إذا تم إضافة الطالب بنجاح وتم اختيار ولي أمر، قم بربطه
+      // استخدام actual_guardian_id هنا
+      if (actual_guardian_id && String(actual_guardian_id).trim() !== '') {
+        try {
+          const relationType = relation || 'parent'; // إذا لم يتم تحديد نوع العلاقة، استخدم 'parent' كافتراضي
+          const linkResult = await linkStudentToGuardian(result.studentId, Number(actual_guardian_id), relationType);
+          if (!linkResult.success) {
+            console.warn('فشل في ربط الطالب بولي الأمر:', linkResult.message);
+          }
+        } catch (linkError) {
+          console.error('خطأ في ربط الطالب بولي الأمر:', linkError);
+        }
+      }
+      
       req.session.insertStudentError = null;
       return res.redirect(`/admin/class/${classId}`);
     }
@@ -1232,7 +1490,6 @@ app.post('/admin/class/:classId/insertStudent', async (req, res) => {
     res.status(400).json({ error: err.message || 'حدث خطأ في قاعدة البيانات' });
   }
 });
-
 //نقل  الطالب من صف إلى صف
 app.post('/admin/class/:classId/transferStudent', async (req, res) => {
   if (!req.session.user || req.session.user.role != "admin")

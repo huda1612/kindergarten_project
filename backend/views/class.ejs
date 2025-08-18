@@ -267,6 +267,49 @@
     .transfer-header h3 {
       margin: 0;
     }
+
+    /* Styles for the new guardian form fields */
+    .add-guardian-fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      width: 100%; /* Ensure it takes full width of its container */
+      margin-top: 10px;
+      border: 1px dashed #a0d8ef;
+      padding: 15px;
+      border-radius: 12px;
+      background-color: #f0f8ff;
+    }
+
+    .add-guardian-fields input[type="text"],
+    .add-guardian-fields input[type="tel"],
+    .add-guardian-fields input[type="email"],
+    .add-guardian-fields textarea {
+      flex: 1;
+      min-width: 180px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+
+    .add-guardian-fields textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .add-guardian-fields button {
+      background-color: #ffcccc; /* Light red for cancel */
+      color: #cc0000;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .add-guardian-fields button:hover {
+      background-color: #ffaaaa;
+    }
   </style>
 </head>
 
@@ -325,6 +368,49 @@
           <option value="male">ذكر</option>
           <option value="female">أنثى</option>
         </select>
+
+        <% if (session.user && session.user.role === 'admin') { %>
+        <button type="button" id="toggleGuardianLinkingBtn" class="toggle-button">ربط مع ولي أمر</button>
+        <div id="guardianLinkingContainer" style="display: none;">
+          <!-- Group for existing guardian selection -->
+          <div id="existingGuardianSection" style="display: block;">
+            <select name="guardian_id" id="guardianSelect">
+              <option value="">اختر ولي الأمر (اختياري)</option>
+              <% guardians.forEach(guardian => { %>
+                <option value="<%= guardian.id %>">
+                  <%= guardian.first_name %> <%= guardian.last_name %> 
+                  <% if (guardian.phone) { %> (<%= guardian.phone %>)<% } %>
+                </option>
+              <% }) %>
+            </select>
+            <button type="button" id="addNewGuardianBtn">إضافة ولي أمر جديد</button>
+          </div>
+
+          <!-- New Guardian Form - Hidden by default -->
+          <div id="newGuardianForm" style="display: none;" class="add-guardian-fields">
+            <input type="text" name="new_guardian_first_name" placeholder="الاسم الأول لولي الأمر الجديد" />
+            <input type="text" name="new_guardian_last_name" placeholder="الاسم الأخير لولي الأمر الجديد" />
+            <input type="tel" name="new_guardian_phone" placeholder="رقم هاتف ولي الأمر الجديد" />
+            <input type="email" name="new_guardian_email" placeholder="البريد الإلكتروني لولي الأمر الجديد" />
+            <textarea name="new_guardian_address" placeholder="عنوان ولي الأمر الجديد"></textarea>
+            <button type="button" id="cancelNewGuardian">إلغاء إضافة ولي أمر جديد</button>
+          </div>
+          
+          <select name="relation" id="relationSelect">
+            <option value="">نوع العلاقة (اختياري)</option>
+            <option value="parent">أب/أم</option>
+            <option value="grandparent">جد/جدة</option>
+            <option value="uncle">عم/خال</option>
+            <option value="aunt">عمة/خالة</option>
+            <option value="sibling">أخ/أخت</option>
+            <option value="other">أخرى</option>
+          </select>
+          <button type="button" id="cancelGuardianLinking">إلغاء الربط</button>
+        </div>
+        <% } else { %>
+          <input type="hidden" name="guardian_id" value="" />
+          <input type="hidden" name="relation" value="" />
+        <% } %>
         <button type="submit">إضافة</button>
       </form>
     </div>
@@ -449,6 +535,60 @@
 </div>
 
 <script>
+  const guardianSelect = document.getElementById('guardianSelect');
+  const existingGuardianSection = document.getElementById('existingGuardianSection');
+  const newGuardianForm = document.getElementById('newGuardianForm');
+  const cancelNewGuardianBtn = document.getElementById('cancelNewGuardian');
+  const addNewGuardianBtn = document.getElementById('addNewGuardianBtn'); // New button
+  const relationSelect = document.getElementById('relationSelect');
+  const guardianLinkingContainer = document.getElementById('guardianLinkingContainer'); // New container
+  const toggleGuardianLinkingBtn = document.getElementById('toggleGuardianLinkingBtn'); // New button
+  const cancelGuardianLinkingBtn = document.getElementById('cancelGuardianLinking'); // New button
+
+  // Initially hide the new guardian form
+  // newGuardianForm.style.display = 'none'; // This is now controlled by toggleGuardianLinkingBtn
+  // existingGuardianSection.style.display = 'block'; // This is now controlled by toggleGuardianLinkingBtn
+
+  if (toggleGuardianLinkingBtn && guardianLinkingContainer && guardianSelect && existingGuardianSection && newGuardianForm && cancelNewGuardianBtn && addNewGuardianBtn && relationSelect && cancelGuardianLinkingBtn) {
+    toggleGuardianLinkingBtn.addEventListener('click', () => {
+      guardianLinkingContainer.style.display = 'flex';
+      toggleGuardianLinkingBtn.style.display = 'none';
+      // Ensure existing guardian section is visible by default when linking is toggled on
+      existingGuardianSection.style.display = 'block'; 
+      newGuardianForm.style.display = 'none'; // Hide new guardian form initially
+    });
+
+    cancelGuardianLinkingBtn.addEventListener('click', () => {
+      guardianLinkingContainer.style.display = 'none';
+      toggleGuardianLinkingBtn.style.display = 'inline-block';
+      // Reset guardian and relation selections when cancelling linking
+      guardianSelect.value = '';
+      relationSelect.value = '';
+      // Also ensure new guardian form fields are cleared and not required
+      newGuardianForm.querySelectorAll('input, textarea').forEach(input => {
+        input.value = '';
+        input.removeAttribute('required');
+      });
+      relationSelect.removeAttribute('required');
+    });
+
+    addNewGuardianBtn.addEventListener('click', () => {
+      existingGuardianSection.style.display = 'none';
+      newGuardianForm.style.display = 'flex';
+      newGuardianForm.querySelectorAll('input, textarea').forEach(input => input.setAttribute('required', 'true'));
+      relationSelect.setAttribute('required', 'true');
+    });
+
+    cancelNewGuardianBtn.addEventListener('click', () => {
+      newGuardianForm.style.display = 'none';
+      existingGuardianSection.style.display = 'block';
+      guardianSelect.value = ''; // Reset select to default
+      newGuardianForm.querySelectorAll('input, textarea').forEach(input => input.removeAttribute('required'));
+      relationSelect.removeAttribute('required');
+    });
+  }
+
+  // Existing transfer student script
   const btnShow = document.getElementById('showTransferFormBtn');
   const form = document.getElementById('transferStudentForm');
   const btnCancel = document.getElementById('cancelTransfer');

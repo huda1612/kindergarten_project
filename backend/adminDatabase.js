@@ -409,3 +409,286 @@ export async function insertClass(className , gradeId , TeacherId , engTeacherId
 
 }
 
+//****************************************************************GUARDIANS*************************************************************************************
+
+// جلب جميع أولياء الأمور مع معلومات أبنائهم
+export async function getAllGuardiansData() {
+    const result = await executeQuery(`
+        SELECT 
+            g.id,
+            g.first_name,
+            g.last_name,
+            g.phone,
+            g.email,
+            g.address,
+            COUNT(gs.student_id) as children_count,
+            GROUP_CONCAT(
+                CONCAT(s.first_name, ' ', s.last_name, ' (', CASE gs.relation 
+                    WHEN 'parent' THEN 'أب/أم'
+                    WHEN 'guardian' THEN 'ولي أمر'
+                    WHEN 'uncle' THEN 'عم'
+                    WHEN 'aunt' THEN 'عمة'
+                    WHEN 'grandparent' THEN 'أبو/أم'
+                    WHEN 'other' THEN gs.relation
+                    ELSE gs.relation
+                END, ')') 
+                SEPARATOR ', '
+            ) as children_names
+        FROM guardians g
+        LEFT JOIN guardians_students gs ON g.id = gs.guardian_id
+        LEFT JOIN students s ON gs.student_id = s.id
+        GROUP BY g.id, g.first_name, g.last_name, g.phone, g.email, g.address
+        ORDER BY g.first_name, g.last_name
+    `);
+    return result;
+}
+
+// إضافة ولي أمر جديد
+export async function insertGuardian(first_name, last_name, phone, email, address) {
+    // التحقق من صحة البيانات
+    const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (
+        typeof first_name !== 'string' ||
+        typeof last_name !== 'string' ||
+        first_name.trim() === '' ||
+        last_name.trim() === '' ||
+        !nameRegex.test(first_name) ||
+        !nameRegex.test(last_name)
+    ) {
+        return { success: false, message: "البيانات المدخلة غير صالحة" };
+    }
+
+    // التحقق من رقم الهاتف
+    if (phone && phone.trim() !== '') {
+        if (isNaN(phone)) {
+            return { success: false, message: "رقم الهاتف يجب أن يكون أرقام فقط" };
+        }
+        
+        const phoneStr = phone.toString();
+        if (phoneStr.length < 5 || phoneStr.length > 15) {
+            return { success: false, message: "رقم الهاتف يجب أن يكون بين 5 و 15 خانة" };
+        }
+
+        // التحقق من عدم تكرار رقم الهاتف
+        const checkPhone = await executeQuery(`
+            SELECT id FROM guardians WHERE phone = ?
+        `, [phone]);
+        if (checkPhone.length !== 0) {
+            return { success: false, message: "رقم الهاتف هذا موجود مسبقاً" };
+        }
+    }
+
+    // التحقق من البريد الإلكتروني
+    if (email && email.trim() !== '') {
+        if (!emailRegex.test(email)) {
+            return { success: false, message: "البريد الإلكتروني غير صالح" };
+        }
+
+        // التحقق من عدم تكرار البريد الإلكتروني
+        const checkEmail = await executeQuery(`
+            SELECT id FROM guardians WHERE email = ?
+        `, [email]);
+        if (checkEmail.length !== 0) {
+            return { success: false, message: "البريد الإلكتروني هذا موجود مسبقاً" };
+        }
+    }
+
+    try {
+        const insertResult = await executeQuery(`
+            INSERT INTO guardians (first_name, last_name, phone, email, address)
+            VALUES (?, ?, ?, ?, ?)
+        `, [first_name, last_name, phone || null, email || null, address || null]);
+        
+        // Retrieve the ID of the newly inserted guardian
+        const newGuardianId = insertResult.insertId;
+
+        return { success: true, message: "تم إضافة ولي الأمر بنجاح", guardianId: newGuardianId };
+    } catch (error) {
+        console.error('Error inserting guardian:', error);
+        return { success: false, message: "حدث خطأ أثناء إضافة ولي الأمر" };
+    }
+}
+
+// تحديث بيانات ولي الأمر
+export async function updateGuardianById(guardianId, first_name, last_name, phone, email, address) {
+    // التحقق من صحة البيانات
+    const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (
+        typeof first_name !== 'string' ||
+        typeof last_name !== 'string' ||
+        first_name.trim() === '' ||
+        last_name.trim() === '' ||
+        !nameRegex.test(first_name) ||
+        !nameRegex.test(last_name)
+    ) {
+        return { success: false, message: "البيانات المدخلة غير صالحة" };
+    }
+
+    // التحقق من وجود ولي الأمر
+    const guardianExists = await executeQuery(`
+        SELECT id FROM guardians WHERE id = ?
+    `, [guardianId]);
+    if (guardianExists.length === 0) {
+        return { success: false, message: "ولي الأمر غير موجود" };
+    }
+
+    // التحقق من رقم الهاتف
+    if (phone && phone.trim() !== '') {
+        if (isNaN(phone)) {
+            return { success: false, message: "رقم الهاتف يجب أن يكون أرقام فقط" };
+        }
+        
+        const phoneStr = phone.toString();
+        if (phoneStr.length < 5 || phoneStr.length > 15) {
+            return { success: false, message: "رقم الهاتف يجب أن يكون بين 5 و 15 خانة" };
+        }
+
+        // التحقق من عدم تكرار رقم الهاتف (باستثناء ولي الأمر الحالي)
+        const checkPhone = await executeQuery(`
+            SELECT id FROM guardians WHERE phone = ? AND id != ?
+        `, [phone, guardianId]);
+        if (checkPhone.length !== 0) {
+            return { success: false, message: "رقم الهاتف هذا موجود مسبقاً" };
+        }
+    }
+
+    // التحقق من البريد الإلكتروني
+    if (email && email.trim() !== '') {
+        if (!emailRegex.test(email)) {
+            return { success: false, message: "البريد الإلكتروني غير صالح" };
+        }
+
+        // التحقق من عدم تكرار البريد الإلكتروني (باستثناء ولي الأمر الحالي)
+        const checkEmail = await executeQuery(`
+            SELECT id FROM guardians WHERE email = ? AND id != ?
+        `, [email, guardianId]);
+        if (checkEmail.length !== 0) {
+            return { success: false, message: "البريد الإلكتروني هذا موجود مسبقاً" };
+        }
+    }
+
+    try {
+        await executeQuery(`
+            UPDATE guardians 
+            SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?
+            WHERE id = ?
+        `, [first_name, last_name, phone || null, email || null, address || null, guardianId]);
+        
+        return { success: true, message: "تم تحديث بيانات ولي الأمر بنجاح" };
+    } catch (error) {
+        console.error('Error updating guardian:', error);
+        return { success: false, message: "حدث خطأ أثناء تحديث بيانات ولي الأمر" };
+    }
+}
+
+// حذف ولي أمر
+export async function deleteGuardianById(guardianId) {
+    try {
+        // التحقق من وجود ولي الأمر
+        const guardianExists = await executeQuery(`
+            SELECT id FROM guardians WHERE id = ?
+        `, [guardianId]);
+        if (guardianExists.length === 0) {
+            return { success: false, message: "ولي الأمر غير موجود" };
+        }
+
+        // حذف العلاقات مع الطلاب أولاً
+        await executeQuery(`
+            DELETE FROM guardians_students WHERE guardian_id = ?
+        `, [guardianId]);
+
+        // حذف ولي الأمر
+        await executeQuery(`
+            DELETE FROM guardians WHERE id = ?
+        `, [guardianId]);
+
+        return { success: true, message: "تم حذف ولي الأمر بنجاح" };
+    } catch (error) {
+        console.error('Error deleting guardian:', error);
+        return { success: false, message: "حدث خطأ أثناء حذف ولي الأمر" };
+    }
+}
+
+// جلب قائمة الطلاب مع حالة ربطهم بولي أمر محدد
+export async function getStudentsWithLinkingStatus(guardianId) {
+    const result = await executeQuery(`
+        SELECT 
+            s.id,
+            s.first_name,
+            s.last_name,
+            c.class_name,
+            gs.relation, -- إضافة عمود العلاقة
+            CASE 
+                WHEN gs.guardian_id = ? THEN TRUE
+                ELSE FALSE
+            END as linked_to_current_guardian
+        FROM students s
+        LEFT JOIN classes c ON s.class_id = c.id
+        LEFT JOIN guardians_students gs ON s.id = gs.student_id AND gs.guardian_id = ?
+        ORDER BY s.first_name, s.last_name
+    `, [guardianId, guardianId]);
+    return result;
+}
+
+// ربط طالب بولي أمر
+export async function linkStudentToGuardian(studentId, guardianId, relation = 'parent') {
+    try {
+        // التحقق من وجود الطالب وولي الأمر
+        const studentExists = await executeQuery(`
+            SELECT id FROM students WHERE id = ?
+        `, [studentId]);
+        if (studentExists.length === 0) {
+            return { success: false, message: "الطالب غير موجود" };
+        }
+
+        const guardianExists = await executeQuery(`
+            SELECT id FROM guardians WHERE id = ?
+        `, [guardianId]);
+        if (guardianExists.length === 0) {
+            return { success: false, message: "ولي الأمر غير موجود" };
+        }
+
+        // التحقق من عدم وجود ربط مسبق لنفس العلاقة (يمكن أن يكون للطالب أكثر من ولي أمر، ولكن ليس نفس ولي الأمر مرتين)
+        const existingLink = await executeQuery(`
+            SELECT student_id FROM guardians_students WHERE student_id = ? AND guardian_id = ?
+        `, [studentId, guardianId]);
+        if (existingLink.length !== 0) {
+            // إذا كان الربط موجوداً، نقوم بتحديث العلاقة بدلاً من إرجاع خطأ
+            await executeQuery(`
+                UPDATE guardians_students SET relation = ? WHERE student_id = ? AND guardian_id = ?
+            `, [relation, studentId, guardianId]);
+            return { success: true, message: "تم تحديث علاقة الطالب بولي الأمر بنجاح" };
+        }
+
+        // إنشاء الربط
+        await executeQuery(`
+            INSERT INTO guardians_students (student_id, guardian_id, relation)
+            VALUES (?, ?, ?)
+        `, [studentId, guardianId, relation]);
+
+        return { success: true, message: "تم ربط الطالب بولي الأمر بنجاح" };
+    } catch (error) {
+        console.error('Error linking student to guardian:', error);
+        return { success: false, message: "حدث خطأ أثناء ربط الطالب بولي الأمر" };
+    }
+}
+
+// إلغاء ربط طالب من ولي أمر
+export async function unlinkStudentFromGuardian(studentId, guardianId) {
+    try {
+        await executeQuery(`
+            DELETE FROM guardians_students 
+            WHERE student_id = ? AND guardian_id = ?
+        `, [studentId, guardianId]);
+
+        return { success: true, message: "تم إلغاء ربط الطالب من ولي الأمر بنجاح" };
+    } catch (error) {
+        console.error('Error unlinking student from guardian:', error);
+        return { success: false, message: "حدث خطأ أثناء إلغاء ربط الطالب من ولي الأمر" };
+    }
+}
+
