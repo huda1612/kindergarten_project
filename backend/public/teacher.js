@@ -1,4 +1,5 @@
 const showAddFilebtn = document.getElementById('showAddFilebtn');
+const cencelAddFilebtn = document.getElementById('cencelAddFilebtn');
 const addFileForm = document.getElementById('addFileForm');
 const fileDatebtn = document.getElementById('fileDatebtn');
 const fileDateForm = document.getElementById('fileDateForm');
@@ -553,7 +554,7 @@ document.addEventListener("DOMContentLoaded", async () => {
      // Current Experience Section Logic
      const experienceDisplayDiv = document.getElementById('experienceDisplay');
      const experienceInfoDiv = document.getElementById('experienceInfo');
-const experienceActionsDiv = document.getElementById('experienceActions');
+     const experienceActionsDiv = document.getElementById('experienceActions');
 
      let experienceNameDisplay; // Declared here, assigned inside initializeExperienceDisplay
      let editExperienceBtn;     // Declared here, assigned inside initializeExperienceDisplay

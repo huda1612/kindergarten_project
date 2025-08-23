@@ -74,6 +74,31 @@ export async function getStudentsByTeacher(teacherId) {
   return formattedRows;
 }
 
+//تابع لاعادة بيانات التقرير اليومي لصف محدد
+export async function getClassReportByClassId(classId , date) {
+  const rows = await executeQuery(`
+    SELECT 
+    s.id AS id,
+    s.first_name,
+    s.last_name,
+    CASE 
+        WHEN a.id IS NOT NULL THEN FALSE  
+        ELSE TRUE                          
+    END AS is_present,
+    n.content AS note
+    FROM students s
+    LEFT JOIN absences a 
+    ON s.id = a.student_id AND a.date = ?  
+    LEFT JOIN notes n
+    ON s.id = n.student_id AND n.date = ? 
+    WHERE s.class_id = ?;  
+ ` , [date , date , classId]) ;
+
+  return rows;
+}
+
+
+
 //تابع لرد رقم الصف للمعلم
 export async function getClassIdByTeacherId(teacherId) {
   const rows = await executeQuery(

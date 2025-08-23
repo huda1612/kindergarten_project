@@ -19,44 +19,7 @@
             min-height: 100vh;
             position: relative;
         }
-        /* زخرفة طفولية في الخلفية */
-        /*body::before {
-            content: '';
-            position: fixed;
-            top: -80px;
-            left: -80px;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle at 70% 30%, #a0d8ef55 60%, transparent 100%);
-            z-index: 0;
-            pointer-events: none;
-        }
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -100px;
-            right: -100px;
-            width: 250px;
-            height: 250px;
-            background: radial-gradient(circle at 30% 70%, #ffb6b955 60%, transparent 100%);
-            z-index: 0;
-            pointer-events: none;
-        }
-        // زخارف إضافية طفولية 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 40%;
-            left: 8%;
-            width: 70px;
-            height: 70px;
-            background: radial-gradient(circle, #ffd70033 30%, transparent 70%);
-            border-radius: 50%;
-            z-index: 0;
-            pointer-events: none;
-            animation: float 7s ease-in-out infinite;
-        }
-        */
+
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
@@ -238,7 +201,8 @@
         }
         async function loadStudentsNames() {
             try {
-                const response = await fetch('/api/getStudentsNames');
+                const response = await fetch('/api/getClassReportInfo');
+                
                 if (!response.ok) throw new Error('Network response was not ok');
                 const students = await response.json();
                 displayStudents(students);
@@ -249,21 +213,29 @@
             }
         }
 
-        function displayStudents(students) {
-    const tbody = document.getElementById('students-list');
-    tbody.innerHTML = '';
+    function displayStudents(students) {
+         const tbody = document.getElementById('students-list');
+         tbody.innerHTML = '';
 
-    if (students.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3">لا يوجد طلاب</td></tr>';
-        return;
-    }
+          if (students.length === 0) {
+               tbody.innerHTML = '<tr><td colspan="3">لا يوجد طلاب</td></tr>';
+               return;
+             }
 
     students.forEach(student => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${student.first_name + " " + student.last_name}</td>
-            <td><input type="checkbox" class="attendance" data-id="${student.id}"></td>
-            <td><input type="text" class="note" data-id="${student.id}" placeholder="ادخال ملاحظة عن الطالب..."></td>
+            <td>
+                <input type="checkbox" class="attendance" data-id="${student.id}" 
+                    ${student.is_present ? 'checked' : ''}>
+            </td>
+            <td>
+                <input type="text" class="note" data-id="${student.id}" 
+                    placeholder="ادخال ملاحظة عن الطالب..." 
+                    value="${student.note ? student.note : ''}">
+            </td>
+
         `;
         tbody.appendChild(row);
     });

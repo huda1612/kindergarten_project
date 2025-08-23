@@ -221,10 +221,158 @@ function renderAct(act, isEnglish = false) {
   container.appendChild(div);
 }
 
+//****************************file section ******************************
+
+const fileDatebtn = document.getElementById('fileDatebtn');
+const fileDateForm = document.getElementById('fileDateForm');
+const cencelDateSelectFilebtn = document.getElementById('cencelDateSelectFilebtn');
+const dateSelectFilebtn = document.getElementById('dateSelectFilebtn');
+
+fileDatebtn.addEventListener('click', () =>{
+    fileDatebtn.style.display = 'none';
+    fileDateForm.style.display = 'block';
+})
+cencelDateSelectFilebtn.addEventListener('click', () =>{
+    fileDatebtn.style.display = 'block';
+    fileDateForm.style.display = 'none';
+})
+
+dateSelectFilebtn.addEventListener('click', async () =>{
+    const form = document.getElementById("fileDateForm");
+    const formData = new FormData(form);
+    let day = formData.get("day") ;
+    let month = formData.get("month");
+    let year = formData.get("year");
+
+    day = day.padStart(2, '0');
+    month = month.padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    console.log(dateString)
+    await loadFiles(dateString)
+    fileDatebtn.style.display = 'block';
+    fileDateForm.style.display = 'none';
+})
+
+async function loadFiles(date) {
+    try{ 
+     const get_class_id = document.getElementById("get_class_id");
+     const classId = get_class_id.dataset.classId;
+     const response = await fetch("/api/getFileList" ,{
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json"
+             },
+            body: JSON.stringify({ classId : classId , date : date})
+             });
+     if (!response.ok) throw new Error("فشل في تحميل ملفات اليوم");
+
+     const data = await response.json();
+     const dailyFiles = data.flies || [];
+
+     const container = document.getElementById("todayFiles");
+     container.innerHTML = "";
+        
+    if (dailyFiles.length === 0) {
+      container.innerHTML = `<p>لا توجد ملفات مضافة لهذا اليوم ${date}</p>`;
+      return;
+    }
+
+    let mainFiles = dailyFiles.filter(files => files.type ==='main') ;
+    let englishFiles = dailyFiles.filter(files => files.type ==='english') ;
+    
+    //عرض الملفات الرئيسية
+    if(mainFiles.length > 0 ){
+    const title = document.createElement("h4");
+    title.innerHTML = "ملفات رئيسية";
+    container.appendChild(title);
+
+    //const br = document.createElement("br");
+    //container.appendChild(br);
+
+    mainFiles.forEach((file) => {
+            const div = document.createElement("div");
+            div.className = "file-item";
+
+            let html =`
+    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+        <i class="fa-solid fa-file" style="font-size: 20px; color :#e74c3c"></i>
+        <div style="flex: 1;">
+            <strong>${file.name}</strong><br/>
+            <small>${file.activity_name || "لا يتعلق بنشاط محدد"}</small>
+            <br>
+            <small>${file.description || "بدون وصف"}</small>
+        </div>
+    </div>
+    <div class="file-actions">
+        <a href=${file.path} class="download-btn" download>
+            <i class="fas fa-download"></i>
+            تحميل
+        </a>
+
+    </div>
+`
+             div.innerHTML = html;
+
+
+
+            container.appendChild(div);
+        });
+    }
+    
+    //عرض ملفات الإنجليزي
+    if(englishFiles.length > 0 ){
+    const title = document.createElement("h4");
+    title.innerHTML = "ملفات الإنجليزي";
+    container.appendChild(title);
+
+    //const br = document.createElement("br");
+    //container.appendChild(br);
+
+    englishFiles.forEach((file) => {
+            const div = document.createElement("div");
+            div.className = "file-item";
+
+            let html =`
+    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+        <i class="fa-solid fa-file" style="font-size: 20px; color :#e74c3c"></i>
+        <div style="flex: 1;">
+            <strong>${file.name}</strong><br/>
+            <small>${file.activity_name || "لا يتعلق بنشاط محدد"}</small>
+            <br>
+            <small>${file.description || "بدون وصف"}</small>
+        </div>
+    </div>
+    <div class="file-actions">
+        <a href=${file.path} class="download-btn" download>
+            <i class="fas fa-download"></i>
+            تحميل
+        </a>
+
+    </div>
+`
+             div.innerHTML = html;
+
+
+
+            container.appendChild(div);
+        });
+    }
+            
+    }catch(err){
+        console.error(err);
+        document.getElementById("todayFiles").innerHTML =
+            "<p>خطأ في تحميل ملفات اليوم</p>";
+    }}
+
+
+//******************************************************************************** */
+
 // تحميل تلقائي عند فتح الصفحة
 window.addEventListener('DOMContentLoaded', async () => {
   await loadStudentActivities();
   await loadWeeklyNotes();
+  const today = new Date().toISOString().split('T')[0]; // يعطي "2025-07-18"
+  await loadFiles(today);
 });
 
 

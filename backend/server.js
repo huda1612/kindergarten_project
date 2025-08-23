@@ -10,8 +10,8 @@ import iconv from'iconv-lite';//لتزبيط اسم الملف العربي لم
 
 import { fileURLToPath } from 'url'
 import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass,deleteDailyActivity , insertTodayDailyActivity , register , getFlieListByClass ,deleteFile} from './database.js'
-import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames, saveClassFile } from './teacherDatabase.js'
-import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
+import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames, saveClassFile, getClassIdByTeacherId , getClassReportByClassId} from './teacherDatabase.js'
+import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , deleteNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
 import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById , updateClassEnglishTeacherById , deleteClassById , insertClass ,getAllGuardiansData,getStudentsWithLinkingStatus,linkStudentToGuardian, 
         unlinkStudentFromGuardian,insertGuardian , updateGuardianById ,deleteGuardianById} from './adminDatabase.js'
 import { getAllClasses , getMaxGradeLevel, getClassInfo, getStudentsByClass, deleteStudent, addStudent, transferStudentToClass, updateStudent, promoteEntireClass,getGuardiansForStudentForm , addExperience, getExperienceByClassId, updateExperience } from './classDatabase.js';
@@ -239,11 +239,12 @@ app.get('/student' , async (req,res ) => {
   const teacher_Name = await getTeacherNameByStudentId(student_id);
   const absenceCount = await getAbsenceCountByStudentId(student_id);
   const today_Note = await getTodayNoteByStudentId(student_id);
+  const classId = await getClassIdFromSession(req.session.user);
+
   // جلب درجة الصف
   let gradeLevelId = null;
   let gradeLevelName = null;
   try {
-    const classId = await getClassIdFromSession(req.session.user);
     const classInfo = classId ? await getClassInfo(classId) : null;
     gradeLevelId = classInfo?.grade_level_id ?? null;
     gradeLevelName = classInfo?.grade_level_name ?? null;
@@ -252,11 +253,10 @@ app.get('/student' , async (req,res ) => {
   // جلب الخبرة الحالية للصف
 let currentExperience = null;
 try {
-  const classId = await getClassIdFromSession(req.session.user);
   currentExperience = classId ? await getExperienceByClassId(classId) : null;
 } catch (e) { console.warn('تعذر جلب الخبرة الحالية:', e); }
 
-res.render('student', { full_name, name_With_Nikname, class_Name, teacher_Name, absenceCount, today_Note, gradeLevelId, gradeLevelName, currentExperience })
+res.render('student', { classId , full_name, name_With_Nikname, class_Name, teacher_Name, absenceCount, today_Note, gradeLevelId, gradeLevelName, currentExperience })
  }catch (error) {
   console.error(error);
   res.status(500).send('حدث خطأ في السيرفر');
@@ -289,7 +289,11 @@ app.get('/teacher', async (req, res) => {
       className = classInfo?.class_name || null;
     }
     const currentExperience = classId ? await getExperienceByClassId(classId) : null;
-    res.render('teacher', { classId , className, full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names, currentExperience })
+    if(!classId){
+      res.render('noclass')
+    }
+    else
+      res.render('teacher', { classId , className, full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names, currentExperience })
   } catch (err) {
     console.error('Error loading /teacher page:', err);
     res.status(500).send('حدث خطأ في السيرفر');
@@ -372,8 +376,11 @@ app.post('/dailyReport' , async (req,res ) => {
         await insertAbsence(student_id , date) ;
       //اذا في ملاحظة
       if(note && note.trim()!='')
-        await insertNote(student_id , note.trim() , date) ;      
+        await insertNote(student_id , note.trim() , date) ;  
+      else //مشان اذا عدل التقرير وحذف ملاحظه كان كاتبها تنحذف
+      await deleteNote(student_id , date) ;     
     }
+   
   res.status(200).json({ success: true, message: "تم حفظ التقرير بنجاح" });
   }catch(err){
   console.error("Error processing daily report:", err);
@@ -397,8 +404,7 @@ app.get('/logout', (req, res) => {
 //********************************************************************************************************************************************************************
 //******************************************************************API SECTION***************************************************************************************
 
-//هي  ليحصل الفرونت على قائمة باسماء الطلاب بصف المعلم 
-//يمكن بدها حذف هي 
+//هي  ليحصل الفرونت على قائمة باسماء الطلاب بصف المعلمة 
 app.get('/api/getStudentsNames' , async (req, res ) => {
   if (!req.session.user || !req.session.user.teacher_id) {
   return res.status(401).json({ error: 'Unauthorized' });
@@ -413,6 +419,27 @@ app.get('/api/getStudentsNames' , async (req, res ) => {
     res.status(500).send('حدث خطأ في قاعدة البيانات');
   }
 })
+
+//ليحصل بصفحة التقرير اليومي على بيانات التقرير 
+app.get('/api/getClassReportInfo' , async (req, res ) => {
+  if (!req.session.user || !req.session.user.teacher_id) {
+  return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try{
+  const today = new Date().toISOString().split('T')[0];
+  const teacher_id = req.session.user.teacher_id ; 
+  const classId = await getClassIdByTeacherId(teacher_id) ;
+  //if(!classId) console.log("s;laddddddddddddddddddddddddddd");
+  const studentsObject = await getClassReportByClassId(classId , today);
+
+  res.json(studentsObject);
+  }catch(err){
+    console.error('Error loading /api/getClassReportInfo :', err);
+    res.status(500).send('حدث خطأ في قاعدة البيانات');
+  }
+})
+
+
 
 //هي لارسال اسماء الانشطة كلها مشان يختار منها المعلم 
 app.get('/api/getActivityNames' , async (req, res) => {

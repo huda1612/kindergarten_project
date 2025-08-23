@@ -29,11 +29,11 @@
         <!-- القائمة الجانبية -->
         <div class="sidebar">
             <p>قائمة الأقسام</p>
-            <a class="menu-item" href="../main page/home.html"><i class="fas fa-home"></i><span>الصفحة الرئيسية</span></a>
             <a class="menu-item" href="#stu"><i class="fas fa-child"></i><span>معلومات الطالب</span></a>
-            <a class="menu-item" href="../Teacher page/teacher.html"><i class="fas fa-puzzle-piece"></i><span>صفحة المعلم</span></a>
-            <a class="menu-item" href="../Daily report page/index.html"><i class="fas fa-file"></i><span>التقارير اليومية</span></a>
-            
+            <a class="menu-item" href="../Teacher page/teacher.html"><i class="fas fa-puzzle-piece"></i><span>الأنشطة  </span></a>
+            <a class="menu-item" href="../Daily report page/index.html"><i class="fas fa-file"></i><span> الملفات</span></a>
+            <a class="menu-item" href=""><i class="fas fa-sticky-note"></i><span> ملاحظات الأسبوع</span></a>
+
         </div>
 
         <!-- المحتوى الرئيسي -->
@@ -97,34 +97,39 @@
     </div>
 </div>
             
+ <!--هي بس لاخد رقم الصف بملف الjs-->
+ <div id="get_class_id" data-class-id="<%= classId %>"></div>
 
-            <!-- ملفات اليوم -->
-            <section class="section-box">
-                <h3>ملفات اليوم:</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>اسم الملف</th>
-                            <th>الوصف</th>
-                            <th>تحميل</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>ورقة عمل 1</td>
-                            <td>تمارين على الحروف</td>
-                            <td><button>تحميل</button></td>
-                        </tr>
-                        <tr>
-                            <td>رسم تلوين</td>
-                            <td>نشاط فني</td>
-                            <td><button>تحميل</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-            <!-- ملاحظات اليوم -->
-           <!-- ملاحظات الأسبوع -->
+<!-- قسم الملفات -->
+<section class="section-box">
+<!-- قسم الملفات -->
+    <div class="files-section">
+        <div class="section-title">
+            <h3 id="file">ملفات اليوم</h3>
+
+            <button class="add-btn" id="fileDatebtn">عرض ملفات يوم اخر</button>
+            <form id="fileDateForm" style="display:none;">
+                <select id="day" name="day"> </select>
+                <select id="month" name="month"> </select>
+                <select id="year" name="year"> </select>
+                <button type="button" class="add-btn" id="dateSelectFilebtn">عرض</button>
+                <button type="button" class="add-btn" id="cencelDateSelectFilebtn">إلغاء</button>
+            </form>
+        </div>
+
+
+        <div class="files-list">
+            <div id="todayFiles"></div>
+        </div>
+
+
+
+    </div>
+ 
+</section>
+
+
+<!-- ملاحظات الأسبوع -->
 <section class="section-box">
     <h3>ملاحظات الأسبوع:</h3>
     <table>
@@ -143,3 +148,45 @@
     </div>
 </body>
 </html>
+
+
+<script>
+        //قائمة عرض توايخ السنه
+    const daySelect = document.getElementById("day");
+    const monthSelect = document.getElementById("month");
+    const yearSelect = document.getElementById("year");
+
+    // تعبئة الأيام (1 إلى 31)
+    for (let i = 1; i <= 31; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        daySelect.appendChild(option);
+    }
+
+    // أسماء الشهور بالعربي
+    const monthNames = [
+        "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+        "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+    ];
+
+    // تعبئة الشهور
+    monthNames.forEach((month, index) => {
+        const option = document.createElement("option");
+        option.value = index + 1; // القيم من 1 إلى 12
+        option.textContent = month;
+        monthSelect.appendChild(option);
+    });
+
+    // تعبئة السنوات (السنة الحالية والسنة الماضية فقط)
+    const thisYear = new Date().getFullYear();
+    const years = [thisYear, thisYear - 1];
+
+    years.forEach(year => {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    });
+
+</script>

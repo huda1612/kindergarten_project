@@ -525,3 +525,95 @@ button:hover {
 #todayActivities .activity-item i {
     color: #ff6666 !important;   /* زهري ثابت */
 }
+
+
+
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: white;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(160, 216, 239, 0.1);
+    border: 2px solid #a0d8ef;
+    transition: 0.3s;
+}
+
+.file-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(160, 216, 239, 0.15);
+}
+
+.file-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+    border: none;
+    cursor: pointer;
+}
+
+.download-btn:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.download-btn i {
+    font-size: 16px;
+}
+
+
+  /* Date form box like teacher page */
+#fileDateForm {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  }
+  
+  #fileDateForm select {
+    padding: 10px 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 120px;
+    transition: border-color .2s ease;
+  }
+  
+  #fileDateForm select:focus {
+    outline: none;
+    border-color: #a0d8ef;
+    box-shadow: 0 0 0 3px rgba(160,216,239,.1);
+  }
+  
+  #fileDateForm .add-btn {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }

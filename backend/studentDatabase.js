@@ -34,18 +34,39 @@ export async function getClassIdByStudentId(studentId) {
 }
 
 
-//تابع لاضافة ملاحظه جديده عن الطالب 
+// تابع لإضافة ملاحظة جديدة عن الطالب مع حذف أي ملاحظة موجودة لليوم
 export async function insertNote(studentId, content, date) {
-  const query = `INSERT INTO notes (student_id, content, date) VALUES (?, ?, ?)`;
-  const params = [studentId, content, date];
-  return await executeQuery(query, params);
+  // احذف أي ملاحظة موجودة لهذا الطالب في نفس اليوم
+  const deleteQuery = `DELETE FROM notes WHERE student_id = ? AND date = ?`;
+  await executeQuery(deleteQuery, [studentId, date]);
+  
+  // أضف الملاحظة الجديدة
+  const insertQuery = `INSERT INTO notes (student_id, content, date) VALUES (?, ?, ?)`;
+  return await executeQuery(insertQuery, [studentId, content, date]);
 }
 
-//تابع لتسجيل غياب طالب
+export async function deleteNote(studentId, date) {
+   await executeQuery(
+          `DELETE FROM notes WHERE student_id = ? AND date = ?`,
+          [studentId, date]
+        );
+}
+
+
+//تابع لتسجيل غياب طالب لو كان مافي غياب اله بهاليوم بس
 export async function insertAbsence(studentId, date) {
-  const query = `INSERT INTO absences (student_id, date) VALUES (?, ?)`;
-  const params = [studentId, date];
-  return await executeQuery(query, params);
+  // تحقق إذا الغياب موجود مسبقاً
+  const checkQuery = `SELECT id FROM absences WHERE student_id = ? AND date = ?`;
+  const existing = await executeQuery(checkQuery, [studentId, date]);
+  
+  if (existing.length === 0) {
+    // إذا لا يوجد غياب، أضف سجل جديد
+    const query = `INSERT INTO absences (student_id, date) VALUES (?, ?)`;
+    return await executeQuery(query, [studentId, date]);
+  }
+  
+  // إذا موجود بالفعل، لا نفعل شيء
+  return null;
 }
 
 //تابع يرد اسم المعلم بناء رقم الطالب 
