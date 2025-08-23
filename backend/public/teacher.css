@@ -220,7 +220,7 @@ nav.scrolled {
     margin-top: 10px;
 }
 
-.students-list, .activities-section, .files-section {
+.students-list, .activities-section, .files-section, .current-experience-section {
     background: linear-gradient(120deg, #fff 80%, #a0d8ef11 100%);
     padding: 32px 28px;
     border-radius: 18px;
@@ -230,7 +230,7 @@ nav.scrolled {
     transition: 0.3s;
 }
 
-.students-list:hover, .activities-section:hover, .files-section:hover {
+.students-list:hover, .activities-section:hover, .files-section:hover , .current-experience-section:hover {
     transform: translateY(-7px) scale(1.01);
     box-shadow: 0 12px 32px rgba(255, 182, 185, 0.13);
 }
@@ -732,4 +732,31 @@ a{
     align-items: center;
   }
 
- 
+
+
+  .experience-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* يخلي info ببداية الكونتينر والأزرار بآخره */
+    gap: 15px;
+}
+
+.experience-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* مسافة بين العنوان والاسم/الانبت */
+}
+
+.experience-info h3 {
+    margin: 0;
+}
+
+.experience-info p,
+.experience-info input {
+    margin: 0;
+}
+#experienceNameDisplay {
+    font-size: 1.5rem; /* أو أي حجم يناسبك */
+    font-weight: bold; /* يخليه أوضح */
+  }
+  

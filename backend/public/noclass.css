@@ -1,0 +1,112 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    --main-bg: #f5f7fa;
+    --nav-bg: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+    --accent: #ff6666;
+    --input-bg: #fff;
+    --input-border: #a0d8ef;
+    --btn-bg: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+    --btn-hover: #ff6666;
+    --btn-text: #222;
+    --text-main: #333;
+    --error: #e53935;
+  }
+  
+body {
+    font-family: 'Tajawal', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c9e7f2 100%);
+    min-height: 100vh;
+    position: relative;
+    display: block;
+    color: var(--text-main);
+}
+
+
+
+nav {
+    background: var(--nav-bg);
+    padding: 12px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-radius: 0 0 18px 18px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    transition: box-shadow 0.3s;
+}
+.school-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 22px;
+    color: #333;
+    font-weight: bold;
+}
+
+.school-icon {
+    font-size: 28px;
+    color: #ff6666;
+}
+.teacher-name {
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+}
+.logout-btn {
+    background: linear-gradient(90deg, #a0d8ef 60%, #ffb6b9 100%);
+    color: #222;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 22px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(255, 182, 185, 0.15);
+}
+
+.logout-btn:hover {
+    background: #ff6666;
+    color: #fff;
+    transform: scale(1.08);
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    text-align: center;
+    padding-top: 70px; 
+}
+
+
+.container p {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--text-main);
+    background: #ffffff;
+    width: 400px;      
+    height: 300px;      
+    border-radius: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.container p:hover {
+    transform: translateY(-10px) scale(1.05); 
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);  
+}

@@ -14,7 +14,7 @@ import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeache
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
 import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById , updateClassEnglishTeacherById , deleteClassById , insertClass ,getAllGuardiansData,getStudentsWithLinkingStatus,linkStudentToGuardian, 
         unlinkStudentFromGuardian,insertGuardian , updateGuardianById ,deleteGuardianById} from './adminDatabase.js'
-import { getAllClasses , getMaxGradeLevel, getClassInfo, getStudentsByClass, deleteStudent, addStudent, transferStudentToClass, updateStudent, promoteEntireClass,getGuardiansForStudentForm } from './classDatabase.js';
+import { getAllClasses , getMaxGradeLevel, getClassInfo, getStudentsByClass, deleteStudent, addStudent, transferStudentToClass, updateStudent, promoteEntireClass,getGuardiansForStudentForm , addExperience, getExperienceByClassId, updateExperience } from './classDatabase.js';
 import {getEnglishTeacherClasses , getStudentCountForClass ,getTodayAbsenceCountByClassId , getStudentsByClassId , getTodayEnglishActivityCount , getEnglishActivityNames} from './englishTeacherDatabase.js'
 import {weekActivityCount , allTeachersCount , allStudentsCount , allClassesCount , getMonthAttendanceRate , getAllActivities , getGradeLevelsWithClassCount} from './aboutDatabase.js'
 import {getClassIdFromSession} from './serverFunctions.js' 
@@ -248,8 +248,15 @@ app.get('/student' , async (req,res ) => {
     gradeLevelId = classInfo?.grade_level_id ?? null;
     gradeLevelName = classInfo?.grade_level_name ?? null;
   } catch (e) { console.warn('تعذر جلب درجة الصف:', e); }
+  
+  // جلب الخبرة الحالية للصف
+let currentExperience = null;
+try {
+  const classId = await getClassIdFromSession(req.session.user);
+  currentExperience = classId ? await getExperienceByClassId(classId) : null;
+} catch (e) { console.warn('تعذر جلب الخبرة الحالية:', e); }
 
-  res.render('student', { full_name, name_With_Nikname, class_Name, teacher_Name, absenceCount, today_Note, gradeLevelId, gradeLevelName })
+res.render('student', { full_name, name_With_Nikname, class_Name, teacher_Name, absenceCount, today_Note, gradeLevelId, gradeLevelName, currentExperience })
  }catch (error) {
   console.error(error);
   res.status(500).send('حدث خطأ في السيرفر');
@@ -262,6 +269,7 @@ app.get('/teacher', async (req, res) => {
   if (!req.session.user || !req.session.user.teacher_id) { //حتى ما يعطي خطأ لان مافي معلومات بالجلسه وما يكون فينه يدخل عهالصفحه بلا ما يسجل
     return res.redirect('/login');
   }
+  
   try {
     const teacher_id = req.session.user.teacher_id;
     const full_name = await getTeacherFullName(teacher_id);
@@ -275,16 +283,19 @@ app.get('/teacher', async (req, res) => {
     console.log("🚀 الأنشطة المرسلة للواجهة:", activity_names);
     const classId = await getClassIdFromSession(req.session.user);
     let className = null;
+  
     if (classId) {
       const classInfo = await getClassInfo(classId);
       className = classInfo?.class_name || null;
     }
-    res.render('teacher', { classId , className, full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names })
+    const currentExperience = classId ? await getExperienceByClassId(classId) : null;
+    res.render('teacher', { classId , className, full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names, currentExperience })
   } catch (err) {
     console.error('Error loading /teacher page:', err);
     res.status(500).send('حدث خطأ في السيرفر');
   }
 })
+
 
 
 
@@ -491,6 +502,45 @@ app.get('/api/student/weekly-notes', async (req, res) => {
   } catch (err) {
     console.error('Error /api/student/weekly-notes:', err);
     res.status(500).json({ error: 'حدث خطأ في قاعدة البيانات' });
+  }
+});
+  
+//API to get the current experience for a class
+app.get('/api/experience/:classId', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const classId = req.params.classId;
+    const experience = await getExperienceByClassId(classId);
+    res.json({ success: true, experience });
+  } catch (err) {
+    console.error('Error fetching experience:', err);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء جلب الخبرة' });
+  }
+});
+
+// API to add or update experience
+app.post('/api/experience', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'teacher') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const { classId, experienceName, experienceId } = req.body;
+    if (!classId || !experienceName) {
+      return res.status(400).json({ success: false, message: 'البيانات ناقصة' });
+    }
+
+    let result;
+    if (experienceId) {
+      result = await updateExperience(experienceId, experienceName);
+    } else {
+      result = await addExperience(classId, experienceName);
+    }
+    res.json(result);
+  } catch (err) {
+    console.error('Error saving/updating experience:', err);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء حفظ الخبرة' });
   }
 });
 
@@ -1237,9 +1287,13 @@ app.get('/admin/class/:classId', async (req, res) => {
 
     const transferStudentError = req.session.transferStudentError || null;
     const transferStudentSuccess = req.session.transferStudentSuccess || null;
+    const promoteClassError = req.session.promoteClassError || null; // جلب رسالة الخطأ
+    const promoteClassSuccess = req.session.promoteClassSuccess || null; // جلب رسالة النجاح
 
     req.session.transferStudentError = null;
     req.session.transferStudentSuccess = null;
+    req.session.promoteClassError = null; // مسح رسالة الخطأ بعد قراءتها
+    req.session.promoteClassSuccess = null; // مسح رسالة النجاح بعد قراءتها
 
     res.render('class', {
       students_data,
@@ -1537,7 +1591,13 @@ app.post('/admin/class/:classId/promote', async (req, res) => {
     }
 
     req.session.promoteClassSuccess = result.message;
-    return res.redirect(`/admin/class/${result.newClassId || classId}`);
+   // إذا تم تخريج الصف، أعد التوجيه إلى صفحة الإدارة الرئيسية
+   if (result.message.includes("تم تخريج الصف بنجاح")) {
+    return res.redirect('/admin');
+  } else {
+    // إذا تمت الترقية بنجاح (وليس تخريج)، أعد التوجيه إلى نفس صفحة الصف
+    return res.redirect(`/admin/class/${classId}`);
+  }
   } catch (err) {
     console.error("خطأ في ترقية الصف:", err);
     req.session.promoteClassError = "حدث خطأ أثناء ترقية الصف";

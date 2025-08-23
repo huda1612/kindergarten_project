@@ -30,48 +30,6 @@ body {
     padding-top: 80px; /* ارتفاع الـ nav التقريبي */
 }
 
-/* لمسة زخرفية طفولية في الخلفية */
-/*
-body::before {
-    content: '';
-    position: fixed;
-    top: -80px;
-    left: -80px;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle at 70% 30%, #a0d8ef55 60%, transparent 100%);
-    z-index: 0;
-    pointer-events: none;
-}
-
-body::after {
-    content: '';
-    position: fixed;
-    bottom: -100px;
-    right: -100px;
-    width: 250px;
-    height: 250px;
-    background: radial-gradient(circle at 30% 70%, #ffb6b955 60%, transparent 100%);
-    z-index: 0;
-    pointer-events: none;
-}
-*/
-/* زخارف إضافية طفولية */
-/*
-body::before {
-    content: '';
-    position: fixed;
-    top: 50%;
-    left: 10%;
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(circle, #ffd70033 30%, transparent 70%);
-    border-radius: 50%;
-    z-index: 0;
-    pointer-events: none;
-    animation: float 6s ease-in-out infinite;
-}*/
-
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-20px); }
@@ -109,7 +67,7 @@ nav a {
     transition: color 0.3s, font-size 0.3s, background 0.3s;
     font-size: 19px;
     padding: 6px 14px;
-    border-radius: 12px;
+    border-radius: 22px;
 }
 
 nav a:hover {
@@ -192,10 +150,14 @@ nav a:hover {
     border: 2px solid var(--input-border);
     outline: none;
     border-radius: 18px;
-    font-size: 18px;
     color: var(--text-main);
     padding: 20px 45px 20px 20px;
     transition: border-color 0.3s, box-shadow 0.3s;
+    margin: 0;
+    padding: 12px 45px 12px 20px;
+    font-size: 16px;
+    text-align: right; /* ✅ لمحاذاة نص الإدخال */
+    direction: rtl;
 }
 
 .input-box input::placeholder {
@@ -205,10 +167,10 @@ nav a:hover {
 .input-box i {
     position: absolute;
     left: 16px;
-    top: 50%;
     transform: translateY(-50%);
     font-size: 22px;
     color: #a0d8ef;
+    top: 68%;
 }
 
 .wrapper .btn {
@@ -287,3 +249,30 @@ nav a:hover {
   align-items: center;
   margin-bottom: 24px;
 }
+.input-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding-right: 10px;
+    position: relative;
+    height: 72px;
+    direction: rtl; 
+    text-align: right; 
+}
+
+.input-box label {
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: var(--text-main);
+    text-align: right; /* ✅ لمحاذاة الليبل */
+    width: 100%;
+}
+
+.input-box#id-box input {
+    padding-left: 45px;  /* ترك مساحة كافية للأيقونة */
+    padding-right: 30px; /* مساحة للأزرار spinner على اليمين */
+    direction: rtl;
+  }
+ 
+  

@@ -61,7 +61,7 @@
                 </div>
                 <div class="box3">
                     <i class="fas fa-chalkboard-teacher"></i>
-                    <div>اسم الأستاذ المشرف:</div>
+                    <div>اسم المربية المشرفة:</div>
                     <div class="stat-value"><%= teacher_Name %> </div>
                 </div>
                 <div class="box4">
@@ -70,7 +70,15 @@
                     <div class="stat-value"><%= absenceCount %></div>
                 </div>
             </div>
-
+    <!-- الخبرة الحالية -->
+<div class="current-experience-section">
+    <h3 class="section-title">الخبرة الحالية للصف:</h3>
+    <% if (currentExperience && currentExperience.experience_name) { %>
+        <p class="experience-name"><%= currentExperience.experience_name %></p>
+    <% } else { %>
+        <p class="no-experience">لم يتم تحديد خبرة حالية للصف</p>
+    <% } %>
+</div>
             <!-- أنشطة اليوم -->
 <div class="activities-section">
     <div class="section-title" style="display:flex; align-items:center; gap:10px;">
