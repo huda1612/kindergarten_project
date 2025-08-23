@@ -135,6 +135,30 @@
                     </tbody>
                 </table>
             </div>
+             
+            <div class="current-experience-section">
+                <div class="experience-header">
+                    <!-- group 1 -->
+                    <div class="experience-info" id="experienceInfo">
+                        <h3 class="section-title">الخبرة الحالية للصف:</h3>
+                        <% if (currentExperience) { %>
+                            <p id="experienceNameDisplay"><%= currentExperience.experience_name %></p>
+                        <% } else { %>
+                            <input type="text" id="experienceInput" placeholder="أدخل الخبرة الحالية" />
+                        <% } %>
+                    </div>
+            
+                    <!-- group 2 -->
+                    <div class="experience-actions" id="experienceActions">
+                        <% if (currentExperience) { %>
+                            <button id="editExperienceBtn" class="add-btn">تعديل</button>
+                        <% } else { %>
+                            <button id="saveExperienceBtn" class="add-btn">حفظ الخبرة</button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            
 
             <!-- قسم الأنشطة -->
             <div class="activities-section">

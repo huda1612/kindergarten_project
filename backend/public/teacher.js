@@ -549,4 +549,132 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadTodayActivities();
     const today = new Date().toISOString().split('T')[0]; // يعطي "2025-07-18"
     await loadFiles(today);
-});
+
+     // Current Experience Section Logic
+     const experienceDisplayDiv = document.getElementById('experienceDisplay');
+     const experienceInfoDiv = document.getElementById('experienceInfo');
+const experienceActionsDiv = document.getElementById('experienceActions');
+
+     let experienceNameDisplay; // Declared here, assigned inside initializeExperienceDisplay
+     let editExperienceBtn;     // Declared here, assigned inside initializeExperienceDisplay
+     let experienceInput;       // Declared here, assigned inside initializeExperienceDisplay
+     let saveExperienceBtn;     // Declared here, assigned inside initializeExperienceDisplay
+     let cancelEditExperienceBtn; // Declared here, assigned inside editExperience
+ 
+     const classIdElement = document.getElementById("get_class_id");
+     const classId = classIdElement ? classIdElement.dataset.classId : null;
+     let currentExperienceId = null; // To store the ID of the current experience if it exists
+ 
+     // Function to initialize or update the experience display
+     async function initializeExperienceDisplay() {
+         if (!classId) {
+             console.error("Class ID not found. Cannot manage experience.");
+             return;
+         }
+         try {
+             const response = await fetch(`/api/experience/${classId}`);
+             const data = await response.json();
+             if (data.success && data.experience) {
+              currentExperienceId = data.experience.id;
+          
+              // الجزء الخاص بالمعلومات
+              experienceInfoDiv.innerHTML = `
+                  <h3 class="section-title">الخبرة الحالية للصف:</h3>
+                  <p id="experienceNameDisplay">${data.experience.experience_name}</p>
+              `;
+          
+              // الجزء الخاص بالأزرار
+              experienceActionsDiv.innerHTML = `
+                  <button id="editExperienceBtn" class="add-btn">تعديل</button>
+              `;
+          
+              editExperienceBtn = document.getElementById('editExperienceBtn');
+              if (editExperienceBtn) {
+                  editExperienceBtn.addEventListener('click', editExperience);
+              }
+          
+          } else {
+              experienceInfoDiv.innerHTML = `
+                  <h3 class="section-title">الخبرة الحالية للصف:</h3>
+                  <input type="text" id="experienceInput" placeholder="أدخل الخبرة الحالية" />
+              `;
+          
+              experienceActionsDiv.innerHTML = `
+                  <button id="saveExperienceBtn" class="add-btn">حفظ الخبرة</button>
+              `;
+          
+              experienceInput = document.getElementById('experienceInput');
+              saveExperienceBtn = document.getElementById('saveExperienceBtn');
+              if (saveExperienceBtn) {
+                  saveExperienceBtn.addEventListener('click', saveExperience);
+              }
+          }
+          
+         } catch (error) {
+             console.error("Error fetching current experience:", error);
+             alert("حدث خطأ أثناء جلب الخبرة الحالية.");
+         }
+     }
+ 
+     async function saveExperience() {
+         // Ensure experienceInput is correctly referenced
+         const inputElement = document.getElementById('experienceInput');
+         const experienceName = inputElement ? inputElement.value.trim() : '';
+         
+         if (!experienceName) {
+             alert("الرجاء إدخال اسم الخبرة.");
+             return;
+         }
+ 
+         try {
+             const response = await fetch('/api/experience', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ 
+                     classId: classId, 
+                     experienceName: experienceName, 
+                     experienceId: currentExperienceId // Pass ID if updating
+                 })
+             });
+             const data = await response.json();
+             if (data.success) {
+                 alert(data.message);
+                 initializeExperienceDisplay(); // Re-render to show updated state
+             } else {
+                 alert("فشل الحفظ: " + (data.message || ''));
+             }
+         } catch (error) {
+             console.error("Error saving experience:", error);
+             alert("حدث خطأ أثناء حفظ الخبرة.");
+         }
+     }
+ 
+     function editExperience() {
+      const currentNameDisplay = document.getElementById('experienceNameDisplay');
+      const currentName = currentNameDisplay ? currentNameDisplay.textContent : '';
+  
+      experienceInfoDiv.innerHTML = `
+          <h3 class="section-title">الخبرة الحالية للصف:</h3>
+          <input type="text" id="experienceInput" value="${currentName}" />
+      `;
+  
+      experienceActionsDiv.innerHTML = `
+          <button id="saveExperienceBtn" class="add-btn">حفظ التعديل</button>
+          <button id="cancelEditExperienceBtn" class="add-btn">إلغاء</button>
+      `;
+  
+      experienceInput = document.getElementById('experienceInput');
+      saveExperienceBtn = document.getElementById('saveExperienceBtn');
+      cancelEditExperienceBtn = document.getElementById('cancelEditExperienceBtn');
+  
+      if (saveExperienceBtn) {
+          saveExperienceBtn.addEventListener('click', saveExperience);
+      }
+      if (cancelEditExperienceBtn) {
+          cancelEditExperienceBtn.addEventListener('click', initializeExperienceDisplay);
+      }
+  }
+  
+     
+     initializeExperienceDisplay(); // Initial call to set up the display
+ });

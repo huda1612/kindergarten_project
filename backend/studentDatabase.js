@@ -112,3 +112,4 @@ export async function getNotesByStudentIdInDateRange(studentId, startDate, endDa
   const rows = await executeQuery(query, [studentId, startDate, endDate]);
   return rows;
 }
+

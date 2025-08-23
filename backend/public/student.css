@@ -477,3 +477,51 @@ button:hover {
   #todayActivities > h4 {
     margin: 12px 0 10px; /* مسافة قبل وبعد العنوان */
   }
+  .current-experience-section {
+    background: linear-gradient(120deg, #fff 80%, #a0d8ef11 100%);
+    padding: 32px 28px;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(160, 216, 239, 0.10);
+    margin-bottom: 20px;
+    border: 3px solid #a0d8ef;
+    transition: 0.3s;
+}
+
+.current-experience-section:hover {
+    transform: translateY(-7px) scale(1.01);
+    box-shadow: 0 12px 32px rgba(255, 182, 185, 0.13);
+}
+
+.current-experience-section h3 {
+    color: #ff6666;
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.experience-name {
+    font-size: 18px;
+    color: #333;
+    font-weight: 500;
+    padding: 15px;
+    background: linear-gradient(120deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border: 2px solid #a0d8ef;
+    text-align: center;
+}
+
+.no-experience {
+    font-size: 16px;
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+
+#todayActivities .activity-item i {
+    color: #ff6666 !important;   /* زهري ثابت */
+}

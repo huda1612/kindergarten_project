@@ -317,7 +317,12 @@ export async function promoteEntireClass(class_id) {
     );
 
     if (nextLevelRes.length === 0) {
-      return { success: false, message: "لا يوجد مستوى أعلى للترقية" };
+      const studentsInClass = await executeQuery(`SELECT id FROM students WHERE class_id = ?`, [class_id]);
+      for (const student of studentsInClass) {
+        await deleteStudent(student.id);
+      }
+      await executeQuery(`DELETE FROM classes WHERE id = ?`, [class_id]);
+      return { success: true, message: "تم تخريج الصف بنجاح وحذف جميع الطلاب المرتبطين به." };
     }
 
     // تحديث مستوى الصف نفسه
@@ -349,4 +354,55 @@ export async function getGuardiansForStudentForm() {
     ORDER BY g.first_name, g.last_name
   `);
   return result;
+}
+export async function addExperience(classId, experienceName) {
+  try {
+    const result = await executeQuery(
+      `INSERT INTO class_experience (class_id, experience_name) VALUES (?, ?)`,
+      [classId, experienceName]
+    );
+    return { success: true, message: "تم إضافة الخبرة بنجاح", experienceId: result.insertId };
+  } catch (err) {
+    console.error("خطأ في إضافة الخبرة:", err);
+    return { success: false, message: "حدث خطأ أثناء إضافة الخبرة" };
+  }
+}
+
+export async function getExperienceByClassId(classId) {
+  try {
+    const result = await executeQuery(
+      `SELECT id, experience_name FROM class_experience WHERE class_id = ? ORDER BY id DESC LIMIT 1`,
+      [classId]
+    );
+    return result[0] || null; // Returns the latest experience or null if not found
+  } catch (err) {
+    console.error("خطأ في جلب الخبرة:", err);
+    return null;
+  }
+}
+
+export async function updateExperience(experienceId, experienceName) {
+  try {
+    await executeQuery(
+      `UPDATE class_experience SET experience_name = ? WHERE id = ?`,
+      [experienceName, experienceId]
+    );
+    return { success: true, message: "تم تحديث الخبرة بنجاح" };
+  } catch (err) {
+    console.error("خطأ في تحديث الخبرة:", err);
+    return { success: false, message: "حدث خطأ أثناء تحديث الخبرة" };
+  }
+}
+
+export async function deleteExperience(experienceId) {
+  try {
+    await executeQuery(
+      `DELETE FROM class_experience WHERE id = ?`,
+      [experienceId]
+    );
+    return { success: true, message: "تم حذف الخبرة بنجاح" };
+  } catch (err) {
+    console.error("خطأ في حذف الخبرة:", err);
+    return { success: false, message: "حدث خطأ أثناء حذف الخبرة" };
+  }
 }
