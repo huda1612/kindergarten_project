@@ -310,16 +310,6 @@ export async function updateClassTeacherById(classId  , oldTeacherId , newTeache
     if(teacherExist.length === 0)
         return {success : false , message : "هذه المربية غير موجودة"} ;
 
-    /*
-    //اتأكد ان المعلمة الجديد ما الها اي صف 
-    const classCheck =await executeQuery(`
-        SELECT * FROM classes WHERE teacher_id = ?
-        `,[newTeacherId])
-    if(classCheck.length != 0)
-          return {success : false , message : "هذا المعلمة يدرس صف اخر" }
-
-    */
-
    //خليه ما بقا بعلم صف لو كان بعلم
    const oldClassChange =await executeQuery(`
         SELECT * FROM classes WHERE teacher_id = ?

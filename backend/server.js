@@ -290,7 +290,7 @@ app.get('/teacher', async (req, res) => {
     }
     const currentExperience = classId ? await getExperienceByClassId(classId) : null;
     if(!classId){
-      res.render('noclass')
+      res.render('noclass', {name_With_Nikname})
     }
     else
       res.render('teacher', { classId , className, full_name, name_With_Nikname, student_count, absence_count, attendance_count, activity_count, students, activities: activity_names, currentExperience })
