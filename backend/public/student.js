@@ -44,40 +44,10 @@ currentActivitiesDate = date || new Date().toISOString().split('T')[0];
 const totalCount = mainActivities.length + englishActivities.length;
 if (totalCount === 0) {
       const dayIdx = new Date(currentActivitiesDate).getDay(); // 0-6, 5=Friday, 6=Saturday
-
       if (dayIdx === 5 || dayIdx === 6) {
-        // جرّب عرض أنشطة الخميس السابق
-        const thursday = previousSpecificWeekday(currentActivitiesDate, 4);
-        if (thursday) {
-          // جلب مباشر لأنشطة الخميس
-          let thUrl = '/api/getTodayActivityList' + `?date=${thursday}`;
-          const thRes = await fetch(thUrl);
-          if (thRes.ok) {
-            const thData = await thRes.json();
-            const thActs = thData.dailyActivities || [];
-            if (thActs.length > 0) {
-              thActs.forEach((act) => {
-                const div = document.createElement('div');
-                div.classList.add('activity-item');
-                div.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-          <i class="fas ${act.icon}" style="font-size: 20px; color :#e74c3c"></i>
-          <div style="flex: 1;">
-            <strong>${act.name}</strong><br/>
-            <small>${act.description || 'بدون وصف'}</small>
-          </div>
-        </div>
-              `;
-                container.appendChild(div);
-              });
-              return;
-            }
-          }
-        }
         container.innerHTML = `<p>عطلة سعيدة، لا يوجد أنشطة اليوم</p>`;
         return;
       }
-
       container.innerHTML = `<p>لا توجد أنشطة مضافة لهذا اليوم${date ? ' ('+date+')' : ''}</p>`;
       return;
     }
@@ -213,8 +183,10 @@ function renderAct(act, isEnglish = false) {
     <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
       <i class="fas ${act.icon}" style="font-size: 20px; color :${isEnglish ? '#2980b9' : '#e74c3c'}"></i>
       <div style="flex: 1;">
-        <strong>${act.name}</strong><br/>
-        <small>${act.description || 'بدون وصف'}</small>
+        <strong style="font-size: 16px; color: #2c3e50;">${act.name}</strong><br/>
+        <small style="color: ${isEnglish ? '#2980b9' : '#ff6666'}; font-size: 13px; font-weight: bold; background: ${isEnglish ? '#e3f2fd' : '#fff5f5'}; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 3px 0;">${act.category || 'بدون تصنيف'}</small><br/>
+        <small style="color: #7f8c8d; font-size: 12px; margin-top: 5px; display: block;">${act.description || 'بدون وصف'}</small>
+
       </div>
     </div>
   `;
@@ -364,7 +336,8 @@ async function loadFiles(date) {
             "<p>خطأ في تحميل ملفات اليوم</p>";
     }}
 
-
+    
+    
 //******************************************************************************** */
 
 // تحميل تلقائي عند فتح الصفحة

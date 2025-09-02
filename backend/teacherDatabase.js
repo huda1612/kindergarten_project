@@ -112,8 +112,8 @@ export async function getClassIdByTeacherId(teacherId) {
 
 //تابع لرد قائمة اسماء الانشطه الممكنه 
 export async function getActivityNames(){
-  const rows = await executeQuery('SELECT name , icon FROM activities WHERE type="main"')
-  return rows ;
+  const rows = await executeQuery('SELECT name , icon, category FROM activities WHERE type="main"')
+    return rows ;
 }
 
 

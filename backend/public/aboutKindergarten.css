@@ -134,8 +134,10 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: center;
+    justify-content: flex-start;
 }
+
+
 
 .activity-box {
     width: 280px;
@@ -151,6 +153,7 @@ h2 {
     justify-content: flex-start;
     overflow: hidden;
 }
+
 
 .activity-box h3{
     color: #ff6666;

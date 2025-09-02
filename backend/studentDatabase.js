@@ -34,15 +34,10 @@ export async function getClassIdByStudentId(studentId) {
 }
 
 
-// تابع لإضافة ملاحظة جديدة عن الطالب مع حذف أي ملاحظة موجودة لليوم
 export async function insertNote(studentId, content, date) {
-  // احذف أي ملاحظة موجودة لهذا الطالب في نفس اليوم
-  const deleteQuery = `DELETE FROM notes WHERE student_id = ? AND date = ?`;
-  await executeQuery(deleteQuery, [studentId, date]);
-  
-  // أضف الملاحظة الجديدة
-  const insertQuery = `INSERT INTO notes (student_id, content, date) VALUES (?, ?, ?)`;
-  return await executeQuery(insertQuery, [studentId, content, date]);
+  const query = `INSERT INTO notes (student_id, content, date) VALUES (?, ?, ?)`;
+  const params = [studentId, content, date];
+  return await executeQuery(query, params);
 }
 
 export async function deleteNote(studentId, date) {
@@ -123,12 +118,30 @@ export async function getTodayNoteByStudentId(studentId) {
   return rows[0]?.content || null;
 }
 
+
 export async function getNotesByStudentIdInDateRange(studentId, startDate, endDate) {
   const query = `
-    SELECT DATE(date) AS date, content
+    SELECT 
+      DATE(
+        COALESCE(
+          /* إذا كان الحقل نصيًا، جرّب صيغة YYYY-MM-DD ثم DD-MM-YYYY */
+          STR_TO_DATE(date, '%Y-%m-%d'),
+          STR_TO_DATE(date, '%d-%m-%Y'),
+          /* في حال كان الحقل DATE أصلاً */
+          date
+        )
+      ) AS date,
+      content
     FROM notes
-    WHERE student_id = ? AND DATE(date) BETWEEN ? AND ?
-    ORDER BY DATE(date) ASC
+    WHERE student_id = ?
+      AND DATE(
+        COALESCE(
+          STR_TO_DATE(date, '%Y-%m-%d'),
+          STR_TO_DATE(date, '%d-%m-%Y'),
+          date
+        )
+      ) BETWEEN ? AND ?
+    ORDER BY date ASC
   `;
   const rows = await executeQuery(query, [studentId, startDate, endDate]);
   return rows;

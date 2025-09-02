@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 const pool = mysql.createPool({
   host: '127.0.0.1' ,
   user: 'root',
-  password: '1234',
+  password: 'nona2003',
   database: 'kindergarten'
   
 }).promise();
@@ -191,14 +191,14 @@ export async function getTodayActivityListByClass(classId, date = null, type = '
   let query, params;
   if (targetDate === 'CURRENT_DATE') {
     query = `
-      SELECT d.id, a.name, d.description, a.icon, a.type
+      SELECT d.id, a.name, d.description, a.icon, a.type, a.category
       FROM daily_activities d
       JOIN activities a ON d.activity_id = a.id
       WHERE d.class_id = ? AND d.date = CURRENT_DATE AND a.type = ?`;
     params = [classId, type];
   } else {
     query = `
-      SELECT d.id, a.name, d.description, a.icon, a.type
+      SELECT d.id, a.name, d.description, a.icon, a.type, a.category
       FROM daily_activities d
       JOIN activities a ON d.activity_id = a.id
       WHERE d.class_id = ? AND DATE(d.date) = ? AND a.type = ?`;
@@ -207,7 +207,6 @@ export async function getTodayActivityListByClass(classId, date = null, type = '
   const rows = await executeQuery(query, params);
   return rows;
 }
-
 
 export async function getFlieListByClass(classId , date ){
   const date2 = date ;
@@ -226,12 +225,13 @@ export async function getFlieListByClass(classId , date ){
 export async function insertTodayDailyActivity(activityName, classId , description , date) {
   try{
     const [activity] = await executeQuery(
-            'SELECT id FROM activities WHERE name = ?',
+            'SELECT id, category FROM activities WHERE name = ?',
             [activityName ]
         );
         if (!activity) throw new Error("النشاط غير موجود");
 
         const activityId = activity.id;
+        
 
     const existing = await executeQuery(
       'SELECT id FROM daily_activities WHERE activity_id = ? AND class_id = ?  AND date = ?',
@@ -239,13 +239,14 @@ export async function insertTodayDailyActivity(activityName, classId , descripti
     if (existing.length > 0) throw new Error("النشاط مسجل بالفعل اليوم لهذا الصف");
 
     return await executeQuery(`
-      INSERT INTO daily_activities (activity_id, class_id, date , description )
-      VALUES (?, ?,? , ?) `, [activityId, classId , date, description]);
+      INSERT INTO daily_activities (activity_id, class_id, date, description)
+      VALUES (?, ?, ?, ?) `, [activityId, classId, date, description]);
     }catch(err){
     console.error("فشل إضافة النشاط:", err.message);
     throw err;
   }
 }
+
 
 //تابع حذف نشاط يومي 
 // تابع حذف نشاط يومي حسب اسم النشاط و classId

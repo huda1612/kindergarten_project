@@ -125,8 +125,9 @@ async function loadTodayActivities(date = null) {
   <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
     <i class="fas ${act.icon}" style="font-size: 20px; color :#e74c3c"></i>
     <div style="flex: 1;">
-      <strong>${act.name}</strong><br/>
-      <small>${act.description || "بدون وصف"}</small>
+      <strong style="font-size: 16px; color: #2c3e50;">${act.name}</strong><br/>
+      <small style="color: #ff6666; font-size: 13px; font-weight: bold; background: #fff5f5; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 3px 0;">${act.category || "بدون تصنيف"}</small><br/>
+      <small style="color: #7f8c8d; font-size: 12px; margin-top: 5px; display: block;">${act.description || "بدون وصف"}</small>
     </div>
   </div>
 `;
@@ -453,62 +454,86 @@ function fillActsDateSelects() {
 function fillActivityOptions() {
   const container = document.getElementById('activityOptions');
   container.innerHTML = '';
-  
-  if (typeof activities !== 'undefined' && Array.isArray(activities)) {
-    activities.forEach(act => {
-      const activityDiv = document.createElement('div');
-      activityDiv.className = 'activity-option';
-      activityDiv.style.cssText = `
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background: white;
-      `;
-      
-      activityDiv.innerHTML = `
-        <i class="fas ${act.icon}" style="font-size: 24px; color: #e74c3c; margin-bottom: 8px; display: block;"></i>
-        <span style="font-weight: bold; color: #333;">${act.name}</span>
-      `;
-      
-      // إضافة تأثيرات عند التمرير
-      activityDiv.addEventListener('mouseenter', () => {
-        activityDiv.style.borderColor = '#e74c3c';
-        activityDiv.style.backgroundColor = '#f8f9fa';
-        activityDiv.style.transform = 'translateY(-2px)';
-      });
-      
-      activityDiv.addEventListener('mouseleave', () => {
-        activityDiv.style.borderColor = '#ddd';
-        activityDiv.style.backgroundColor = 'white';
-        activityDiv.style.transform = 'translateY(0)';
-      });
-      
-      // عند النقر على النشاط
-      activityDiv.addEventListener('click', async () => {
-        // إزالة التحديد من جميع الأنشطة
-        document.querySelectorAll('.activity-option').forEach(opt => {
-          opt.style.borderColor = '#ddd';
-          opt.style.backgroundColor = 'white';
-        });
-        
-        // تحديد النشاط المختار
-        activityDiv.style.borderColor = '#e74c3c';
-        activityDiv.style.backgroundColor = '#e8f5e8';
-        
-        // إرسال النشاط
-        await submitActivity(act.name);
-      });
-      
-      container.appendChild(activityDiv);
-    });
+
+  // التحقق من وجود الأنشطة
+  if (!activities || activities.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: #666; font-size: 16px; padding: 20px;">لا توجد أنشطة متاحة حالياً</p>';
+    return;
   }
+  
+  
+  // تجميع الأنشطة حسب التصنيف
+  const activitiesByCategory = {};
+  activities.forEach(act => {
+    const category = act.category || 'عام';
+    if (!activitiesByCategory[category]) {
+      activitiesByCategory[category] = [];
+    }
+    activitiesByCategory[category].push(act);
+  });
+
+  // ترتيب التصنيفات حسب الأهمية
+  const categoryOrder = ['تعليمي', 'فني', 'حركي', 'اجتماعي', 'موسيقي', 'علمي', 'عام'];
+  const sortedCategories = Object.keys(activitiesByCategory).sort((a, b) => {
+    const aIndex = categoryOrder.indexOf(a);
+    const bIndex = categoryOrder.indexOf(b);
+    if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+
+  // عرض كل تصنيف في حاوية منفصلة
+  sortedCategories.forEach(category => {
+    const categoryActivities = activitiesByCategory[category];
+    const categoryContainer = document.createElement('div');
+    categoryContainer.className = 'category-container';
+    categoryContainer.style.cssText = 'margin-bottom: 25px; padding: 20px; border: 2px solid #e0e0e0; border-radius: 12px; background: #f8f9fa; box-shadow: 0 2px 10px rgba(0,0,0,0.05);';
+    
+    const categoryTitle = document.createElement('h4');
+    categoryTitle.textContent = category;
+    categoryTitle.style.cssText = 'margin: 0 0 20px 0; color: #333; font-size: 20px; border-bottom: 3px solid #ff6666; padding-bottom: 8px; font-weight: bold; text-align: center;';
+    categoryContainer.appendChild(categoryTitle);
+
+    // عرض أنشطة هذا التصنيف
+  
+   const activitiesRow = document.createElement('div');
+   
+   
+   categoryActivities.forEach(act => {
+     const div = document.createElement('div');
+     div.className = 'activity-option';
+     div.style.cssText = 'display: flex; flex-direction: column; align-items: center; padding: 15px; border: 2px solid #ddd; border-radius: 8px; background: white; cursor: pointer; transition: all 0.3s ease; text-align: center; min-height: 80px; justify-content: center; min-width: 150px; flex: 1; max-width: 200px;';
+
+      div.innerHTML = `
+       <i class="fas ${act.icon || 'fa-star'}" style="font-size: 24px; color: #ff6666; margin-bottom: 8px;"></i>
+        <span style="font-weight: 500; color: #333; font-size: 14px;">${act.name}</span>
+      `;
+      // إضافة تأثيرات عند التمرير
+      div.addEventListener('mouseenter', () => {
+        div.style.backgroundColor = '#fff5f5';
+        div.style.borderColor = '#ff6666';
+        div.style.transform = 'translateY(-3px)';
+        div.style.boxShadow = '0 6px 20px rgba(255, 102, 102, 0.15)';
+      });
+      
+      div.addEventListener('mouseleave', () => {
+        div.style.backgroundColor = 'white';
+        div.style.borderColor = '#ddd';
+        div.style.transform = 'translateY(0)';
+        div.style.boxShadow = 'none';
+      });
+      // إضافة event listener للنقر
+      div.addEventListener('click', () => submitActivity(act.name, act.category));
+      activitiesRow.appendChild(div);
+    });
+    categoryContainer.appendChild(activitiesRow);
+    container.appendChild(categoryContainer);
+  });
 }
 
 // إرسال النشاط للسيرفر
-async function submitActivity(activityName) {
+async function submitActivity(activityName, category) {
   const description = activityDesc.value;
   const date = activityDateSelect.value;
   
@@ -521,7 +546,7 @@ async function submitActivity(activityName) {
     const res = await fetch('/api/insertTodayDailyActivity', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ activityName, description, date })
+      body: JSON.stringify({ activityName, description, date, category })
     });
     const data = await res.json();
     if (data.success) {

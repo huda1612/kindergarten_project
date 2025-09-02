@@ -67,7 +67,8 @@
             <h1><i class="fas fa-puzzle-piece"></i >    الأنشطة التعليمية والترفيهية في الروضة   </h1>
             <h2> أنشطتنا المتنوعة:</h2>
             <p class="description"> نُقدّم مجموعة من الأنشطة التعليمية الممتعة ، لتنمية مهارات طفلك وتعزيز حبّه للتعلّم من خلال اللعب والاكتشاف </p>
-
+               
+            
             <%AllActivities.forEach(activity =>{%>
             <div class="activity-container">
                 <div class="activity-box">
@@ -75,6 +76,7 @@
                     <p><%=activity.description%></p>
                  </div>
             <% }) %>
+        
         
             </div>
         </div>

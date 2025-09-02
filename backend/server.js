@@ -504,19 +504,40 @@ app.get('/api/getTodayActivityList', async (req, res) => {
 
 app.get('/api/student/weekly-notes', async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.role !== 'student' || !req.session.user.student_id) {
+    if (!req.session.user || req.session.user.role !== 'student') {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    const studentId = req.session.user.student_id;
+    const studentId = req.session.user.student_id || await getTheId(req.session.user.user_id);
 
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 6);
 
-    const fmt = (d) => d.toISOString().split('T')[0];
+    const fmt = (d) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
     const rows = await getNotesByStudentIdInDateRange(studentId, fmt(startDate), fmt(endDate));
 
-    const map = new Map(rows.map(r => [r.date, r.content]));
+    const toKey = (value) => {
+      if (!value) return '';
+      if (value instanceof Date) return fmt(value);
+      if (typeof value === 'string') {
+        // إذا كانت بصيغة YYYY-MM-DD أعدها كما هي
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+        const d = new Date(value);
+        if (!isNaN(d)) return fmt(d);
+        return value;
+      }
+      try {
+        const d = new Date(value);
+        if (!isNaN(d)) return fmt(d);
+      } catch {}
+      return String(value);
+    };
+    const map = new Map(rows.map(r => [toKey(r.date), r.content]));
     const days = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(startDate);
@@ -525,7 +546,7 @@ app.get('/api/student/weekly-notes', async (req, res) => {
       days.push({ date: key, content: map.get(key) || null });
     }
 
-    res.json({ days });
+    res.json({ days, _debug: { studentId, startDate: fmt(startDate), endDate: fmt(endDate), rowCount: rows.length } });
   } catch (err) {
     console.error('Error /api/student/weekly-notes:', err);
     res.status(500).json({ error: 'حدث خطأ في قاعدة البيانات' });
