@@ -4,11 +4,12 @@ import {executeQuery} from './database.js'
 //لشرط الأول: date >= بداية الأسبوع (السبت الحالي)
 //الشرط الثاني: date < بداية الأسبوع + 7 أيام (أي قبل السبت القادم)
 
+//بحسب بداية الأسبوع الحالي بإنقاص عدد الأيام اللي مرقوا من بداية الأسبوع
 export async function weekActivityCount() {
     const result = await executeQuery(`
         SELECT COUNT(*) AS activity_count
         FROM daily_activities
-        WHERE date >= DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) + 2) % 7 DAY)
+        WHERE date >= DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) + 2) % 7 DAY) 
         AND date < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) + 2) % 7 DAY), INTERVAL 7 DAY);
         `)
     return result[0].activity_count ; 
@@ -41,7 +42,7 @@ export async function allClassesCount(){
     return result.classes_count ; 
 }
 
-//تابع لحساب نسبة الحضور خلال الششهر الحالي
+//تابع لحساب نسبة الحضور خلال الشهر الحالي
 //اخدت ايام الغياب هالشهر لكل الطلاب و عدد ايام الحضور الممكنه بهالشهر لكل الطلاب وطرحتهم و قسمتهم عالعدد الكلي 
 //وضربته ب100 لحوله لنسبة
 export async function getMonthAttendanceRate() {
@@ -49,7 +50,7 @@ export async function getMonthAttendanceRate() {
   const studentsResult = await executeQuery(`SELECT COUNT(*) AS total_students FROM students`);
   const totalStudents = studentsResult[0]?.total_students || 0;
   // عدد أيام الشهر الحالي
-  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate(); //يوم 0 في Date، المتصفح بيرجعلك آخر يوم من الشهر السابق.
   // احصل على عدد أيام الغياب (لكل الطلاب)
   const absenceResult = await executeQuery(`
     SELECT COUNT(DISTINCT student_id, date) AS total_absence_days

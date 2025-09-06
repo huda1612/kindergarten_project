@@ -65,7 +65,7 @@ app.use('/uploads', express.static('uploads'));//لتحميل الملفات
 // 5.**************************************************************** ROUTES SECTION *********************************************************************************
 //home page
 app.get('/', (req, res) => {
-  console.log(new Date().toISOString().split('T')[0])
+  //console.log(new Date().toISOString().split('T')[0])
   res.render('home'); 
 })
 
@@ -514,7 +514,7 @@ app.get('/api/student/weekly-notes', async (req, res) => {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 6);
-
+    //لتنسيق التاريخ بشكل YYYY-MM-DD
     const fmt = (d) => {
       const yyyy = d.getFullYear();
       const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -522,7 +522,7 @@ app.get('/api/student/weekly-notes', async (req, res) => {
       return `${yyyy}-${mm}-${dd}`;
     };
     const rows = await getNotesByStudentIdInDateRange(studentId, fmt(startDate), fmt(endDate));
-
+    //دالة مساعدة لتحويل أي قيمة تاريخ  إلى YYYY-MM-DD
     const toKey = (value) => {
       if (!value) return '';
       if (value instanceof Date) return fmt(value);
