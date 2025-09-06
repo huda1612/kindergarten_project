@@ -11,7 +11,7 @@ import iconv from'iconv-lite';//لتزبيط اسم الملف العربي لم
 import { fileURLToPath } from 'url'
 import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass,deleteDailyActivity , insertTodayDailyActivity , register , getFlieListByClass ,deleteFile} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames, saveClassFile, getClassIdByTeacherId , getClassReportByClassId} from './teacherDatabase.js'
-import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , deleteNote , getTodayNoteByStudentId , insertAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
+import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , deleteNote , getTodayNoteByStudentId , insertAbsence , deleteAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
 import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById , updateClassEnglishTeacherById , deleteClassById , insertClass ,getAllGuardiansData,getStudentsWithLinkingStatus,linkStudentToGuardian, 
         unlinkStudentFromGuardian,insertGuardian , updateGuardianById ,deleteGuardianById} from './adminDatabase.js'
 import { getAllClasses , getMaxGradeLevel, getClassInfo, getStudentsByClass, deleteStudent, addStudent, transferStudentToClass, updateStudent, promoteEntireClass,getGuardiansForStudentForm , addExperience, getExperienceByClassId, updateExperience } from './classDatabase.js';
@@ -374,6 +374,8 @@ app.post('/dailyReport' , async (req,res ) => {
       //اذا الطالب غايب 
       if(attendance === false)
         await insertAbsence(student_id , date) ;
+      else //لازم اذا حطه حضران شوف اذا في غياب بهاليوم شيله 
+        await deleteAbsence(student_id , date)
       //اذا في ملاحظة
       if(note && note.trim()!='')
         await insertNote(student_id , note.trim() , date) ;  

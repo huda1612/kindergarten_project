@@ -239,7 +239,7 @@ async function loadFiles(date) {
         <i class="fa-solid fa-file" style="font-size: 20px; color :#e74c3c"></i>
         <div style="flex: 1;">
             <strong>${file.name}</strong><br/>
-            <small>${file.activity_name || "لا يتعلق بنشاط محدد"}</small>
+            <small style="color:  #6a9baeff; font-size: 13px; font-weight: bold; background: #f5faffff; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 3px 0;">${file.activity_name ? "ملف نشاط " + file.activity_name : "لا يتعلق بنشاط محدد"}</small>
             <br>
             <small>${file.description || "بدون وصف"}</small>
         </div>

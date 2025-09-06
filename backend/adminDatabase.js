@@ -15,7 +15,6 @@ export async function getAllMainTeachersData() {
     return result ; 
 }
 
-//بده تعديل لاتأكد من البيانات المدخله ان صح 
 export async function insertTeacher(first_name , last_name , phone , role ,  certificate , description){
     const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/; // يقبل الحروف العربية والانجليزية ومسافات فقط
      if (

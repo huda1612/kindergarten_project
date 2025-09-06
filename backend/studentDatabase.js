@@ -35,6 +35,8 @@ export async function getClassIdByStudentId(studentId) {
 
 
 export async function insertNote(studentId, content, date) {
+  //اولا نحذف الملاحظة القديمة للطالب ان وجدت
+  await executeQuery(`DELETE From notes WHERE student_id=?`,[studentId])
   const query = `INSERT INTO notes (student_id, content, date) VALUES (?, ?, ?)`;
   const params = [studentId, content, date];
   return await executeQuery(query, params);
@@ -47,6 +49,13 @@ export async function deleteNote(studentId, date) {
         );
 }
 
+
+export async function deleteAbsence(studentId, date) {
+   await executeQuery(
+          `DELETE FROM absences WHERE student_id = ? AND date = ?`,
+          [studentId, date]
+        );
+}
 
 //تابع لتسجيل غياب طالب لو كان مافي غياب اله بهاليوم بس
 export async function insertAbsence(studentId, date) {
@@ -99,11 +108,56 @@ export async function getClassNameByStudentId(studentId) {
 
 //تابع يرد عدد مرات غياب طالب محدد
 export async function getAbsenceCountByStudentId(studentId) {
+
+    // هذا الاستعلام يحسب عدد الغيابات خلال السنة الدراسية الحالية
+  // السنة الدراسية تبدأ من 1 أيلول وتنتهي في 31 آب من السنة التالية
+  // إذا كنا بعد شهر أيلول => النطاق من 1 أيلول للسنة الحالية حتى 31 آب للسنة القادمة
+  // إذا كنا قبل شهر أيلول => النطاق من 1 أيلول للسنة الماضية حتى 31 آب للسنة الحالية
+  const result = await executeQuery(`
+    SELECT COUNT(*) AS total_absences
+    FROM absences
+    WHERE student_id = ?
+      AND date BETWEEN 
+        (CASE 
+           WHEN MONTH(CURDATE()) >= 9 
+             THEN CONCAT(YEAR(CURDATE()), '-09-01')
+           ELSE CONCAT(YEAR(CURDATE()) - 1, '-09-01')
+         END)
+        AND 
+        (CASE 
+           WHEN MONTH(CURDATE()) >= 9 
+             THEN CONCAT(YEAR(CURDATE()) + 1, '-08-31')
+           ELSE CONCAT(YEAR(CURDATE()), '-08-31')
+         END)
+  `, [studentId]);
+
+  return result[0].total_absences;
+
+  /*
+  const result = await executeQuery(`
+    SELECT COUNT(*) AS total_absences
+    FROM absences
+    WHERE student_id = ?
+      AND date BETWEEN 
+        (IF(MONTH(CURDATE()) >= 9, 
+            CONCAT(YEAR(CURDATE()), '-09-01'),
+            CONCAT(YEAR(CURDATE()) - 1, '-09-01')))
+        AND 
+        (IF(MONTH(CURDATE()) >= 9, 
+            CONCAT(YEAR(CURDATE()) + 1, '-06-30'),
+            CONCAT(YEAR(CURDATE()), '-06-30')))
+  `, [studentId]);
+
+  return result[0].total_absences;
+
+  /*
+
   const rows = await executeQuery(
     `SELECT COUNT(*) AS absence_count FROM absences WHERE student_id = ?`,
     [studentId]
   );
   return rows[0]?.absence_count || 0;
+  */
 }
 
 //تابع يرد ملاحظة اليوم لطالب محدد

@@ -30,10 +30,10 @@
         <div class="sidebar">
             <p>القائمة الرئيسية</p>
             <a class="menu-item" href="#stu"><i class="fas fa-child"></i><span>معلومات الطالب</span></a>
-            <a class="menu-item" href="#"><i class="fas fa-book-open"></i><span>خبرة الصف الحالية </span></a>
-            <a class="menu-item" href="#"><i class="fas fa-puzzle-piece"></i><span>قسم الأنشطة</span></a>
-            <a class="menu-item" href="#"><i class="fas fa-file"></i><span>قسم الملفات</span></a>
-            <a class="menu-item" href="#"><i class="fas fa-sticky-note"></i><span> ملاحظات الأسبوع</span></a>
+            <a class="menu-item" href="#exp"><i class="fas fa-book-open"></i><span>خبرة الصف الحالية </span></a>
+            <a class="menu-item" href="#act"><i class="fas fa-puzzle-piece"></i><span>قسم الأنشطة</span></a>
+            <a class="menu-item" href="#fil"><i class="fas fa-file"></i><span>قسم الملفات</span></a>
+            <a class="menu-item" href="#not"><i class="fas fa-sticky-note"></i><span> ملاحظات الأسبوع</span></a>
 
         </div>
 
@@ -72,7 +72,7 @@
                 </div>
             </div>
     <!-- الخبرة الحالية -->
-<div class="current-experience-section">
+<div class="current-experience-section" id="exp">
     <h3 class="section-title">الخبرة الحالية للصف:</h3>
     <% if (currentExperience && currentExperience.experience_name) { %>
         <p class="experience-name"><%= currentExperience.experience_name %></p>
@@ -81,7 +81,7 @@
     <% } %>
 </div>
             <!-- أنشطة اليوم -->
-<div class="activities-section">
+<div class="activities-section" id="act">
     <div class="section-title" style="display:flex; align-items:center; gap:10px;">
         <h3 style="margin:0;">أنشطة اليوم</h3>
         <button id="showActivitiesByDateBtn" class="add-btn" type="button">عرض أنشطة يوم آخر</button>
@@ -104,7 +104,7 @@
 <!-- قسم الملفات -->
 <section class="section-box">
 <!-- قسم الملفات -->
-    <div class="files-section">
+    <div class="files-section" id="fil">
         <div class="section-title">
             <h3 id="file">ملفات اليوم</h3>
 
@@ -131,7 +131,7 @@
 
 
 <!-- ملاحظات الأسبوع -->
-<section class="section-box">
+<section class="section-box" id="not">
     <h3>ملاحظات الأسبوع:</h3>
     <table>
       <thead>

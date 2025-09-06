@@ -68,9 +68,8 @@
             <h2> أنشطتنا المتنوعة:</h2>
             <p class="description"> نُقدّم مجموعة من الأنشطة التعليمية الممتعة ، لتنمية مهارات طفلك وتعزيز حبّه للتعلّم من خلال اللعب والاكتشاف </p>
                
-            
-            <%AllActivities.forEach(activity =>{%>
             <div class="activity-container">
+            <%AllActivities.forEach(activity =>{%>
                 <div class="activity-box">
                     <h3><i class="fas <%=activity.icon%>"></i > <%=activity.name%></h3>
                     <p><%=activity.description%></p>

@@ -127,7 +127,7 @@ async function loadTodayActivities(date = null) {
     <div style="flex: 1;">
       <strong style="font-size: 16px; color: #2c3e50;">${act.name}</strong><br/>
       <small style="color: #ff6666; font-size: 13px; font-weight: bold; background: #fff5f5; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 3px 0;">${act.category || "بدون تصنيف"}</small><br/>
-      <small style="color: #7f8c8d; font-size: 12px; margin-top: 5px; display: block;">${act.description || "بدون وصف"}</small>
+      <small style="color: #272d2dff; font-size: 13px; margin-top: 5px; display: block;">${act.description || "بدون وصف"}</small>
     </div>
   </div>
 `;
@@ -226,7 +226,7 @@ async function loadFiles(date) {
         <i class="fa-solid fa-file" style="font-size: 20px; color :#e74c3c"></i>
         <div style="flex: 1;">
             <strong>${file.name}</strong><br/>
-            <small>${file.activity_name || "لا يتعلق بنشاط محدد"}</small>
+            <small style="color:  #6a9baeff; font-size: 13px; font-weight: bold; background: #f5faffff; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 3px 0;">${file.activity_name ? "ملف نشاط " + file.activity_name : "لا يتعلق بنشاط محدد"}</small>
             <br>
             <small>${file.description || "بدون وصف"}</small>
         </div>
