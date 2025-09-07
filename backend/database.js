@@ -280,7 +280,13 @@ export async function deleteFile( fileId , classId) {
   return {success : true} ;
 }
 
-
+export async function getFileInfo( fileId ) {
+    const [file] = await executeQuery(
+      "SELECT name, path FROM files WHERE id = ?",
+      [fileId]
+    );
+    return file ; 
+}
 //*********************************************************CLASS FUNCTIONS END**********************************************************************
 
 

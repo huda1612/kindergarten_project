@@ -232,7 +232,7 @@ async function loadFiles(date) {
         </div>
     </div>
     <div class="file-actions">
-        <a href=${file.path} class="download-btn" download>
+        <a href="/files/${file.id}" class="download-btn" >
             <i class="fas fa-download"></i>
             تحميل
         </a>

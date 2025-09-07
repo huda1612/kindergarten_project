@@ -245,7 +245,7 @@ async function loadFiles(date) {
         </div>
     </div>
     <div class="file-actions">
-        <a href=${file.path} class="download-btn" download>
+        <a href="/files/${file.id}" class="download-btn" >
             <i class="fas fa-download"></i>
             تحميل
         </a>
@@ -552,11 +552,11 @@ async function submitActivity(activityName) {
             activityItem.remove();
         });
     }
-
+    /*
     // رفع ملف
     document.querySelector(".files-section .add-btn").addEventListener("click", function () {
         alert("سيتم فتح نافذة لاختيار الملفات");
-    });
+    });*/
 };
 
 function toggleActivityOptions() {

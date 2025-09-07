@@ -4,12 +4,13 @@ import cors from 'cors'
 import path from 'path'
 import multer from 'multer'
 import fs from "fs/promises"; 
+import fs1 from "fs" ;
 import iconv from'iconv-lite';//لتزبيط اسم الملف العربي لما بينرفع
 
 
 
 import { fileURLToPath } from 'url'
-import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass,deleteDailyActivity , insertTodayDailyActivity , register , getFlieListByClass ,deleteFile} from './database.js'
+import {authentication , getTheId , getTeacherRole , getTodayActivityListByClass,deleteDailyActivity , insertTodayDailyActivity , register , getFlieListByClass ,deleteFile , getFileInfo} from './database.js'
 import {getTeacherFullName , getTeacherNameWithNikname, getStudentCountForTeacher , getTodayAbsenceCount , getTodayActivityCount , getStudentsByTeacher , getActivityNames, saveClassFile, getClassIdByTeacherId , getClassReportByClassId} from './teacherDatabase.js'
 import {getStudentFullName , getStudentNameWithNikname ,getClassNameByStudentId, getAbsenceCountByStudentId, insertNote , deleteNote , getTodayNoteByStudentId , insertAbsence , deleteAbsence , getTeacherNameByStudentId ,  getNotesByStudentIdInDateRange} from './studentDatabase.js'
 import {getAllMainTeachersData , insertTeacher , updateClassTeacher , deleteTeacherById , updateTeacherById ,getAllEngTeachersData, getEnglishTeachersWithClasses ,    getGradeLevels , getAllClassesData , updateClassNameById , updateClassTeacherById , updateClassEnglishTeacherById , deleteClassById , insertClass ,getAllGuardiansData,getStudentsWithLinkingStatus,linkStudentToGuardian, 
@@ -773,6 +774,77 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "خطأ في قواعد البيانات" });
+  }
+});
+
+/*
+//لتحميل ملف
+app.get("/files/:id", async (req, res) => {
+  try {
+    const fileId = req.params.id;
+    const file = await getFileInfo(fileId) ;
+
+    if (!file) return res.status(404).send("الملف غير موجود");
+
+    // المسار الفعلي على السيرفر
+    const filePath = path.join(__dirname, file.path.replace(/\\/g, "/"));
+
+    // تحميل بالاسم الأصلي
+    res.download(filePath, file.name, (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send("خطأ في تحميل الملف");
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("خطأ في السيرفر");
+  }
+});
+*/
+
+
+app.get("/files/:id", async (req, res) => {
+  try {
+    const fileId = req.params.id;
+    const file = await getFileInfo(fileId);
+
+    if (!file) return res.status(404).send("الملف غير موجود");
+
+    const filePath = path.join(__dirname, file.path.replace(/\\/g, "/"));
+
+    if (!fs1.existsSync(filePath)) {
+      return res.status(404).send("الملف غير موجود على السيرفر");
+    }
+
+    // نطبع المسار + حجم الملف
+    const stats = fs1.statSync(filePath);
+    console.log("📂 المسار:", filePath);
+    console.log("📦 الحجم:", stats.size, "bytes");
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename*=UTF-8''${encodeURIComponent(file.name)}`
+    );
+    res.setHeader("Content-Length", stats.size);
+    res.setHeader("Content-Type", "application/octet-stream");
+
+    const stream = fs1.createReadStream(filePath);
+    stream.pipe(res);
+
+    stream.on("error", (err) => {
+      console.error("❌ خطأ أثناء قراءة الملف:", err);
+      if (!res.headersSent) {
+        res.status(500).end("خطأ في قراءة الملف");
+      } else {
+        res.end();
+      }
+    });
+  } catch (err) {
+    console.error("❌ خطأ في السيرفر:", err);
+    if (!res.headersSent) {
+      res.status(500).send("خطأ في السيرفر");
+    }
   }
 });
 
