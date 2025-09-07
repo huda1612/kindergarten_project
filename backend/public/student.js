@@ -94,13 +94,17 @@ async function loadWeeklyNotes() {
     tableBody.innerHTML = '';
 
     days.forEach(({ date, content }) => {
+      const dayName = new Date(date).toLocaleDateString('ar-EG', { weekday: 'long' });
+      if(dayName === 'الجمعة' || dayName === 'السبت') return; // تجاهل عطلة الأسبوع
+    
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${new Date(date).toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
+        <td>${dayName} ${new Date(date).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
         <td>${content ? content : 'لا يوجد ملاحظة'}</td>
       `;
       tableBody.appendChild(tr);
     });
+    
   } catch (err) {
     console.error(err);
     const tableBody = document.getElementById('weekly-notes-body');

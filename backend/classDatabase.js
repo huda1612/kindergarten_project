@@ -2,8 +2,16 @@ import { executeQuery } from './database.js';
 
 //بجيب كل الصفوف
 export async function getAllClasses() {
-  return await executeQuery('SELECT id, class_name FROM classes ORDER BY class_name');
+  return await executeQuery(`
+    SELECT c.id, c.class_name, c.grade_level_id, 
+           COUNT(s.id) AS student_count
+    FROM classes c
+    LEFT JOIN students s ON s.class_id = c.id
+    GROUP BY c.id, c.class_name, c.grade_level_id
+    ORDER BY c.class_name
+  `);
 }
+
 // دالة جلب أعلى مستوى دراسي
 export async function getMaxGradeLevel() {
   const result = await executeQuery('SELECT MAX(id) AS maxLevel FROM grade_levels');
@@ -140,7 +148,18 @@ export async function addStudent(studentData) {
     if (classCheck.length === 0) {
       return { success: false, message: "الصف غير موجود" };
     }
-
+    
+        // تحقق من عدد الطلاب الحاليين بالصف
+        const maxStudents = 35; // هون بتحطي الحد اللي بدك ياه
+        const studentCount = await executeQuery(
+          `SELECT COUNT(*) AS count FROM students WHERE class_id = ?`,
+          [class_id]
+        );
+    
+        if (studentCount[0].count >= maxStudents) {
+          return { success: false, message: "❌ الصف ممتلئ، لا يمكن إضافة طالب جديد" };
+        }
+    
     // تحقق من وجود طالب بنفس الاسم والكنية وتاريخ الميلاد والصف
     const existingStudent = await executeQuery(`
       SELECT id FROM students
@@ -229,6 +248,18 @@ export async function transferStudentToClass(student_id, new_class_id) {
     if (duplicateCheck.length > 0) {
       return { success: false, message: "طالب بنفس المعلومات موجود مسبقًا في الصف الجديد" };
     }
+
+    // ✅ تحقق من عدد الطلاب في الصف الجديد
+    const maxStudents = 35; // حطي العدد اللي بدك ياه
+    const studentCount = await executeQuery(
+      `SELECT COUNT(*) AS count FROM students WHERE class_id = ?`,
+      [new_class_id]
+    );
+
+    if (studentCount[0].count >= maxStudents) {
+      return { success: false, message: "❌ الصف الجديد ممتلئ، لا يمكن نقل الطالب إليه" };
+    }
+
 
     // نفّذ عملية النقل
     await executeQuery(`UPDATE students SET class_id = ? WHERE id = ?`, [new_class_id, student_id]);

@@ -1,4 +1,7 @@
 let allStudentsData = []; // To store all students fetched from the server
+let selectedStudentIds = []; // لتخزين الطلاب اللي تم اختيارهم
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure modal is hidden on initial page load to prevent flicker
@@ -43,6 +46,13 @@ async function fetchStudentsForGuardian(guardianId) {
 
 function populateStudentsInModal(studentsToDisplay, guardianId) {
   const container = document.getElementById('studentsCheckboxes');
+  const checkboxes = document.querySelectorAll('#studentsCheckboxes input[type="checkbox"]');
+checkboxes.forEach(cb => {
+  if (cb.checked && !selectedStudentIds.includes(cb.value)) {
+    selectedStudentIds.push(cb.value);
+  }
+});
+
   container.innerHTML = ''; // Clear previous content
 
   const relations = [
@@ -67,7 +77,7 @@ function populateStudentsInModal(studentsToDisplay, guardianId) {
     studentInfo.className = 'student-info';
 
     const checkboxId = `student-${student.id}`;
-    const isLinked = student.linked_to_current_guardian;
+    const isLinked = student.linked_to_current_guardian || selectedStudentIds.includes(student.id.toString());
 
     studentInfo.innerHTML = `
       <input type="checkbox" id="${checkboxId}" value="${student.id}" ${isLinked ? 'checked' : ''}>

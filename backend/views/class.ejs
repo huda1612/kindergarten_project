@@ -487,9 +487,16 @@
         <label for="newClassId">اختر الصف الجديد:</label>
         <select name="newClassId" id="newClassId" required>
           <% classes.forEach(cls => { %>
-            <option value="<%= cls.id %>" <%= cls.id == classId ? 'disabled' : '' %>><%= cls.class_name %></option>
+            <option value="<%= cls.id %>" 
+              <%= cls.id == classId ? 'disabled' : '' %>
+              <%= cls.grade_level_id != gradeLevelId ? 'disabled' : '' %>
+              <%= cls.student_count >= 35 ? 'disabled' : '' %>
+            >
+              <%= cls.class_name %>
+            </option>
           <% }); %>
         </select>
+        
   
         <button type="submit">نقل الطالب</button>
         <button type="button" id="cancelTransfer">إلغاء</button>
