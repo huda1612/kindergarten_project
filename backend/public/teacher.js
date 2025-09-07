@@ -581,11 +581,11 @@ document.addEventListener("DOMContentLoaded", async () => {
      const experienceInfoDiv = document.getElementById('experienceInfo');
      const experienceActionsDiv = document.getElementById('experienceActions');
 
-     let experienceNameDisplay; // Declared here, assigned inside initializeExperienceDisplay
-     let editExperienceBtn;     // Declared here, assigned inside initializeExperienceDisplay
-     let experienceInput;       // Declared here, assigned inside initializeExperienceDisplay
-     let saveExperienceBtn;     // Declared here, assigned inside initializeExperienceDisplay
-     let cancelEditExperienceBtn; // Declared here, assigned inside editExperience
+     let experienceNameDisplay; 
+     let editExperienceBtn;     
+     let experienceInput;       
+     let saveExperienceBtn;     
+     let cancelEditExperienceBtn; 
  
      const classIdElement = document.getElementById("get_class_id");
      const classId = classIdElement ? classIdElement.dataset.classId : null;

@@ -54,27 +54,27 @@ export async function getStudentsByClass(classId) {
 //حذف طالب
 export async function deleteStudent(studentId) {
   try {
-    // 1. جلب حساب الطالب
+    //جلب حساب الطالب
     const studentRow = await executeQuery(`SELECT user_id FROM students WHERE id = ?`, [studentId]);
     if (studentRow.length === 0) {
       return { success: false, message: 'الطالب غير موجود' };
     }
     const userId = studentRow[0].user_id;
 
-    // 2. حذف حساب الطالب (إن وجد)
+    // حذف حساب الطالب (إن وجد)
     if (userId) {
       await executeQuery(`DELETE FROM users WHERE id = ?`, [userId]);
       console.log("تم حذف حساب الطالب");
     }
 
-    // 3. جلب أولياء الأمور (ممكن أكثر من واحد)
+    // جلب أولياء الأمور (ممكن أكثر من واحد)
     const guardianRows = await executeQuery(`SELECT guardian_id FROM guardians_students WHERE student_id = ?`, [studentId]);
 
-    // 4. حذف العلاقة بين الطالب وأولياء الأمور
+    //حذف العلاقة بين الطالب وأولياء الأمور
     await executeQuery(`DELETE FROM guardians_students WHERE student_id = ?`, [studentId]);
     console.log("تم حذف العلاقة بين الطالب وأولياء الأمور");
 
-    // 5. لكل ولي أمر: إذا ما عنده أولاد غير الطالب، نحذفه
+    // لكل ولي أمر: إذا ما عنده أولاد غير الطالب، نحذفه
     for (const row of guardianRows) {
       const guardianId = row.guardian_id;
       if (!guardianId) continue;
@@ -88,7 +88,7 @@ export async function deleteStudent(studentId) {
       }
     }
 
-    // 6. حذف الطالب نفسه
+    // حذف الطالب نفسه
     await executeQuery(`DELETE FROM students WHERE id = ?`, [studentId]);
     console.log("تم حذف الطالب");
 
@@ -150,7 +150,7 @@ export async function addStudent(studentData) {
     }
     
         // تحقق من عدد الطلاب الحاليين بالصف
-        const maxStudents = 35; // هون بتحطي الحد اللي بدك ياه
+        const maxStudents = 35; // حطينا الحد للطلاب بالصف الواحد هو 35 طالب
         const studentCount = await executeQuery(
           `SELECT COUNT(*) AS count FROM students WHERE class_id = ?`,
           [class_id]

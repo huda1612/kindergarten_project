@@ -36,7 +36,7 @@ export async function getClassIdByStudentId(studentId) {
 
 export async function insertNote(studentId, content, date) {
   //اولا نحذف الملاحظة القديمة للطالب ان وجدت
-  await executeQuery(`DELETE From notes WHERE student_id=?`,[studentId])
+  await executeQuery(`DELETE From notes WHERE student_id=? AND date = ? `,[studentId , date])
   const query = `INSERT INTO notes (student_id, content, date) VALUES (?, ?, ?)`;
   const params = [studentId, content, date];
   return await executeQuery(query, params);

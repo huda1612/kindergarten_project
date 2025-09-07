@@ -752,8 +752,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     if (!req.file || !req.file.path)
       return res.json({ success: false, message: "يجب اختيار ملف أولاً" });
     const { class_id , daily_activity_id  , description , type , date } = req.body;
-    if(!req.file.path)
-      return res.json({success : false , message : "يجب اختيار ملف اولاً"});
+   // if(!req.file.path)
+   // return res.json({success : false , message : "يجب اختيار ملف اولاً"});
     const filePath = req.file.path;
     const originalName = req.file.originalname;
     //رح استخرج اسم الملف من المسار لان عم يتخزن بالداتا كرموز كان
@@ -777,31 +777,6 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-/*
-//لتحميل ملف
-app.get("/files/:id", async (req, res) => {
-  try {
-    const fileId = req.params.id;
-    const file = await getFileInfo(fileId) ;
-
-    if (!file) return res.status(404).send("الملف غير موجود");
-
-    // المسار الفعلي على السيرفر
-    const filePath = path.join(__dirname, file.path.replace(/\\/g, "/"));
-
-    // تحميل بالاسم الأصلي
-    res.download(filePath, file.name, (err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send("خطأ في تحميل الملف");
-      }
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("خطأ في السيرفر");
-  }
-});
-*/
 
 
 app.get("/files/:id", async (req, res) => {
@@ -819,29 +794,29 @@ app.get("/files/:id", async (req, res) => {
 
     // نطبع المسار + حجم الملف
     const stats = fs1.statSync(filePath);
-    console.log("📂 المسار:", filePath);
-    console.log("📦 الحجم:", stats.size, "bytes");
+    console.log("المسار:", filePath);
+    console.log(" الحجم:", stats.size, "bytes");
 
     res.setHeader(
       "Content-Disposition",
       `attachment; filename*=UTF-8''${encodeURIComponent(file.name)}`
-    );
+    );//المتصفح رح يستخدم اسم file.name كاسم الملف المنزل
     res.setHeader("Content-Length", stats.size);
     res.setHeader("Content-Type", "application/octet-stream");
 
     const stream = fs1.createReadStream(filePath);
-    stream.pipe(res);
-
+    stream.pipe(res); //هذا يرسل الملف كتيار بيانات مباشرة إلى العميل دون تحميل الملف كله في الذاكرة
+    //لو صارت مشكلة أثناء القراءة
     stream.on("error", (err) => {
-      console.error("❌ خطأ أثناء قراءة الملف:", err);
-      if (!res.headersSent) {
+      console.error(" خطأ أثناء قراءة الملف:", err);
+      if (!res.headersSent) { //إذا لم تُرسل الرؤوس بعد  نرسل 500 مع رسالة.
         res.status(500).end("خطأ في قراءة الملف");
       } else {
-        res.end();
+        res.end(); //إذا تم إرسال الرؤوس (جزء من الملف وصل) فننهي الاستجابة
       }
     });
   } catch (err) {
-    console.error("❌ خطأ في السيرفر:", err);
+    console.error(" خطأ في السيرفر:", err);
     if (!res.headersSent) {
       res.status(500).send("خطأ في السيرفر");
     }
@@ -994,22 +969,6 @@ try{
 
 //للتعديل على اسم الصف 
 
-/*
-app.post('/admin/editClassName', (req, res) => {
-  const { editClassNameId } = req.body;
-  req.session.editClassNameId = parseInt(editClassNameId); // نحدد من هو الصف الذي نعدّله
-  res.redirect('/admin');
-});
-
-app.post('/admin/cencelUpdateClassName', async (req, res) => {
-  if (!req.session.user || req.session.user.role != "admin") 
-    return res.status(401).json({ error: 'Unauthorized' });
-  
-  req.session.editClassNameId = null ;
-  res.redirect('/admin');
- 
-})
-*/
 
 app.post('/admin/updateClassName', async (req, res) => {
   if (!req.session.user || req.session.user.role != "admin") 
@@ -1158,7 +1117,7 @@ try{
 
 
 
-//للاولياء***************************
+
 
 
 
@@ -1609,8 +1568,7 @@ app.post('/admin/class/:classId/insertStudent', async (req, res) => {
 
     // If a new guardian is to be added (check if new guardian fields are provided)
     if (new_guardian_first_name && new_guardian_first_name.trim() !== '' && new_guardian_last_name && new_guardian_last_name.trim() !== '') {
-      // The validation for new_guardian_first_name/last_name is already inside insertGuardian
-      // but it's good to have a basic check here for user feedback before DB operation
+      // The validation for new_guardian_first_name/last_name is already inside insertGuardian but it's good to have a basic check here 
       
       const newGuardianResult = await insertGuardian(
         new_guardian_first_name,
