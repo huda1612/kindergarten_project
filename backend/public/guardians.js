@@ -56,14 +56,14 @@ checkboxes.forEach(cb => {
   container.innerHTML = ''; // Clear previous content
 
   const relations = [
-    { value: 'parent', text: 'أب/أم' },
-    { value: 'grandparent', text: 'جد/جدة' },
-    { value: 'uncle', text: 'عم/خال' },
-    { value: 'aunt', text: 'عمة/خالة' },
-    { value: 'sibling', text: 'أخ/أخت' },
-    { value: 'other', text: 'أخرى' }
+    { value: 'أب/أم', text: 'أب/أم' },
+    { value: 'جد/جدة', text: 'جد/جدة' },
+    { value: 'عم/خال', text: 'عم/خال' },
+    { value: 'عمة/خالة', text: 'عمة/خالة' },
+    { value: 'أخ/أخت', text: 'أخ/أخت' },
+    { value: 'أخرى', text: 'أخرى' }
   ];
-
+  
   if (studentsToDisplay.length === 0) {
     container.innerHTML = '<p class="no-results">لا يوجد طلاب مطابقون للبحث.</p>';
     return;
